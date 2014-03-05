@@ -6,7 +6,7 @@ from glob import glob
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
 
-
+#  test
 from imp import find_module
 try: find_module('numpy')
 except: sys.exit('### Error: python module numpy not found')
