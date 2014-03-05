@@ -1,0 +1,35 @@
+# Sun 11:43:59 27-Jan-2013
+begin	identify arc_20130126_blue_1.6_56319_1_ex - Ap 1
+	id	arc_20130126_blue_1.6_56319_1_ex
+	task	identify
+	image	arc_20130126_blue_1.6_56319_1_ex - Ap 1
+	aperture	1
+	aplow	46.77
+	aphigh	66.77
+	units	Angstroms
+	features	6
+	        313.49  3650.1509   3650.153   7.0 1 1 Hg
+	        547.08 4046.57637   4046.563   7.0 1 1 Hg
+	        729.13 4358.31017   4358.328   7.0 1 1 Hg
+	       1362.87 5460.78783  5460.7348   7.0 1 1 Hg
+	       1537.35 5769.10753  5769.5982   7.0 1 1 Hg
+	       1549.76  5791.1072   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1669.
+		293.4915710821543
+		519.4127523850077
+		755.5171310278028
+		999.149927685357
+		1251.022548914402
+

@@ -1,0 +1,164 @@
+SIMPLE  =                    T / Fits standard                                  BITPIX  =                  -32 / Bits per pixel                                 NAXIS   =                    1 / Number of axes                                 NAXIS1  =                 1678 / Axis length                                    EXTEND  =                    F / File may contain extensions                    ORIGIN  = 'NOAO-IRAF FITS Image Kernel July 2003' / FITS file originator        IRAF-TLM= '2013-02-28T07:11:21' / Time of last modification                     OBJECT  = 'LTT3218 '           / Name of the object observed                    OBSTYPE = 'EXPOSE  '           / What type of observation has been taken        RUNNUM  =                    4 / Number of Multrun                              EXPNUM  =                    1 / Number of exposure within Multrun              EXPTOTAL=                    1 / Total number of exposure within Multrun        DATE    = '2013-02-28T07:11:21' / [UTC] The start date of the observation       DATE-OBS= '2013-02-08T11:33:32.400' / [UTC] The start time of the observation   UTSTART = '11:33:32.400'       / [UTC] The start time of the observation        UTSTOP  = '11:36:54.692'       / [UTC] The finish time of the observation       MJD     =         56331.481625 / [days] Modified Julian Days.                   EXPTIME =          180.0000000 / [Seconds] Exposure length.                     FILTER1 = 'UNKNOWN '           / The first filter wheel filter type.            FILTERI1= 'UNKNOWN '           / The first filter wheel filter id.              FILTER2 = 'UNKNOWN '           / The second filter wheel filter type.           FILTERI2= 'UNKNOWN '           / The second filter wheel filter id.             FILTER3 = 'UNKNOWN '           / The third filter wheel filter type.            FILTERI3= 'UNKNOWN '           / The third filter wheel filter id.              INSTRUME= 'en05    '           / Instrument used.                               INSTATUS= 'Nominal '           / The instrument status.                         CONFIGID=                  986 / Unique configuration ID.                       CONFNAME= 'SCA/GRPSEQ(4)/GRPEXEC/OBS(1)/INST_CFG' / The instrument configurationDETECTOR= 'e2v CCD42-10/07244-11-18' / CCD type                                 PRESCAN =                    0 / [pixels] Number of pixels in left bias strip.  POSTSCAN=                    0 / [pixels] Number of pixels in right bias strip. PRESCNY =                    0 / [pixels] Number of pixels in top bias strip.   POSTSCNY=                    0 / [pixels] Number of pixels in bottom bias strip.GAIN    =            1.4000000 / [electrons/count] Pixel gain                   READNOIS=            2.0900000 / [electrons/pixel] Read noise                   EPERDN  =            1.4000000 / [electrons/count] Electrons per digital number CCDXIMSI=                 2079 / [pixels] Imaging pixels                        CCDYIMSI=                  511 / [pixels] Imaging pixels                        CCDXBIN =                    1 / [pixels] X binning factor                      CCDYBIN =                    1 / [pixels] Y binning factor                      CCDXPIXE=            0.0000135 / [m] Size of pixels, in X                       CCDYPIXE=            0.0000135 / [m] Size of pixels, in Y                       CCDSCALE=            0.1340000 / [arcsec/pixel] (Uncalibrated) Scale of CCD pixeCCDRDOUT= '7: 16-bit, Conventional, 0.1 MHz, preamp=2.00' / Readout circuit usedCCDSTEMP=          -70.0000000 / [Centigrade] Required temperature.             CCDATEMP=          -69.5120010 / [Centigrade] Actual temperature.               CCDWMODE=                    F / Using windows if TRUE, full image if FALSE     CCDWXOFF=                    0 / [pixels] Offset of window in X, from the top coCCDWYOFF=                    0 / [pixels] Offset of window in Y, from the top coCCDWXSIZ=                    0 / [pixels] Size of window in X.                  CCDWYSIZ=                    0 / [pixels] Size of window in Y.                  CALBEFOR=                    F / Whether the calibrate before flag was set      CALAFTER=                    F / Whether the calibrate after flag was set       ROTCENTX=                  512 / [pixels] The rotator centre on the CCD, X pixelROTCENTY=                  512 / [pixels] The rotator centre on the CCD, Y pixelGAINMULT=                    0 / The 0-255 multiplier on the gain               FWID    = 'UNKNOWN '           / Filter wheel ID                                FWSWVERS= 'UNKNOWN '           / Filter wheel software version                  FRMINTVL=            0.0000000 / [Seconds] Exposure Cadence                     APERWID = '2.0"    '           / [arcsec] Aperture Width                        TELESCOP= 'Faulkes Telescope South' / The Name of the Telescope                 TELMODE = 'ROBOTIC '           / [{PLANETARIUM, ROBOTIC, MANUAL, ENGINEERING}] TTAGID   = 'LCO     '           / Telescope Allocation Committee ID              USERID  = 'david.sand'         / User login ID                                  PROPID  = 'LCO2012B-001'       / Proposal ID                                    GROUPID = 'LTT3218_monitor'    / Group Id                                       OBSID   = 'LTT3218obs2'        / Observation Id                                 GRPTIMNG= 'MONITOR '           / Group timing constraint class                  GRPUID  =                    5 / Group unique ID                                GRPMONP =        86400.0000000 / [secs] Group monitor period                    GRPNUMOB=                    3 / Number of observations in group                GRPEDATE= '2013-12-30 T 23:59:59 UTC' / [date] Group expiry date                GRPNOMEX=          415.0000000 / [secs] Group nominal exec time                 GRPLUNCO= 'BRIGHT  '           / Maximum lunar brightness                       GRPSEECO= 'ATROCIOUS'          / Minimum seeing                                 COMPRESS= 'PROFESSIONAL'       / [{PLANETARIUM, PROFESSIONAL, AMATEUR}] CompressLATITUDE=          -31.2700000 / [degrees] Observatory Latitude                 LONGITUD=          149.0700000 / [degrees West] Observatory Longitude           RA      = ' 8:41:31.578'       / [HH:MM:SS.ss] RA where telescope is pointing   DEC     = '-32:56:24.05'       / [DD:MM:SS.ss] Dec where telescope is pointing  RADECSYS= 'FK5     '           / [{FK4, FK5}] Fundamental coordinate system of cLST     = ' 6:44:44.00'        / [HH:MM:SS] Local sidereal time at start of currEQUINOX =         2000.0000000 / [Years] Date of the coordinate system for curreCAT-RA  = ' 8:41:32.37'        / [HH:MM:SS.sss] Catalog RA of the current observCAT-DEC = '-32:56:32.90'       / [DD:MM:SS.sss] Catalog declination of the curreCAT-EQUI=         2000.0000000 / [Year] Catalog date of the coordinate system foCAT-EPOC=         2000.0000000 / [Year] Catalog date of the epoch               CAT-NAME= 'LTT3218 '           / Catalog name of the current observation source SRCTYPE = 'EXTRASOLAR'         / [{EXTRASOLAR, MAJORPLANET, MINORPLANET, COMET,]PM-RA   =            0.0000000 / [sec/year] Proper motion in RA of the current oPM-DEC  =            0.0000000 / [arcsec/year] Proper motion in declination  of PARALLAX=            0.0000000 / [arcsec] Parallax of the current observation soRADVEL  =            0.0000000 / [km/s] Radial velocity of the current observatiRATRACK =            0.0000000 / [arcsec/sec] Non-sidereal tracking in RA of theDECTRACK=            0.0000000 / [arcsec/sec] Non-sidereal tracking in declinatiTELSTAT = 'WARN    '           / [---] Current telescope status                 NETSTATE= 'ENABLED '           / Network control state                          ENGSTATE= 'DISABLED'           / Engineering override state                     TCSSTATE= 'OKAY    '           / TCS state                                      PWRESTRT=                    F / Power will be cycled imminently                PWSHUTDN=                    F / Power will be shutdown imminently              AZDMD   =          101.9738000 / [degrees] Azimuth demand                       AZIMUTH =          101.9738000 / [degrees] Azimuth axis position                AZSTAT  = 'TRACKING'           / Azimuth axis state                             ALTDMD  =           64.9997000 / [degrees] Altitude axis demand                 ALTITUDE=           64.9997000 / [degrees] Altitude axis position               ALTSTAT = 'TRACKING'           / Altitude axis state                            AIRMASS =            1.1015900 / [n/a] Airmass                                  ROTDMD  =           30.8607000 / Rotator axis demand                            ROTMODE = 'VFLOAT  '           / [{SKY, MOUNT, VFLOAT, VERTICAL, FLOAT}] CassegrROTSKYPA=          265.6795000 / [degrees] Rotator position angle               ROTANGLE=           30.8612000 / [degrees] Rotator mount angle                  ROTSTATE= 'TRACKING'           / Rotator axis state                             ENC1DMD = 'OPEN    '           / Enc 1 demand                                   ENC1POS = 'OPEN    '           / Enc 1 position                                 ENC1STAT= 'IN POSN '           / Enc 1 state                                    ENC2DMD = 'OPEN    '           / Enc 2 demand                                   ENC2POS = 'OPEN    '           / Enc 2 position                                 ENC2STAT= 'IN POSN '           / Enc 2 state                                    FOLDDMD = 'PORT 5  '           / Fold mirror demand                             FOLDPOS = 'PORT 5  '           / Fold mirror position                           FOLDSTAT= 'IN POSN '           / Fold mirror state                              PMCDMD  = 'OPEN    '           / Primary mirror cover demand                    PMCPOS  = 'OPEN    '           / Primary mirror cover position                  PMCSTAT = 'IN POSN '           / Primary mirror cover state                     FOCDMD  =           22.1190000 / [mm] Focus demand                              TELFOCUS=           22.2520000 / [mm] Focus position                            DFOCUS  =           -0.2000000 / [mm] Focus offset                              FOCSTAT = 'TRACKING'           / Focus state                                    MIRSYSST= 'UNKNOWN '           / Primary mirror support state                   WMSHUMID=           37.0000000 / [0.00% - 100.00%] Current percentage humidity  WMSTEMP =          295.2500000 / [Kelvin] Current (external) temperature        WMSPRES =          894.0000000 / [mbar] Current pressure                        WINDSPEE=            0.9000000 / [m/s] Windspeed                                WINDDIR =           62.0000000 / [degrees E of N] Wind direction                TEMPTUBE=           21.0700000 / [degrees C] Temperature of the telescope tube  WMSSTATE= 'WARN    '           / WMS system state                               WMSRAIN = 'CLEAR   '           / Rain alert                                     WMSMOIST=            0.0200000 / Moisture level                                 WMOILTMP=           11.2000000 / Oil temperature                                WMSPMT  =            0.0000000 / Primary mirror temperature                     WMFOCTMP=            0.0000000 / Focus temperature                              WMAGBTMP=           24.7000000 / AG Box temperature                             WMSDEWPT=            6.7000000 / Dewpoint                                       ZSKYTMP1=          -23.8000000 / Boltwood Sky-Ambient Temperature               REFPRES =          890.0000000 / [mbar] Pressure used in refraction calculation REFTEMP =          278.1500000 / [Kelvin] Temperature used in refraction calculaREFHUMID=           60.0000000 / [0.00% - 100.00%] Percentage humidity used in rAUTOGUID= 'FLOYDSAG'           / Current autoguider                             AGSTATUS= 'LOCKED  '           / [{LOCKED, UNLOCKED, SUSPENDED}] Autoguider lockAGSTATE = 'TRKOK   '           / [{TRKOK, ACQFAIL, NOSTAR, OFF, GUI}] AutoguiderAGMODE  = 'AUTO    '           / [{OFF, ON, AUTO}] Autoguider mode              AGGMAG  =           13.1110000 / [mag] Autoguider guide star mag                AGFWHM  =            1.1460000 / [arcsec] Autoguider FWHM                       AGMIRDMD=            0.0000000 / [mm] Autoguider mirror demand                  AGMIRPOS=           -0.0010000 / [mm] Autoguider mirror position                AGMIRST = 'IN POSN '           / Autoguider mirror state                        AGFOCDMD=            8.1430000 / [mm] Autoguider focus demand                   AGFOCUS =            8.1440000 / [mm] Autoguider focus position                 AGFOCST = 'TRACKING'           / Autoguider focus state                         AGFILDMD= 'RETRACT '           / Autoguider filter demand                       AGFILPOS= 'RETRACT '           / Autoguider filter position                     AGFILST = 'IN POSN '           / Autoguider filter state                        MOONSTAT= 'DOWN    '           / [{UP, DOWN}] Moon position at start of current MOONFRAC=            0.0468113 / [(0 - 1)] Lunar illuminated fraction           MOONDIST=          129.2759954 / [(degs)] Lunar Distance from Target            MOONALT =          -40.6470498 / [(degs)] Lunar altitude                        SUNALT  =          -29.3808063 / [(degs)] Solar altitude                        SCHEDSEE=            1.1435342 / [(arcsec)] Predicted seeing when group scheduleSCHEDPHT=            1.0000000 / [(0-1)] Predicted photom when group scheduled  ESTSEE  =            1.2511463 / [(arcsec)] Estimated seeing at start of observaTELID   = 'fts     '           / Telescope ID                                   ENCID   = 'clma    '           / Enclosure ID                                   SITEID  = 'coj     '           / Site ID                                        IMAGETYP= 'sky     '           / type                                           WCSDIM  =                    1                                                  LTM1_1  =                   1.                                                  WAT0_001= 'system=equispec'                                                     WAT1_001= 'wtype=linear label=Wavelength units=Angstroms'                       TRIM    = 'Feb 28  3:39 Trim data section is [380:2048,325:511]'                OVERSCAN= 'Feb 28  3:39 Overscan section is [2049:2079,1:511] with mean=302.397'CCDSEC  = '[380:2048,325:511]'                                                  CCDMEAN =             6.934605                                                  CCDMEANT=           1046489992                                                  CCDPROC = 'Feb 28  3:39 CCD processing done'                                    GRISM   = 'blu     '           /  blue order                                    STDNAME = 'ltt3218.dat'                                                         MAGSTD  =    99.98999999999999                                                  BANDID1 = 'spectrum - background fit, weights variance, clean yes'              BANDID2 = 'raw - background fit, weights none, clean no'                        BANDID3 = 'background - background fit'                                         BANDID4 = 'sigma - background fit, weights variance, clean yes'                 APNUM1  = '1 1 43.92 63.92'                                                     CTYPE1  = 'LINEAR  '                                                            CRVAL1  =      3101.5830078125                                                  CRPIX1  =                   1.                                                  CD1_1   =       1.724476313264                                                  XMIN    =                380.0 / min wavelength [Angstrom]                      XMAX    =               2048.0 / max wavelength [Angstrom]                      DC-FLAG =                    0                                                  DCLOG1  = 'REFSPEC1 = arc_LTT3218_sky_20130207_blue_2.0_56351_1_ex'             CDELT1  =       1.724476313264                                                  NCOMBINE=                    5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  END                                                                             AðØäAöiÓAöÆŽA÷@xAùËŽAú0£AúŸÖAûÉÎAüoAüˆ¥AüñrAýXóAý¿Aþ#·Aþ†úAþèÔAÿILAÿ¨dB B 1>B ^ÀB ‹—B ·ÅB ãJB*B8bBaøBŠêB³:BÚíBÿB(tBNNBsB˜3B¼ABßºBB$ìBFªBg×BˆtB¨ƒBÈBæýBjB#OB@­B]…ByÚB•ªB°ùBËÉBæBÿêBAB2BJBbiByÝBÜB§gB½BÓ'Bè_Bý'B„B%uB8ûBLB^ÐBq BƒB””B¥»B¶BÆèBÖñBæBõðBèBˆB!ÑB/ÄB=dBJ°BW¬BdXBp´B|ÃBˆ‡B”BŸ1BªB´¼B¿BÉ3BÓBÜ¢BåùBïB÷ïB B÷B'BB àB(nB/ÉB6òB=êBD´BKPBQÁBXB^"BdBiäBoŒBuBzsB´B„ÖB‰ØBŽ¾B“‰B˜9BœÐB¡PB¥ºBªB®RB²‚B¶¡Bº±B¾´BÂªBÆ•BÊwBÎPBÒ"BÕïBÙ¸BÝ{Bá<BäüBè¸BìsBð-BóåB÷œBûRBÿB	»B	lB	
+B	ÉB	vB	!B	ÉB	qB	 B	#·B	'XB	*öB	.’B	2,B	5ÃB	9WB	<êB	@yB	DB	GB	KB	N›B	RB	UœB	YB	\B	`B	cwB	fæB	jPB	m¸B	qB	t}B	wÙB	{3B	~‰B	ÚB	…'B	ˆpB	‹·B	ŽøB	’5B	•nB	˜£B	›ÓB	žÿB	¢'B	¥JB	¨hB	«B	®–B	±¦B	´²B	··B	º¸B	½´B	ÀªB	ÃœB	Æ‰B	ÉoB	ÌQB	Ï-B	ÒB	ÔÔB	×ŸB	ÚdB	Ý$B	ßÞB	â‘B	å?B	ççB	êˆB	í#B	ï¸B	òGB	ôÏB	÷QB	ùÍB	üAB	þ¯B
+B
+vB
+ÑB
+#B
+
+oB
+³B
+ñB
+'B
+VB
+}B
+žB
+·B
+ÈB
+ÒB
+ÔB
+!ÎB
+#ÀB
+%¬B
+'B
+)jB
++<B
+-B
+.ÊB
+0„B
+26B
+3àB
+5B
+7B
+8ªB
+:2B
+;±B
+='B
+>”B
+?øB
+ATB
+B¦B
+CðB
+E0B
+FgB
+G•B
+H¹B
+IÔB
+JåB
+KíB
+LìB
+MàB
+NÊB
+O¬B
+PƒB
+QQB
+RB
+RÎB
+S}B
+T$B
+TÀB
+UTB
+UÝB
+V]B
+VÓB
+WBB
+W¥B
+XB
+XUB
+XŸB
+XáB
+YB
+YJB
+YrB
+Y’B
+YªB
+YºB
+YÂB
+YÂB
+Y»B
+Y¬B
+Y•B
+YwB
+YRB
+Y&B
+XòB
+X¸B
+XwB
+X/B
+WáB
+WŒB
+W0B
+VÎB
+VfB
+UøB
+U„B
+U
+B
+T‹B
+TB
+SzB
+RêB
+RTB
+Q¹B
+QB
+PtB
+OÊB
+OB
+NgB
+M®B
+LòB
+L0B
+KjB
+J¡B
+IÓB
+IB
+H+B
+GRB
+FuB
+E”B
+D°B
+CÈB
+BÝB
+AïB
+@ÿB
+@B
+?B
+>B
+=B
+< B
+;B
+:B
+9B
+8B
+7B
+5úB
+4ìB
+3ÞB
+2ÌB
+1»B
+0¨B
+/”B
+.~B
+-gB
+,PB
++7B
+*B
+)B
+'êB
+&ÐB
+%µB
+$˜B
+#B
+ yB
+HB
+bB
++B
+B	÷·B	í]B	ãB	ØÔB	ÎÆB	ÄóB	»lB	²@B	©|B	¡1B	™oB	’EB	‹ÁB	…óB	€êB	|µB	y\B	vÖB	uB	tB	sÐB	t(B	uB	v™B	x˜B	{B	}îB	)B	„²B	ˆ{B	ŒtB	B	”¿B	˜ñB	B	¡(B	¥B	¨ÁB	¬-B	¯EB	±ûB	´EB	¶#B	·šB	¸®B	¹eB	¹ÃB	¹ÌB	¹‰B	¸þB	¸8B	·?B	¶B	´ÛB	³ƒB	²B	°¸B	¯XB	®B	¬ÓB	«ÂB	ªÞB	ª1B	©ÅB	©¢B	©ÔB	ªaB	«IB	¬ŠB	® B	°B	²6B	´§B	·PB	º*B	½,B	ÀPB	ÃB	ÆÚB	Ê.B	Í„B	ÐÓB	ÔB	×9B	Ú@B	ÝB	ß×B	ááB	ã5B	äzB	åJB	å×B	æB	æXB	æœB	æÕB	çB	ç/B	çPB	çhB	çyB	ç‚B	ç…B	çB	çwB	çfB	çPB	ç5B	çB	æïB	æÅB	æ—B	æeB	æ0B	å÷B	å¼B	å}B	å=B	äüB	ä¹B	ävB	ä4B	ãòB	ã³B	ãuB	ã;B	ãB	âÒB	â¤B	â|B	âYB	â=B	â(B	âB	âB	âB	â,B	âEB	âjB	âšB	â×B	ã B	ãuB	ãÔB	ä?B	ä²B	å-B	å­B	æ3B	æ¼B	çHB	çÕB	èbB	èìB	éB	éÅB	é“B	éuB	éfB	éSB	é?B	é)B	éB	èöB	èÙB	èºB	è˜B	èuB	èOB	è&B	çûB	çÍB	çœB	çiB	ç3B	æúB	æ¾B	æ€B	æ?B	åùB	å³B	åiB	åB	äËB	äyB	ä#B	ãËB	ãpB	ãB	â²B	âPB	áêB	á‚B	áB	à¬B	à<B	ßÊB	ßWB	ÞàB	ÞhB	ÝíB	ÝpB	ÜñB	ÜpB	ÛìB	ÛgB	ÚàB	ÚVB	ÙËB	Ù>B	Ø¯B	ØB	×‹B	Ö÷B	ÖaB	ÕÈB	Õ/B	Ô”B	Ó÷B	ÓXB	Ò¸B	ÒB	ÑtB	ÐÐB	Ð*B	ÏƒB	ÎÛB	Î1B	Í‡B	ÌÚB	Ì-B	ËB	ÊÐB	ÊB	ÉnB	È»B	ÈB	ÇTB	ÆžB	ÅèB	Å1B	ÄzB	ÃÁB	ÃB	ÂNB	Á“B	ÀØB	ÀB	¿aB	¾¤B	½çB	½*B	¼lB	»­B	ºïB	º0B	¹qB	¸²B	·óB	·2B	¶rB	µ³B	´ôB	´3B	³tB	²´B	±õB	±5B	°vB	¯·B	®øB	®:B	­|B	¬½B	¬ B	«CB	ª‡B	©ËB	©B	¨UB	§šB	¦áB	¦'B	¥oB	¤¸B	¤B	£KB	¢—B	¡ãB	¡/B	 }B	ŸÌB	ŸB	žlB	¾B	B	œfB	›¼B	›B	škB	™ÄB	™B	˜{B	—ÙB	—7B	–›B	•ÔB	”ºB	“–B	’gB	‘/B	ñB	Ž°B	nB	Œ.B	ŠóB	‰¾B	ˆ“B	‡uB	†dB	…fB	„zB	ƒ¥B	‚êB	‚IB	ÇB	dB	%B	B	
+B	"B	JB	~B	¶B	ëB	‚B	‚B	BB	sB	|jB	xfB	s,B	lB	c_B	YžB	NÐB	BÿB	67B	(„B	ôB	
+›Bú”BéüBØïBÇˆBµáB¤B’HB€‹Bo B]¿BLæB<B,ÙBÜB´BBöSBëBBáSBØBÐýBÊ˜BÅYBÁ;B¾:B¼OB»vB»§B¼ßB¿BÂJBÆrBË‹BÑBØuBà;BèÜBòPBü“BŸBoBûB-5B;BIiBX<BgqBvôB†±B–•B¦ŽB¶‡BÆmBÖ,Bå±BôêB	ÁB	%B	 B	-AB	9ÔB	E¤B	PžB	Z»B	c´B	j›B	o¦B	rlB	shB	rÍB	rµB	r{B	rRB	r*B	rB	qÜB	q³B	qŒB	qcB	q;B	qB	péB	pÀB	p—B	pmB	pCB	pB	oîB	oÃB	o—B	olB	o@B	oB	næB	n¹B	nŠB	n\B	n-B	mýB	mÍB	mœB	mjB	m7B	mB	lÒB	lB	liB	l3B	kýB	kÆB	kŽB	kVB	kB	jäB	j©B	joB	j4B	iøB	i»B	i~B	iAB	iB	hÄB	h…B	hFB	hB	gÆB	g„B	gBB	gB	f¿B	f|B	f9B	eöB	e²B	enB	e)B	däB	d B	dZB	dB	cÎB	c‡B	cAB	bûB	b´B	bmB	b%B	aÞB	a–B	aNB	aB	`½B	`uB	`,B	_äB	_›B	_SB	_	B	^ÀB	^wB	^/B	]åB	]B	]TB	]B	\ÂB	\yB	\0B	[çB	[žB	[VB	[B	ZÅB	Z}B	Z4B	YíB	Y¥B	Y]B	YB	XÎB	X‡B	X@B	WúB	W´B	WnB	W(B	VãB	VžB	VYB	VB	UÐB	UŒB	UHB	UB	TÃB	TB	T?B	SýB	S¼B	S{B	S;B	RüB	R½B	R~B	R@B	RB	QÆB	Q‰B	QMB	QB	P×B	PœB	PcB	P*B	OòB	O¹B	OƒB	OMB	OB	NâB	N­B	NzB	NGB	NB	MäB	M´B	M„B	MUB	M&B	LùB	LÍB	L¡B	LvB	LMB	L$B	KüB	KÕB	K¯B	K‰B	KeB	KAB	KB	JýB	JÝB	J½B	JŸB	JB	JeB	JIB	J/B	JB	IûB	IãB	IËB	IµB	IŸB	IŠB	IuB	IbB	IOB	I<B	I*B	IB	IB	HøB	HéB	HÚB	HËB	H½B	H¯B	H¢B	H•B	H‰B	H{B	HpB	HdB	HXB	HNB	HCB	H8B	H-B	H#B	HB	HB	HB	GúB	GñB	GæB	GÝB	GÓB	GÉB	G¿B	G´B	G©B	GŸB	G”B	G‰B	G~B	GrB	GgB	G[B	GNB	GBB	G5B	G'B	GB	GB	FüB	FíB	FÞB	FÍB	F¼B	FªB	F™B	F†B	FsB	F_B	FKB	F5B	FB	FB	EðB	EØB	E¿B	E¥B	E‰B	EmB	EPB	E3B	EB	DôB	DÓB	D±B	DB	DjB	DEB	DB	CøB	CÏB	C¥B	CzB	CNB	C B	BñB	BÁB	BB	B\B	B(B	AòB	A»B	A‚B	AHB	AB	@ÏB	@B	@PB	@B	?ÊB	?…B	?=B	>õB	>ªB	>^B	>B	=ÁB	=pB	=B	<ÇB	<pB	<B	;¼B	;_B	; B	:žB	:<B	9×B	9oB	9B	8›B	8-B	7½B	7LB	6ØB	6aB	5êB	5nB	4ñB	4rB	3ñB	3mB	2çB	2`B	1ÖB	1JB	0¼B	0,B	/™B	/B	.oB	-ÖB	-=B	,¡B	,B	+bB	*ÀB	*B	)uB	(ÍB	($B	'xB	&ÊB	&B	%jB	$·B	$B	#KB	"“B	!ÙB	!B	 `B	¡B	áB	B	[B	•B	ÎB	B	9B	mB	 B	ÐB	 B	.B	YB	…B	®B	ÖB	üB	"B	EB	gB	ˆB	§B	ÆB	ãB	
+þB	
+B		1B	IB	`B	uB	‰B	œB	­B	¾B	ÌB	 ÛBÿèBþôBýÿBýBüBûBúBù$Bø)B÷-Bö/Bõ1Bô2Bó1Bò0Bñ-Bð+Bï'Bî"BíBìBëBêBèþBçõBæëBåàBäÔBãÇBâºBá­BàŸBßBÞ€BÝpBÜ^BÛMBÚ;BÙ)BØB×BÕîBÔÚBÓÅBÒ¯BÑ™BÐƒBÏmBÎUBÍ=BÌ&BËBÉõBÈÜBÇÃBÆ©BÅBÄuBÃ[BÂABÁ&BÀB¾ðB½ÔB¼¹B»žBºƒB¹gB¸KB·/B¶B´öB³ÚB²½B± B°ƒB¯fB®IB­+B¬BªñB©ÒB¨´B§–B¦wB¥YB¤:B£B¡ûB ÜBŸ¼BžœB{Bœ\B›<BšB˜úB—ØB–·B••B”sB“PB’.B‘BèBŽÅB¢BŒ}B‹ZBŠ5B‰B‡ìB†ÇB… B„{BƒUB‚.BBàB~¹B}’B|iB{ABzBxðBwÆBvBurBtIBsBqòBpÇBoœBnoBmCBlBjèBi»BhBg^Bf0Be BcÑBb¡BapB`@B_B]ÝB\ªB[xBZEBYBWÞBVªBUuBTABSBQÕBPžBOhBN0BLøBKÀBJ‡BINBHBFÙBEŸBDdBC(BAìB@¯B?rB>4B<öB;·B:xB98B7øB6·B5vB43B2ñB1®B0jB/'B-âB,œB+VB*B(ÉB'‚B&:B$òB#¨B"^B!BÉB}B1BäB–BHBúB«BZB
+B¹BgBBÀBlBB
+ÀB	iBB¸B_BB§BJBÿìBþBý-BûËBúhBùB÷žBö7BôÏBófBñúBðŽBï Bí±Bì@BêÍBéYBçâBælBäóBãxBáûBà}BÞüBÝ|BÛ÷BÚpBØêB×_BÕÔBÔEBÒ·BÑ$BÏBÍûBÌbBÊÉBÉ,BÇŒBÅëBÄGBÂ¢BÀùB¿OB½¢B»òBº@B¸‹B¶ÔBµB³]B±žB¯ÝB®B¬QBª‡B¨ºB¦êB¥B£BB¡jBŸB°B›ÏB™êB˜B–B”,B’:BFBŽNBŒTBŠVBˆVB†QB„IB‚=B€/B~B|ByíBwÐBu°BsŒBqeBo9Bm
+Bj×Bh¡BffBd'BaæB_ B]UB[BX¶BV`BTBQ¨BOFBLàBJuBHBE”BCB@¢B>!B;žB9B6‰B3÷B1bB.ÇB,(B)…B&ÝB$0B!€BÊBBPB‹BÃBõB"BIBkBˆBBÿ¬Bü¶Bù·Bö²Bó¥BðBírBêMBçBãçBà§BÝ]BÚ	BÖ«BÓCBÏÐBÌQBÈÈBÅ3BÁ“B½æBº-B¶gB²”B®´BªÆB¦ËB¢ÂBžªBš„B–NB’	B¶B‰RB„ÝB€ZB{ÅBwBrhBm BhÆBcÚB^ÛBYÊBT¦BOoBJ%BDÆB?SB9ÍB42B.‚B(½B"âBòBëBÏB
+œBRBýñB÷xBðèBê@Bã€BÜ§BÕµBÎªBÇ†BÀHB¸ðB±~B©òB¢JBšˆB’©BŠ°B‚›BzjBrBi°Ba(BXƒBOÀBFßB=áB4ÃB+‡B",B²BB]BûƒBñˆBçlBÝ1BÒÓBÈSB½²B²ïB¨	BB‘ÖB†‡B{BoBcÄBWæBKãB?»B3mB&úBaB¢B ¼Bó°Bæ}BÙ#BË¢B½ùB°'B¢-B”
+B…¿BwJBh¬BYäBJòB;×B,“BúB@BË¹B»¯B¬&BPý                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        

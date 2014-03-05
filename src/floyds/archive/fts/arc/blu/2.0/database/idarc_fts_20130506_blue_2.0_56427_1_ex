@@ -1,0 +1,35 @@
+# Wed 22:05:10 15-May-2013
+begin	identify arc_fts_20130506_blue_2.0_56427_1_ex - Ap 1
+	id	arc_fts_20130506_blue_2.0_56427_1_ex
+	task	identify
+	image	arc_fts_20130506_blue_2.0_56427_1_ex - Ap 1
+	aperture	1
+	aplow	41.39
+	aphigh	61.39
+	units	Angstroms
+	features	6
+	        291.84 3650.15347   3650.153   7.0 1 1 Hg
+	        523.61 4046.56026   4046.563   7.0 1 1 Hg
+	        705.76  4358.3315   4358.328   7.0 1 1 Hg
+	       1350.21 5460.72534  5460.7348   7.0 1 1 Hg
+	       1530.62 5769.68847  5769.5982   7.0 1 1 Hg
+	       1542.81 5790.58096   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		290.3757063700473
+		525.1010752647192
+		763.2735400608234
+		1000.468906069424
+		1240.153561086874
+

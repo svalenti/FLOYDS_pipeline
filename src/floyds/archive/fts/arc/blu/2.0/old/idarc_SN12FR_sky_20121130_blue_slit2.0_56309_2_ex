@@ -1,0 +1,35 @@
+# Thu 21:41:10 17-Jan-2013
+begin	identify arc_SN12FR_sky_20121130_blue_slit2.0_56309_2_ex - Ap 1
+	id	arc_SN12FR_sky_20121130_blue_slit2.0_56309_2_ex
+	task	identify
+	image	arc_SN12FR_sky_20121130_blue_slit2.0_56309_2_ex - Ap 1
+	aperture	1
+	aplow	47.74
+	aphigh	61.71
+	units	Angstroms
+	features	6
+	        321.22 3650.15427   3650.153   4.0 1 1 Hg
+	        554.90 4046.55469   4046.563   4.0 1 1 Hg
+	        737.00 4358.33922   4358.328   4.0 1 1 Hg
+	       1370.96 5460.70047  5460.7348   4.0 1 1 Hg
+	       1545.12 5769.94212  5769.5982   4.0 1 1 Hg
+	       1556.54 5790.34922   5790.663   4.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1669.
+		294.4442493463838
+		516.9025609045698
+		753.5123964371313
+		996.0307969867201
+		1254.547469270113
+

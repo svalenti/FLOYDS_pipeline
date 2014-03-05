@@ -1,0 +1,50 @@
+#!/usr/bin/env python 
+
+import glob
+import floyds
+import os
+listfile1=glob.glob('g*_e_*_0.fits')
+listfile2=glob.glob('f*_e_*_0.fits')
+listfile3=glob.glob('ogg2m001*0.fits')
+listfile4=glob.glob('coj2m001*0.fits')
+imglist=listfile1+listfile2+listfile3+listfile4
+for img in imglist:
+  hdr=floyds.util.readhdr(img)
+  if floyds.util.readkey3(hdr,'instrume') in ['en05','en06']:
+    _tel=floyds.util.readkey3(hdr,'TELID')
+    aaa=floyds.util.display_image(img,1,'','',False)
+    _type=floyds.util.readkey3(hdr,'IMAGETYP')
+    _slit=floyds.util.readkey3(hdr,'slit')
+    _exptime=floyds.util.readkey3(hdr,'exptime')
+    _objname=floyds.util.readkey3(hdr,'objname')
+    print _slit,_exptime,_objname
+    if _slit=='None':
+        if _tel=='ftn':
+            floyds.util.updateheader(img,0,{'APERWID':['1.6','slit']})
+        else: 
+            floyds.util.updateheader(img,0,{'APERWID':['2.0','slit']})
+    ans=raw_input('sky,flat,lamp,bad ['+str(_type)+'] ? ')
+    if not ans: ans=_type
+    if ans in ['flat','f','F','Flat']:
+        floyds.util.updateheader(img,0,{'IMAGETYP':['flat','type']})
+        floyds.util.updateheader(img,0,{'OBSTYPE':['LAMP-FLAT','What type of observation has been taken']})
+    elif ans in ['sky','s','S','SKY']:
+        floyds.util.updateheader(img,0,{'IMAGETYP':['sky','type']})
+        floyds.util.updateheader(img,0,{'OBSTYPE':['SPECTRUM','What type of observation has been taken']})
+    elif ans in ['lamp','l','L','LAMP']:
+        floyds.util.updateheader(img,0,{'IMAGETYP':['lamp','type']})
+        floyds.util.updateheader(img,0,{'OBSTYPE':['ARC','What type of observation has been taken']})
+    elif ans in ['Bad','BAD','B','bad','b']:
+        if not os.path.isdir('./bad/'): os.system('mkdir bad/')
+        os.system('mv '+img+' bad/')
+    _grp=floyds.util.readkey3(hdr,'GRPUID')
+    if _grp==-1:
+        _ra=floyds.util.readkey3(hdr,'RA')
+        _dec=floyds.util.readkey3(hdr,'DEC')
+        print '\n### missing groupid, define it from coordinates'
+        print _ra,_dec
+        try:
+            sss=(('000'[len(str(int(_ra))):]+str(int(_ra))+'00'[len(str(int(abs(_dec+90)))):]+str(int(abs(_dec+90)))))
+            print sss
+            floyds.util.updateheader(img,0,{'GRPUID':[sss,'unique group id']})
+        except: pass

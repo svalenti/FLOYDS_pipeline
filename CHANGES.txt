@@ -1,0 +1,5 @@
+v1.0, 20130301 -- Initial release.
+------
+- Floyds pipeline version 1 works for floyds at FTN and FTS 
+
+- reduction keywords following reduction keywords from photometry, to be added

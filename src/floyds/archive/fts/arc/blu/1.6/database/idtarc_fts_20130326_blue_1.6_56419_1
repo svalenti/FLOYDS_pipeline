@@ -1,0 +1,288 @@
+# Tue 13:48:49 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,50]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,50]
+	units	Angstroms
+	features	6
+	        320.54 3650.15317   3650.153   7.0 1 1 Hg
+	        553.15 4046.56188   4046.563   7.0 1 1 Hg
+	        735.06  4358.3295   4358.328   7.0 1 1 Hg
+	       1369.14 5460.73027  5460.7348   7.0 1 1 Hg
+	       1544.17 5769.64211  5769.5982   7.0 1 1 Hg
+	       1556.01 5790.62306   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		283.8719825273045
+		517.743199837872
+		753.7162141750068
+		996.9200106283988
+		1248.049352350632
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,40]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,40]
+	units	Angstroms
+	features	6
+	        321.76 3650.15363   3650.153   7.0 1 1 Hg
+	        554.61 4046.55889   4046.563   7.0 1 1 Hg
+	        736.69 4358.33355   4358.328   7.0 1 1 Hg
+	       1370.68   5460.718  5460.7348   7.0 1 1 Hg
+	       1545.79   5769.763  5769.5982   7.0 1 1 Hg
+	       1557.51 5790.51294   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		283.1078563163063
+		517.6310812402304
+		753.094731453719
+		996.6353531034442
+		1246.894361357442
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,30]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,30]
+	units	Angstroms
+	features	6
+	        323.26 3650.15437   3650.153   7.0 1 1 Hg
+	        555.93 4046.55402   4046.563   7.0 1 1 Hg
+	        738.13 4358.34014   4358.328   7.0 1 1 Hg
+	       1372.18 5460.69779  5460.7348   7.0 1 1 Hg
+	       1547.15 5769.96855  5769.5982   7.0 1 1 Hg
+	       1558.62 5790.32513   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		278.8795327652727
+		517.5376334237055
+		752.5868644970842
+		996.1312124882221
+		1247.726249106884
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,20]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,20]
+	units	Angstroms
+	features	6
+	        323.09 3650.15405   3650.153   7.0 1 1 Hg
+	        557.66 4046.55603   4046.563   7.0 1 1 Hg
+	        739.62 4358.33747   4358.328   7.0 1 1 Hg
+	       1373.56 5460.70588  5460.7348   7.0 1 1 Hg
+	       1548.83 5769.88536  5769.5982   7.0 1 1 Hg
+	       1560.42 5790.40122   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		305.1283881312373
+		515.7130173249187
+		752.6884855990881
+		995.4351553973488
+		1246.91060653034
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,10]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,10]
+	units	Angstroms
+	features	6
+	        327.63 3650.14848   3650.153   7.0 1 1 Hg
+	        555.65 4046.59163   4046.563   7.0 1 1 Hg
+	        740.10 4358.28933   4358.328   7.0 1 1 Hg
+	       1375.03 5460.85548  5460.7348   7.0 1 1 Hg
+	       1547.97  5768.5256  5769.5982   7.0 1 1 Hg
+	       1560.94 5791.62948   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		178.4489564473913
+		524.8957654537001
+		748.962405900904
+		997.3470450034495
+		1244.107409675176
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,60]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,60]
+	units	Angstroms
+	features	6
+	        319.16 3650.15457   3650.153   7.0 1 1 Hg
+	        551.74 4046.55288   4046.563   7.0 1 1 Hg
+	        733.82 4358.34159   4358.328   7.0 1 1 Hg
+	       1367.71 5460.69396  5460.7348   7.0 1 1 Hg
+	       1542.98 5770.00702  5769.5982   7.0 1 1 Hg
+	       1554.44 5790.28998   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		280.8186724404466
+		518.5602012065912
+		753.8575676190347
+		997.5928468400857
+		1247.466366551796
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,70]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,70]
+	units	Angstroms
+	features	6
+	        317.78 3650.15434   3650.153   7.0 1 1 Hg
+	        550.33 4046.55442   4046.563   7.0 1 1 Hg
+	        732.34 4358.33949   4358.328   7.0 1 1 Hg
+	       1366.37 5460.70038  5460.7348   7.0 1 1 Hg
+	       1541.54 5769.94069  5769.5982   7.0 1 1 Hg
+	       1553.06 5790.35068   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		282.5446733341561
+		518.7501896548779
+		754.3973622161618
+		997.8264868602108
+		1248.718482625638
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,80]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,80]
+	units	Angstroms
+	features	6
+	        316.41 3650.15321   3650.153   7.0 1 1 Hg
+	        549.14 4046.56164   4046.563   7.0 1 1 Hg
+	        730.97 4358.32981   4358.328   7.0 1 1 Hg
+	       1364.92 5460.72941  5460.7348   7.0 1 1 Hg
+	       1540.26 5769.65034  5769.5982   7.0 1 1 Hg
+	       1552.13 5790.61558   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		287.1815433522399
+		518.7382289264583
+		754.9078784612558
+		998.340159053021
+		1247.411226986997
+
+# Tue 13:48:55 07-May-2013
+begin	identify tarc_fts_20130326_blue_1.6_56419_1[*,90]
+	id	tarc_fts_20130326_blue_1.6_56419_1
+	task	identify
+	image	tarc_fts_20130326_blue_1.6_56419_1[*,90]
+	units	Angstroms
+	features	6
+	        314.96 3650.15405   3650.153   7.0 1 1 Hg
+	        547.57  4046.5563   4046.563   7.0 1 1 Hg
+	        729.55 4358.33693   4358.328   7.0 1 1 Hg
+	       1363.55 5460.70826  5460.7348   7.0 1 1 Hg
+	       1538.72 5769.86009  5769.5982   7.0 1 1 Hg
+	       1550.33 5790.42436   5790.663   7.0 1 1 Hg
+	function spline3
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	9
+		3.
+		2.
+		1.
+		1668.
+		284.4438771807908
+		519.4521398801841
+		755.2221021086696
+		998.6678851146447
+		1249.386137253198
+
