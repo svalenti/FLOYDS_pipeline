@@ -138,6 +138,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
     iraf.ccdproc.zerocor='no'
     iraf.ccdproc.biassec=''
     iraf.ccdproc.ccdtype=''
+    iraf.ccdred.instrument = "/dev/null"
     if _verbose: 
         iraf.ccdred.verbose='yes'
         iraf.specred.verbose='yes'

@@ -746,6 +746,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
     iraf.ccdproc.zerocor='no'
     iraf.ccdproc.biassec=''
     iraf.ccdproc.ccdtype=''
+    iraf.ccdred.instrument = "/dev/null"
 #    iraf.set(direc=floyds.__path__[0]+'/')
     if _verbose: 
         iraf.ccdred.verbose='yes'
