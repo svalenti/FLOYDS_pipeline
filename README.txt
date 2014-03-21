@@ -16,13 +16,17 @@ NTT is written in python and requires the following package:
 	    - pyfits
 
 - Iraf
+- xhtml2pdf 
+	(pip install  --allow-external pyPdf --allow-unverified pyPdf \
+	xhtml2pdf was needed to make it install with recent pip versions; your
+	mileage may vary)
 	    
 ##############################################################################
 extract the files from the tarball
 > tar -xvf floyds-version.tar
 
 > cd floyds-version
-> python setup.py install  (--record files.txt) 
+> python setup.py install  (--record files.txt)  (--prefix=<install location>)
 
 ##########################################################################
 To uninstall a previus version 
