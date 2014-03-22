@@ -53,10 +53,15 @@ def gettar(img):
     import re,string,os
     data, hdr = pyfits.getdata(img, 0, header=True)
 
+    #
+    #
+    #   need to be change depending what we are doing downloding from floyds machine
+    #
+    #
+         
     imgg=re.sub(string.split(img,'_')[3],re.sub('0','',string.split(img,'_')[3]),img)
     img1=re.sub(string.split(imgg,'_')[4],re.sub('0','',string.split(imgg,'_')[4]),imgg)
 
-    #p=re.sub('-','',floyds.util.readkey3(hdr,'date'))
     _tel=hdr['TELID']
     if _tel=='fts':delta=0
     else:          delta=1
@@ -149,12 +154,21 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
     datenow=now.strftime('20%y%m%d%H%M')
     MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
     outputlist=[]
-    _gain=floyds.util.readkey3(floyds.util.readhdr(re.sub('\n','',files[0])),'gain')
-    _rdnoise=floyds.util.readkey3(floyds.util.readhdr(re.sub('\n','',files[0])),'ron')
+    hdra=floyds.util.readhdr(re.sub('\n','',files[0]))
+    _gain=floyds.util.readkey3(hdra,'gain')
+    _rdnoise=floyds.util.readkey3(hdra,'ron')
     std,rastd,decstd,magstd=floyds.util.readstandard('standard_floyds_mab.txt')
-    _overscan='[2049:2079,1:511]'
-    _biassecblu='[380:2048,325:511]'    
+    _naxis2=hdra.get('NAXIS2')
+    _naxis1=hdra.get('NAXIS1')
+    if not _naxis1: _naxis1=2079
+    if not _naxis2: 
+        if not hdr0.get('HDRVER'):   _naxis1=511
+        else:                        _naxis1=512
+    _overscan='[2049:'+str(_naxis1)+',1:'+str(_naxis2)+']'
+    _biassecblu='[380:2048,325:'+str(_naxis2)+']'    
     _biassecred='[1:1800,1:350]'    
+    print _biassecblu
+    print _biassecred
     lista={}
     objectlist={}
     biaslist={}
@@ -176,17 +190,17 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             _date0=floyds.util.readkey3(hdr0,'date-night')
             _tel=floyds.util.readkey3(hdr0,'TELID')
             _type=floyds.util.readkey3(hdr0,'OBSTYPE')
-            if not _type or _type=='EXPOSE':    _type=floyds.util.readkey3(hdr0,'imagetyp')
-            #print _type
+            if not _type:    _type=floyds.util.readkey3(hdr0,'imagetyp')
+            print _type
             _slit=floyds.util.readkey3(hdr0,'slit')
             if _type:
-                if _type.lower() in ['sky','spectrum']:
+                if _type.lower() in ['sky','spectrum','expose']:
                     nameoutb=str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr=str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
                 elif _type.lower() in ['lamp','arc','l']:
                     nameoutb='arc_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='arc_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
-                elif _type.lower() in ['flat','f','lamp-flat']:
+                elif _type.lower() in ['flat','f','lampflat','lamp-flat']:
                     nameoutb='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
@@ -194,9 +208,17 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
 ####
                 floyds.util.delete(bimg)
                 floyds.util.delete(rimg)
-                iraf.ccdproc(img,output=bimg, overscan="yes", trim="yes", zerocor='no', flatcor='no', zero='', ccdtype='',\
+                iraf.imcopy(img,bimg,verbose='no')
+                iraf.imcopy(img,rimg,verbose='no')
+
+                aaa=iraf.hedit(bimg,'CCDSEC',delete='yes',update='yes',verify='no',Stdout=1)
+                aaa=iraf.hedit(bimg,'TRIMSEC',delete='yes',update='yes',verify='no',Stdout=1)
+                aaa=iraf.hedit(rimg,'CCDSEC',delete='yes',update='yes',verify='no',Stdout=1)
+                aaa=iraf.hedit(rimg,'TRIMSEC',delete='yes',update='yes',verify='no',Stdout=1)
+
+                iraf.ccdproc(bimg,output='', overscan="yes", trim="yes", zerocor='no', flatcor='no', zero='', ccdtype='',\
                                  fixpix='no', trimsec=_biassecblu, biassec=_overscan, readaxi='line', Stdout=1)
-                iraf.ccdproc(img,output=rimg, overscan="yes", trim="yes", zerocor='no', flatcor='no', zero='', ccdtype='',\
+                iraf.ccdproc(rimg,output='', overscan="yes", trim="yes", zerocor='no', flatcor='no', zero='', ccdtype='',\
                                  fixpix='no', trimsec=_biassecred, biassec=_overscan, readaxi='line', Stdout=1)
                 floyds.util.updateheader(bimg,0,{'GRISM':['blu',' blue order']})
                 floyds.util.updateheader(rimg,0,{'GRISM':['red',' blue order']})

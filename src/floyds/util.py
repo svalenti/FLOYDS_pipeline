@@ -234,9 +234,10 @@ def readkey3(hdr,keyword):
        elif keyword=='TELID':
             value=hdr.get(keyword)
             value=re.sub('-','',value)
-            if value in ['fts','2m0b']: value='fts'
-            elif value in ['ftn','2m0a']: value='ftn'
-            else:  sys.exit('Warning: keyword not valid')
+            if value not in ['fts','ftn']: 
+                 value=hdr.get('SITEID')
+                 if value in ['ogg']: value='ftn'
+                 if value in ['coj']: value='fts'
        else:
           try:     value=hdr.get(keyword)
           except:       sys.exit('Warning: keyword not valid')

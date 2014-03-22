@@ -217,10 +217,12 @@ def sensfunction(standardfile,_outputsens,_function,_order,_interactive,sample='
        _airmass=readkey3(hdrs,'airmass')
        _exptime=readkey3(hdrs,'exptime')
        _tel=readkey3(hdrs,'TELID')
-       if _tel in ['fts','2m0b']:   # to be checked
+       if _tel not in ['ftn','fts']:     _tel=readkey3(hdrs,'SITEID')
+       print _tel
+       if _tel in ['fts','coj']:   # to be checked
            _extinction='ssoextinct.dat'
            _observatory='sso'
-       elif _tel in ['ftn','2m0a']:
+       elif _tel in ['ftn','ogg']:
            _extinction='maua.dat' 
            _observatory='cfht'   
        else: sys.exit('ERROR: observatory not recognised')
@@ -285,6 +287,7 @@ def telluric_atmo(imgstd):
    import os,string
    _grism=readkey3(readhdr(imgstd),'grism')
    _tel=readkey3(readhdr(imgstd),'TELID')
+#   if _tel not in ['ftn','fts']:    _tel=readkey3(readhdr(imgstd),'SIDEID')
    imgout='invers_atmo_'+imgstd
    delete(imgout)
    iraf.set(direc=floyds.__path__[0]+'/')
@@ -374,6 +377,8 @@ def checkwavestd(imgex,_interactive,_type=1):
         skyxx=arange(len(skyff))
         skyaa=crval1+(skyxx)*cd1
         _tel=popen(imgex)[0].header.get('TELID')
+#        if _tel not in ['ftn','fts']:         _tel=popen(imgex)[0].header.get('SITEID')
+
         print imgex
         atmofile=floyds.floydsspecdef.atmofile(imgex,'atmo2_'+_tel+'_'+imgex)
         if _type==1:
@@ -714,13 +719,15 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
     iraf.set(direc=floyds.__path__[0]+'/')
     _extinctdir='direc$standard/extinction/'
     _tel=readkey3(readhdr(re.sub('\n','',files[0])),'TELID')
-    if _tel=='fts':
+    print _tel
+    if _tel in ['fts','coj']:
         _extinction='ssoextinct.dat'
         _observatory='sso'
-    elif _tel=='ftn':
+    elif _tel in ['ftn','ogg']:
         _extinction='maua.dat' 
         _observatory='cfht'   
-    else: sys.exit('ERROR: observatory not recognised')
+    else: 
+        sys.exit('ERROR: observatory not recognised')
     dv=floyds.util.dvex()
     scal=pi/180.
     iraf.noao(_doprint=0)
@@ -747,7 +754,6 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
     iraf.ccdproc.biassec=''
     iraf.ccdproc.ccdtype=''
     iraf.ccdred.instrument = "/dev/null"
-#    iraf.set(direc=floyds.__path__[0]+'/')
     if _verbose: 
         iraf.ccdred.verbose='yes'
         iraf.specred.verbose='yes'
@@ -758,10 +764,10 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
     datenow=now.strftime('20%y%m%d%H%M')
     MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
     outputlist=[]
-    _gain=readkey3(readhdr(re.sub('\n','',files[0])),'gain')
-    _rdnoise=readkey3(readhdr(re.sub('\n','',files[0])),'ron')
-    std,rastd,decstd,magstd=floyds.util.readstandard('standard_floyds_mab.txt')
-    hdr0=readhdr(files[0])
+    hdr0=floyds.util.readhdr(re.sub('\n','',files[0]))
+    _gain=readkey3(hdr0,'gain')
+    _rdnoise=readkey3(hdr0,'ron')
+    std,rastd,decstd,magstd=floyds.util.readstandard('standard_floyds_mab.txt')    
     _naxis2=hdr0.get('NAXIS2')
     _naxis1=hdr0.get('NAXIS1')
     if not _naxis1: _naxis1=2079
@@ -793,17 +799,18 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             _date0=readkey3(hdr0,'date-night')
             _tel=readkey3(hdr0,'TELID')
             _type=readkey3(hdr0,'OBSTYPE')
-            if not _type or _type=='EXPOSE':    _type=readkey3(hdr0,'imagetyp')
+            if not _type:    _type=readkey3(hdr0,'imagetyp')
             print _type
             _slit=readkey3(hdr0,'slit')
             if _type:
-                if _type.lower() in ['sky','spectrum']:
+                print _type
+                if _type.lower() in ['expose','sky','spectrum']:
                     nameoutb=str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr=str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
                 elif _type.lower() in ['lamp','arc','l']:
                     nameoutb='arc_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='arc_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
-                elif _type.lower() in ['flat','f','lamp-flat']:
+                elif _type.lower() in ['flat','f','lampflat','lamp-flat']:
                     nameoutb='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
@@ -835,10 +842,10 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
         for img in lista[arm]:
             hdr=readhdr(img)
             _type=readkey3(hdr,'obstype')
-            if not _type or _type=='EXPOSE':    _type=readkey3(hdr,'imagetyp')
+            if not _type:    _type=readkey3(hdr,'imagetyp')
             _slit=readkey3(hdr,'slit')
             _grpid=readkey3(hdr,'grpid')
-            if _type.lower() in ['flat','f','lamp-flat'] :
+            if _type.lower() in ['flat','f','lamp-flat','lampflat'] :
                 if (arm,_slit) not in flatlist:  flatlist[arm,_slit]={}
                 if _grpid not in flatlist[arm,_slit]: flatlist[arm,_slit][_grpid]=[img]
                 else: flatlist[arm,_slit][_grpid].append(img)
@@ -849,7 +856,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             elif _type in ['bias','b']:
                 if arm not in biaslist: biaslist[arm]=[]
                 biaslist[arm].append(img)
-            elif _type.lower() in ['sky','s','spectrum']:
+            elif _type.lower() in ['sky','s','spectrum','expose']:
                 try:
                     _ra=float(readkey3(hdr,'RA'))
                     _dec=float(readkey3(hdr,'DEC'))
@@ -1057,7 +1064,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                       if not os.path.isdir('database/'):   os.mkdir('database/')
                       if os.path.isfile(floyds.util.searcharc(imgex,'')[1]+'/database/id'+re.sub('.fits','',arcref)):
                           os.system('cp '+floyds.util.searcharc(imgex,'')[1]+'/database/id'+re.sub('.fits','',arcref)+' database/')
-
+                      
                       identific=iraf.specred.reidentify(referenc=arcref, images= arcfile, interac=_interactive, section= 'middle line',\
                                                   coordli='direc$standard/ident/FLOYDS_lines.txt', overrid='yes', cradius=10, step=0,\
                                                         newaps= 'no', nsum=5, nlost=2, mode='h',verbose='yes',Stdout=1)
@@ -1135,6 +1142,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
 ######################################################
                       hdrs=readhdr(imgl)
                       _tel=readkey3(hdrs,'TELID')
+                      if _tel not in ['fts','ftn']:  _tel=readkey3(hdrs,'SITEID')
                       try:
                           _outputsens2='sens_'+_tel+'_'+str(readkey3(hdrs,'date-night'))+'_'+str(readkey3(hdrs,'grism'))+\
                               '_'+re.sub('.dat','',readkey3(hdrs,'stdname'))+'_'+str(MJDtoday)
@@ -1508,10 +1516,11 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
     _slit=floyds.util.readkey3(hdr,'slit')
     _arm=floyds.util.readkey3(hdr,'GRISM')
     _tel=floyds.util.readkey3(hdr,'TELID')
+    if _tel not in ['ftn','fts']:     _tel=floyds.util.readkey3(hdr,'SITEID')
     setup=[_arm,_slit]
     iraf.delete('t'+img)
     if _arm=='red':
-        if _tel in ['ftn']:
+        if _tel in ['ftn','ogg']:
             xa,xb=0,1800
             ya,yb=211,308
             xdim=xb-xa
@@ -1522,7 +1531,7 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
             xdim=xb-xa
             ydim=yb-ya
     else:
-        if _tel in ['ftn']:
+        if _tel in ['ftn','ogg']:
             xa,xb=0,1800
             ya,yb=127,227
             xdim=xb-xa

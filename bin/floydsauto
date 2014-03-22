@@ -45,8 +45,8 @@ if __name__ == "__main__":
      else:
           listfile1=glob.glob('g_e_*0.fits')
           listfile2=glob.glob('f_e_*0.fits')
-          listfile3=glob.glob('ogg2m001*0.fits')
-          listfile4=glob.glob('coj2m001*0.fits')
+          listfile3=glob.glob('ogg2m002*0.fits')
+          listfile4=glob.glob('coj2m002*0.fits')
           listfile=listfile1+listfile2+listfile3+listfile4
           files=[]
           print 'making the list with raw data in the current directory ...... please wait'
@@ -56,12 +56,12 @@ if __name__ == "__main__":
                _naxis1=readkey3(hdr0,'NAXIS1')
                _naxis2=readkey3(hdr0,'NAXIS2')
                _imagetype=readkey3(hdr0,'OBSTYPE')
-               if not _imagetype or _imagetype=='EXPOSE':  _imagetype=readkey3(hdr0,'imagetyp')
-               if _naxis1!=2079 or _naxis2!=511:         _type='not standard dimension 2079x511'
+               if not _imagetype:  _imagetype=readkey3(hdr0,'imagetyp')
+               if _naxis1!=2079 or (_naxis2!=511 and _naxis2!=512):         _type='not standard dimension 2079x511'
                if not _type and readkey3(hdr0,'instrume') not in ['en05','en06']:                _type='not efosc intrument'
                if _imagetype and not _type:
-                    if _imagetype.lower() in ['lamp-flat','flat','f']: _type='flat'
-                    elif _imagetype.lower() in ['spectrum','sky','s']: _type='sky'
+                    if _imagetype.lower() in ['lamp-flat','flat','f','lampflat']: _type='flat'
+                    elif _imagetype.lower() in ['spectrum','sky','s','expose']: _type='sky'
                     elif _imagetype.lower() in ['arc','lamp','l']: _type='lamp'
                if not _type:
                     _exptime=readkey3(hdr0,'exptime')
@@ -182,7 +182,10 @@ if __name__ == "__main__":
                imglist.append(readme)
                os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
                imglist.append('floyds.pdf')
-               bb,kk=floyds.gettar(img0)
+               try:
+                    bb,kk=floyds.gettar(img0)
+               except: 
+                    bb,kk='',''
                if bb: imglist.append(bb)
                if kk: imglist.append(kk)
                ################# archiving   ##########################
