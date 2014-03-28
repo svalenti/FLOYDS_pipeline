@@ -45,7 +45,7 @@ if __name__ == "__main__":
      else:
           listfile1=glob.glob('g_e_*0.fits')
           listfile2=glob.glob('f_e_*0.fits')
-          listfile3=glob.glob('ogg2m002*0.fits')
+          listfile3=glob.glob('ogg2m001*0.fits')
           listfile4=glob.glob('coj2m002*0.fits')
           listfile=listfile1+listfile2+listfile3+listfile4
           files=[]

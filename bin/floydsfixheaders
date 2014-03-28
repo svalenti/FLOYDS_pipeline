@@ -5,7 +5,7 @@ import floyds
 import os
 listfile1=glob.glob('g*_e_*_0.fits')
 listfile2=glob.glob('f*_e_*_0.fits')
-listfile3=glob.glob('ogg2m002*0.fits')
+listfile3=glob.glob('ogg2m001*0.fits')
 listfile4=glob.glob('coj2m002*0.fits')
 imglist=listfile1+listfile2+listfile3+listfile4
 for img in imglist:
