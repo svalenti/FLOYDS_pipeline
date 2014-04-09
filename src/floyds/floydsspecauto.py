@@ -194,18 +194,19 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             print _type
             _slit=floyds.util.readkey3(hdr0,'slit')
             if _type:
-                if _type.lower() in ['sky','spectrum','expose']:
+                _type = _type.lower()
+                if _type in ['sky','spectrum','expose']:
                     nameoutb=str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr=str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
-                elif _type.lower() in ['lamp','arc','l']:
+                elif _type in ['lamp','arc','l']:
                     nameoutb='arc_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='arc_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
-                elif _type.lower() in ['flat','f','lampflat','lamp-flat']:
+                elif _type in ['flat','f','lampflat','lamp-flat']:
                     nameoutb='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
                 else:
-                    nameoutb=_type.lower()+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
-                    nameoutr=_type.lower()+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
+                    nameoutb=_type+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
+                    nameoutr=_type+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
 
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
                 rimg=floyds.util.name_duplicate(img,nameoutr,'')
@@ -230,7 +231,8 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                 floyds.util.updateheader(rimg,0,{'arcfile':[img,'file name in the archive']})
                 lista['blu'].append(bimg)
                 lista['red'].append(rimg)
-            else: 'print warning type not defined'
+            else: 
+                print 'warning type not defined'
     for arm in lista.keys():
         for img in lista[arm]:
             hdr=floyds.util.readhdr(img)
