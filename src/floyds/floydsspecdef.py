@@ -1098,6 +1098,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                     print arcfile
                     try:       specred=floyds.util.spectraresolution3(arcfile)
                     except:    specred=0
+                    print identific
                     if identific:
                         _rms=float(identific[-1].split()[-1])
                         _num=float(identific[-1].split()[4].split('/')[0])
