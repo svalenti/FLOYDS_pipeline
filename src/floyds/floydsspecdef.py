@@ -167,18 +167,6 @@ def correctfringing(imgex,fringingmask):
     pyfits.writeto(imgex, float32(data1), hdr)
     return imgex
     
-def sortbyJD(lista):
-     print lista
-     from pyfits import open as popen
-     from numpy import array, argsort
-     JDlist=[]
-     for img in lista:  JDlist.append(popen(img)[0].header.get('MJD'))
-     lista = array(lista)
-     JDlist = array(JDlist)
-     inds = JDlist.argsort()
-     sortedlista = lista[inds]
-     return list(sortedlista)
-
 
 def sensfunction(standardfile,_outputsens,_function,_order,_interactive,sample='*'):
     import re,os,sys,string
@@ -954,9 +942,9 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                   if len(arcfile)>1:                           # more than one arc available
                       print arcfile
 #                     _arcclose=floyds.util.searcharc(imgex,arcfile)[0]   # take the closest in time 
-                      _arcclose=floyds.sortbyJD(arcfile)[-1]               #  take the last arc of the sequence
+                      _arcclose=floyds.util.sortbyJD(arcfile)[-1]               #  take the last arc of the sequence
                       if _interactive in ['yes','YES','Y','y']:
-                              for ii in floyds.floydsspecdef.sortbyJD(arcfile):
+                              for ii in floyds.util.sortbyJD(arcfile):
                                   print '\n### ',ii 
                               arcfile=raw_input('\n### more than one arcfile available, which one to use ['+str(_arcclose)+'] ? ')
                               if not arcfile: arcfile=_arcclose

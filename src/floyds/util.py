@@ -2,7 +2,12 @@ def sortbyJD(lista):
      from pyfits import open as popen
      from numpy import array, argsort
      JDlist=[]
-     for img in lista:  JDlist.append(popen(img)[0].header.get('MJD'))
+     for img in lista:
+          hdr=popen(img)[0].header
+          if 'MJD' in hdr:
+               JDlist.append(popen(img)[0].header.get('MJD'))
+          else:
+               JDlist.append(popen(img)[0].header.get('MJD-OBS'))
      lista = array(lista)
      JDlist = array(JDlist)
      inds = JDlist.argsort()
@@ -151,6 +156,7 @@ def readkey3(hdr,keyword):
                              'grpid'     : 'GRPUID',\
                              'exptime'   : 'EXPTIME',\
                              'JD'        : 'MJD',\
+                             'MJD'        : 'MJD',\
                              'lamp'      : 'LMP_ID',\
                              'gain'      : 'GAIN',\
                              'instrume'  : 'INSTRUME',\
@@ -171,6 +177,7 @@ def readkey3(hdr,keyword):
                              'grpid'     : 'GRPUID',\
                              'exptime'   : 'EXPTIME',\
                              'JD'        : 'MJD-OBS',\
+                             'MJD'        : 'MJD-OBS',\
                              'lamp'      : 'LMP1ID',\
                              'gain'      : 'GAIN',\
                              'instrume'  : 'INSTRUME',\

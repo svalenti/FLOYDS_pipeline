@@ -118,7 +118,8 @@ if __name__ == "__main__":
      _fringing=option.fringing
      if len(files)>0:
           outputlist=floyds.floydsspecdef.floydsspecreduction(files,_interactive,_dobias,_doflat,listflat,\
-                                                                            listbias,listarc,_cosmic,_trace,_dispersionline,listsens,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing)
+                                                              listbias,listarc,_cosmic,_trace,_dispersionline,\
+                                                              listsens,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing)
      else:  outputlist=[]
      stoptime=time.time()
      print 'runnning time '+str(stoptime-starttime)
