@@ -413,8 +413,8 @@ def searcharc(img,listarc):
     _instrume=readkey3(hdr,'TELID')
     grism0=readkey3(hdr,'grism')
     slit0=readkey3(hdr,'slit')
-    if slit0=='6.0' and _instrume in ['fts','2m0b']: slit0='2.0'
-    if slit0=='6.0' and _instrume in ['ftn','2m0a']: slit0='1.6'
+    #if slit0=='6.0' and _instrume in ['fts','2m0b']: slit0='2.0'
+    #if slit0=='6.0' and _instrume in ['ftn','2m0a']: slit0='1.6'
     if not listarc:
         directory=floyds.__path__[0]+'/archive/'+str(_instrume)+'/arc/'+grism0+'/'+slit0
         listarc=glob.glob(directory+'/*fits')

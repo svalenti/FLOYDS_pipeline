@@ -1042,10 +1042,14 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                     print imgex,setup
                     if setup[0]=='blu': _order=3
                     else: _order=6
-                    if setup[1] in ['6.0']: _fwidth=20
-                    else: _fwidth=7
-                    if setup[1] in ['6.0']: _cradius=20
-                    else: _cradius=10
+                    if setup[1] in ['6.0']: 
+                        _fwidth=30
+                        _specres=40
+                        _cradius=30
+                    else: 
+                        _fwidth=7
+                        _specres=25
+                        _cradius=10
 
                     arcref=floyds.util.searcharc(imgex,'')[0]
                     print arcref
@@ -1053,7 +1057,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
 
                     if not arcref:
                         identific=iraf.specred.identify(images= arcfile, section= 'middle line', coordli='FLOYDS_lines.txt',\
-                                                        nsum=10, fwidth=_fwidth, function='legendre', order=_order,mode='h',Stdout=1)
+                                                        nsum=10, fwidth=_fwidth, cradius=_cradius, function='legendre', order=_order,mode='h',Stdout=1)
                     else:
                       if arcref[0]=='/':
                           os.system('cp '+arcref+' .')
@@ -1088,13 +1092,13 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                               if setup[0]=='blu': _order=3
                               else: _order=6
                               identific=iraf.specred.identify(images= arcfile, section= 'middle line', coordli='FLOYDS_lines.txt',\
-                                                              nsum=10, fwidth=_fwidth, function='legendre', order=_order,mode='h', Stdout=1)
+                                                              nsum=10, fwidth=_fwidth,  cradius=_cradius, function='legendre', order=_order,mode='h', Stdout=1)
 
 
                     floyds.util.delete('FLOYDS_lines.txt')
                     imgl=re.sub('_ex.fits','_l.fits',imgex)
                     print arcfile
-                    try:       specred=floyds.util.spectraresolution3(arcfile)
+                    try:       specred=floyds.util.spectraresolution3(arcfile,_specres)
                     except:    specred=0
                     print identific
                     if identific:
