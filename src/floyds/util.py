@@ -118,8 +118,9 @@ def delete(listfile):
     for _file in imglist:   lista=lista+glob.glob(_file)
     if lista:
         for _file in lista:
-            try:          os.system('rm '+_file)
-            except:       pass
+            if os.path.isfile(_file):
+                 try:          os.system('rm '+_file)
+                 except:       pass
 ###############################################################
 def readhdr(img):
    from pyfits import open as popen

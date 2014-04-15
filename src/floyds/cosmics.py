@@ -200,7 +200,7 @@ def lacos(_input0,output='clean.fits',outmask='mask.fits',gain=1.3,readn=9,xorde
     delete('_yyy.fits')
     iraf.imutil.imexpr(expr='(1-a)*b+c',a=outmask,b=oldoutput,c=med5,output='_yyy.fits',verbose='no')
       # add sky and object spectra back in
-    iraf.imarith('_yyy.fits',"+",skymod,'_yyy.fits')
+    #iraf.imarith('_yyy.fits',"+",skymod,'_yyy.fits')
       # cleanup and get ready for next iteration
     if npix==0: stop=yes
       # delete temp files

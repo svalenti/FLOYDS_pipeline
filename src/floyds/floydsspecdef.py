@@ -194,11 +194,11 @@ def sensfunction(standardfile,_outputsens,_function,_order,_interactive,sample='
     _outputsens=name_duplicate(standardfile,_outputsens,'')
     if os.path.isfile(_outputsens):
        if _interactive.lower()!='yes':
-          delete(_outputsens)
+          floyds.util.delete(_outputsens)
        else:
           answ=raw_input('sensitivity function already computed, do you want to do it again [[y]/n] ? ')
           if not answ: answ='y'
-          if answ.lower() in ['y','yes']:   delete(_outputsens)
+          if answ.lower() in ['y','yes']:   floyds.util.delete(_outputsens)
 
     if not os.path.isfile(_outputsens):
        hdrs=readhdr(standardfile)
@@ -277,7 +277,7 @@ def telluric_atmo(imgstd):
    _tel=readkey3(readhdr(imgstd),'TELID')
 #   if _tel not in ['ftn','fts']:    _tel=readkey3(readhdr(imgstd),'SIDEID')
    imgout='invers_atmo_'+imgstd
-   delete(imgout)
+   floyds.util.delete(imgout)
    iraf.set(direc=floyds.__path__[0]+'/')
    _cursor='direc$standard/ident/cursor_sky_0'
 #   iraf.noao.onedspec.bplot(imgstd, cursor=_cursor, spec2= imgstd, new_ima=imgout, overwri='yes')
@@ -295,8 +295,8 @@ def telluric_atmo(imgstd):
        atlas_smooto2='_atlas_smoot_o2.fits'
        atlas_smooth2o='_atlas_smoot_h2o.fits'
        _sigma=200
-       delete(atlas_smooto2)
-       delete(atlas_smooth2o)
+       floyds.util.delete(atlas_smooto2)
+       floyds.util.delete(atlas_smooth2o)
        iraf.imfilter.gauss(_skyfileh2o,output=atlas_smooth2o,sigma=_sigma)
        iraf.imfilter.gauss(_skyfileo2,output=atlas_smooto2,sigma=_sigma)
        llskyh2o,ffskyh2o=readspectrum(atlas_smooth2o)
@@ -378,7 +378,7 @@ def checkwavestd(imgex,_interactive,_type=1):
         atmoxx=arange(len(atmoff))
         atmoaa=crval1+(atmoxx)*cd1
         shift=floyds.floydsspecdef.checkwavelength_arc(atmoaa,atmoff,skyaa,skyff,6800,7800,_interactive)
-        delete('atmo2_'+_tel+'_'+imgex)
+        floyds.util.delete('atmo2_'+_tel+'_'+imgex)
     else: shift=0
     zro=popen(imgex)[0].header.get('CRVAL1')
     if _interactive in ['yes','YES','Yes','Y','y']:
@@ -420,7 +420,7 @@ def checkwavelength_obj(fitsfile,skyfile,_interactive='yes',_type=1):
             ion()
             plot(xx1,yy1)
             show()
-        delete('new3.fits')
+        floyds.util.delete('new3.fits')
         hdu = pyfits.PrimaryHDU(yy1)
         hdulist = pyfits.HDUList([hdu])
         hdulist[0].header.update('CRVAL1',crval2)
@@ -431,7 +431,7 @@ def checkwavelength_obj(fitsfile,skyfile,_interactive='yes',_type=1):
         yy1=popen(fitsfile2)[0].data
         xx1=arange(len(yy1))
         aa1=crval2+(xx1)*cd2
-        delete('new3.fits')
+        floyds.util.delete('new3.fits')
         skyff=popen(skyfile)[0].data
         crval1=popen(skyfile)[0].header.get('CRVAL1')
         cd1=popen(skyfile)[0].header.get('CD1_1')
@@ -566,7 +566,7 @@ def extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,_type,automat
                 else:    _new,_extract='yes','no'
             else:   _new,_extract='yes','yes'
     if _extract=='yes':
-        delete(imgex)
+        floyds.util.delete(imgex)
         if _dispersionline and _new in ['Yes','yes','YES','y','Y']:
             question='yes'
             while question=='yes':
@@ -968,7 +968,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                   img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,'no',_cosmic)
 
 ###############     flat correction  method 1 or 3  ###############
-              print img,arcfile,flatfile
+              print img,arcfile,flatfile,setup
               imgn='n'+img
               if fringing in [1,3]:
                   if flatfile and  setup[0]=='red':
@@ -1006,7 +1006,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
               if fringing==2:
                   if setup[0]=='red' and flatfile:
                       print flatfile,img
-                      delete('flat'+imgex)                  
+                      floyds.util.delete('flat'+imgex)                  
                       iraf.specred.apsum(flatfile,output='flat'+imgex,referen=imgn,interac='no',find='no',recente='no',resize='no',\
                                              edit='no',trace='no',fittrac='no',extract='yes',extras='no',review='no',backgro='none')
                       fringingmask=normflat('flat'+imgex)
@@ -1014,9 +1014,8 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                       imgex,so2,shift=correctfringing_auto(imgex,fringingmask)  #  automatic correction
                       #imgex=correctfringing(imgex,fringingmask)      #  manual correction
 #############################################
-              print imgex,arcfile
               if arcfile:
-                  delete('arc_'+imgex)     
+                  floyds.util.delete('arc_'+imgex)     
                   iraf.specred.apsum(arcfile,output='arc_'+imgex,referen=imgn,interac='no',find='no',recente='no',resize='no',\
                                      edit='no',trace='no',fittrac='no',extract='yes',extras='no',review='no',backgro='none')
                   arcfile='arc_'+imgex
@@ -1025,12 +1024,14 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                   if arcfile:
                       os.system('cp '+arcfile+' arc_'+imgex)
                       arcfile=' arc_'+imgex
+              else:  print 'arcfile = '+arcfile
 ############################################
               if not arcfile: 
                   print '\n### warning no arcfile \n exit '
                   imgl=''
               else:
                   imgl=re.sub('_ex.fits','_l.fits',imgex)
+                  print imgl
                   if _interactive in ['yes','YES','Y','y']:
                       if os.path.isfile(imgl):  
                           answ=raw_input('\n### wavelength calibrated file already there, do you want to calibrate again [[y]/n] ? ')
@@ -1038,13 +1039,21 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                       else: answ='y'
                   else: answ='y'
                   if answ in ['y','Y','YES','yes','Yes']:
-                    print imgex
+                    print imgex,setup
+                    if setup[0]=='blu': _order=3
+                    else: _order=6
+                    if setup[1] in ['6.0']: _fwidth=20
+                    else: _fwidth=7
+                    if setup[1] in ['6.0']: _cradius=20
+                    else: _cradius=10
+
                     arcref=floyds.util.searcharc(imgex,'')[0]
+                    print arcref
+                    os.system('cp '+floyds.__path__[0]+'/standard/ident/FLOYDS_lines.txt .')
+
                     if not arcref:
-                      if setup[0]=='blu': _order=3
-                      else: _order=6
-                      identific=iraf.specred.identify(images= arcfile, section= 'column 300', coordli='direc$standard/ident/FLOYDS_lines.txt',\
-                                                      nsum=10, fwidth=7, function='legendre', order=_order,mode='h',Stdout=1)
+                        identific=iraf.specred.identify(images= arcfile, section= 'middle line', coordli='FLOYDS_lines.txt',\
+                                                        nsum=10, fwidth=_fwidth, function='legendre', order=_order,mode='h',Stdout=1)
                     else:
                       if arcref[0]=='/':
                           os.system('cp '+arcref+' .')
@@ -1054,7 +1063,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                           os.system('cp '+floyds.util.searcharc(imgex,'')[1]+'/database/id'+re.sub('.fits','',arcref)+' database/')
                       
                       identific=iraf.specred.reidentify(referenc=arcref, images= arcfile, interac=_interactive, section= 'middle line',\
-                                                  coordli='direc$standard/ident/FLOYDS_lines.txt', overrid='yes', cradius=10, step=0,\
+                                                  coordli='FLOYDS_lines.txt', overrid='yes', cradius=_cradius, step=0,\
                                                         newaps= 'no', nsum=5, nlost=2, mode='h',verbose='yes',Stdout=1)
                       if _interactive in ['yes','YES','Y','y']:
                           answ=raw_input('### do you like the identification [[y]/n]')
@@ -1071,25 +1080,30 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                           _shift=floyds.floydsspecdef.checkwavelength_arc(xx1,yy1,xx2,yy2,'','',_interactive)#*(-1)
                           print _shift
                           identific=iraf.specred.reidentify(referenc=arcref, images= arcfile, interac=_interactive, section= 'middle line', shift=_shift,\
-                                                            coordli='direc$standard/ident/FLOYDS_lines.txt', overrid='yes', cradius=10, step=0, newaps= 'no',\
+                                                            coordli='FLOYDS_lines.txt', overrid='yes', cradius=_cradius, step=0, newaps= 'no',\
                                                             nsum=5, nlost=2, mode='h',verbose='yes',Stdout=1)
                           answ=raw_input('### is it ok now [[y]/n]')
                           if not answ: answ='y'
                           if answ in ['n','N','no','NO','No']:
                               if setup[0]=='blu': _order=3
                               else: _order=6
-                              identific=iraf.specred.identify(images= arcfile, section= 'column 300', coordli='direc$standard/ident/FLOYDS_lines.txt',\
-                                                              nsum=10, fwidth=7, function='legendre', order=_order,mode='h', Stdout=1)
-#                              sys.exit('warning: line identification with some problems')
+                              identific=iraf.specred.identify(images= arcfile, section= 'middle line', coordli='FLOYDS_lines.txt',\
+                                                              nsum=10, fwidth=_fwidth, function='legendre', order=_order,mode='h', Stdout=1)
 
+
+                    floyds.util.delete('FLOYDS_lines.txt')
                     imgl=re.sub('_ex.fits','_l.fits',imgex)
                     print arcfile
                     try:       specred=floyds.util.spectraresolution3(arcfile)
                     except:    specred=0
                     print identific
                     if identific:
-                        _rms=float(identific[-1].split()[-1])
-                        _num=float(identific[-1].split()[4].split('/')[0])
+                        try:
+                            _rms=float(identific[-1].split()[-1])
+                            _num=float(identific[-1].split()[4].split('/')[0])
+                        except:
+                            _rms=9999
+                            _num=9999
                         hedvec={'LAMRMS_'+setup[0][0]:[_rms*.1,'residual RMS [nm]'],'LAMNLIN'+setup[0][0]:[_num,'Nb of arc lines used in the fit of the wavel. solution'],\
                                 'SPE_ER_'+setup[0][0]:[(_rms*.1)/sqrt(float(_num)),'statistical uncertainty'],\
                                 'REFSPEC1':[re.sub('.fits','',arcfile),' reference arc'],'arc'+setup[0]:[re.sub('.fits','',arcfile),' reference arc']}
@@ -1100,7 +1114,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
 
                     floyds.util.updateheader(imgex,0,hedvec)
 
-                    delete(imgl)
+                    floyds.util.delete(imgl)
                     iraf.specred.dispcor(imgex, output=imgl, flux='yes')
                     if imgl not in outputfile: outputfile.append(imgl)
                     if tpe=='std' or floyds.util.readkey3(floyds.util.readhdr(imgex),'exptime') < 300:
@@ -1491,7 +1505,7 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
 ###################################    transform img, arc, flat
     data, hdr = pyfits.getdata(img, 0, header=True)
     _arm=floyds.util.readkey3(hdr,'GRISM')
-    iraf.delete('t'+img)
+    floyds.util.delete('t'+img)
     print img,re.sub('.fits','',imgrect)
 
     if _arm=='red':
@@ -1505,9 +1519,11 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
     _slit=floyds.util.readkey3(hdr,'slit')
     _arm=floyds.util.readkey3(hdr,'GRISM')
     _tel=floyds.util.readkey3(hdr,'TELID')
+    print _slit,_arm,_tel
     if _tel not in ['ftn','fts']:     _tel=floyds.util.readkey3(hdr,'SITEID')
     setup=[_arm,_slit]
-    iraf.delete('t'+img)
+    floyds.util.delete('t'+img)
+    #iraf.delete('t'+img)
     if _arm=='red':
         if _tel in ['ftn','ogg']:
             xa,xb=0,1800
@@ -1553,15 +1569,18 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
         floyds.util.updateheader('t'+img,0,{'LACOSMIC':[False,'Laplacian cosmic ray rejection']})
 
 
-    iraf.delete('tt'+img)
+    floyds.util.delete('tt'+img)
+    #iraf.delete('tt'+img)
     iraf.specred.transform(input='t'+img, output='tt'+img, minput='', fitnames=re.sub('.fits','',imgrect1), databas='database',\
                                x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0, logfile='logfile')#, mode='h')
     floyds.util.updateheader('tt'+img,0,{'DISPAXIS':[1,'dispersion axis']})
     #raw_input('qui2')
-    iraf.delete('t'+img)
+    #iraf.delete('t'+img)
+    floyds.util.delete('t'+img)
 
     if arcfile:
-        iraf.delete('t'+arcfile)
+        floyds.util.delete('t'+arcfile)
+        #iraf.delete('t'+arcfile)
         if _arm=='red':
             iraf.specred.transform(input=arcfile, output='t'+arcfile, minput='', fitnames=re.sub('.fits','',imgrect), databas='database',\
                                    x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0, logfile='logfile')
@@ -1571,7 +1590,7 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
 #            iraf.specred.transform(input=arcfile, output='t'+arcfile, minput='', fitnames=re.sub('.fits','',imgrect), databas='database',\
 #                                   x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes',  blank=0, logfile='logfile')
         data, hdr = pyfits.getdata('t'+arcfile, 0, header=True)
-        iraf.delete('t'+arcfile)
+        floyds.util.delete('t'+arcfile)
         if not hdr.get('HDRVER'):
             pyfits.writeto('t'+arcfile, float32(data[0][ya:yb,xa:xb]),hdr)
         else:
@@ -1584,15 +1603,15 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
         aaa=iraf.hedit('t'+arcfile,'CCDSEC',delete='yes',update='yes',verify='no',Stdout=1)
         aaa=iraf.hedit('t'+arcfile,'TRIM',delete='yes',update='yes',verify='no',Stdout=1)
 
-        iraf.delete('tt'+arcfile)
+        floyds.util.delete('tt'+arcfile)
         iraf.specred.transform(input='t'+arcfile, output='tt'+arcfile, minput='', fitnames=re.sub('.fits','',imgrect1), databas='database',\
                                x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes',  blank=0, logfile='logfile')#, mode='h')
         floyds.util.updateheader('tt'+arcfile,0,{'DISPAXIS':[1,'dispersion axis']})
-        iraf.delete('t'+arcfile)
+        floyds.util.delete('t'+arcfile)
         arcfile='tt'+arcfile
  
     if flatfile:
-        iraf.delete('t'+flatfile)
+        floyds.util.delete('t'+flatfile)
         if _arm=='red':
             iraf.specred.transform(input=flatfile, output='t'+flatfile, minput='', fitnames=re.sub('.fits','',imgrect), databas='database',\
                                    x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0, logfile='logfile')
@@ -1602,7 +1621,7 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
 #        iraf.specred.transform(input=flatfile, output='t'+flatfile, minput='', fitnames=re.sub('.fits','',imgrect), databas='database',\
 #                               x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes',  blank=0, logfile='logfile')#, mode='h')
         data, hdr = pyfits.getdata('t'+flatfile, 0, header=True)
-        iraf.delete('t'+flatfile)
+        floyds.util.delete('t'+flatfile)
         if not hdr.get('HDRVER'):
             pyfits.writeto('t'+flatfile, float32(data[0][ya:yb,xa:xb]),hdr)
         else:
@@ -1615,11 +1634,11 @@ def rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,_interactive=True,_cosmi
         aaa=iraf.hedit('t'+flatfile,'TRIM',delete='yes',update='yes',verify='no',Stdout=1)
         aaa=iraf.hedit('t'+flatfile,'CCDSEC',delete='yes',update='yes',verify='no',Stdout=1)
 
-        iraf.delete('tt'+flatfile)
+        floyds.util.delete('tt'+flatfile)
         iraf.specred.transform(input='t'+flatfile, output='tt'+flatfile, minput='', fitnames=re.sub('.fits','',imgrect1), databas='database',\
                                x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes',  blank=0, logfile='logfile')#, mode='h')
         floyds.util.updateheader('tt'+flatfile,0,{'DISPAXIS':[1,'dispersion axis']})
-        iraf.delete('t'+flatfile)
+        floyds.util.delete('t'+flatfile)
         flatfile='tt'+flatfile
     return 'tt'+img,arcfile,flatfile
 
@@ -1794,6 +1813,7 @@ def fringing_classicmethod2(flatfile,img,_inter,_sample,_order,arm):
         iraf.unlearn(iraf.specred.apflatten)
         print flatfile,_inter,_order,_sample
         floyds.floydsspecdef.aperture(flatfile)
+        print '###',flatfile,_inter,_order
         iraf.specred.apflatten(flatfile,output='n'+flatfile,interac=_inter,find='no',recenter='no', resize='no',edit='no',trace='no',\
                                fittrac='no',fitspec='no', flatten='yes', aperture='',\
                                pfit='fit2d',clean='no',function='legendre',order=_order,sample = '*', mode='ql')
