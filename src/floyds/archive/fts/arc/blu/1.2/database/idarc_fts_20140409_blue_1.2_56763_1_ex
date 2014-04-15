@@ -1,0 +1,33 @@
+# Tue 12:29:31 15-Apr-2014
+begin	identify arc_fts_20140409_blue_1.2_56763_1_ex - Ap 1
+	id	arc_fts_20140409_blue_1.2_56763_1_ex
+	task	identify
+	image	arc_fts_20140409_blue_1.2_56763_1_ex - Ap 1
+	aperture	1
+	aplow	87.84
+	aphigh	107.84
+	units	Angstroms
+	features	6
+	        314.85 3650.12104   3650.153   7.0 1 1 Hg
+	        543.21 4046.45281   4046.563   7.0 1 1 Hg
+	        723.04  4358.5791   4358.328   7.0 1 1 Hg
+	       1357.80 5460.42903  5460.7348   7.0 1 1 Hg
+	       1535.94 5769.69267  5769.5982   7.0 1 1 Hg
+	       1548.08 5790.76534   5790.663   7.0 1 1 Hg
+	function legendre
+	order 3
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	7
+		2.
+		3.
+		314.8484497070313
+		1548.08203125
+		4720.380543804171
+		1070.322148716775
+		0.06264806471067332
+
