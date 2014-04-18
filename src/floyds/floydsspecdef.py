@@ -801,6 +801,10 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                 elif _type.lower() in ['flat','f','lampflat','lamp-flat']:
                     nameoutb='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
+                else:
+                    nameoutb=str(_type.lower())+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
+                    nameoutr=str(_type.lower())+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
+
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
                 rimg=floyds.util.name_duplicate(img,nameoutr,'')
 ####
