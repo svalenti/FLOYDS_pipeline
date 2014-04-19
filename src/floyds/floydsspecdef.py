@@ -351,13 +351,13 @@ def checkwavestd(imgex,_interactive,_type=1):
     from floyds.util import delete, updateheader
     from numpy import arange, array
     _arm=popen(imgex)[0].header.get('GRISM')
-    print '\n### Warning: check in wavelenght with sky lines not performed\n'
-    if _interactive in ['yes','YES','Yes','Y','y']:
-        answ=raw_input('\n### Do you want to check the wavelengh calibration with tellurich lines [[y]/n]? ')
+    print '\n### Warning: check in wavelength with sky lines not performed\n'
+    if _interactive.upper() in ['YES','Y']:
+        answ=raw_input('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
         if not answ: answ='y'
     else: answ='y'
     if answ in ['y','yes']:
-        print '\n### check wavelength calibration with tellurich lines \n'
+        print '\n### check wavelength calibration with telluric lines \n'
         _skyfile=floyds.__path__[0]+'/standard/ident/sky_new_0.fits'
         skyff=1-(popen(_skyfile)[0].data)
         crval1=popen(_skyfile)[0].header.get('CRVAL1')
@@ -381,8 +381,8 @@ def checkwavestd(imgex,_interactive,_type=1):
         floyds.util.delete('atmo2_'+_tel+'_'+imgex)
     else: shift=0
     zro=popen(imgex)[0].header.get('CRVAL1')
-    if _interactive in ['yes','YES','Yes','Y','y']:
-        answ=raw_input('\n### do you want to correct the wavelengh calibration with this shift: '+str(shift)+' [[y]/n] ? ')
+    if _interactive.upper() in ['YES','Y']:
+        answ=raw_input('\n### do you want to correct the wavelength calibration with this shift: '+str(shift)+' [[y]/n] ? ')
         if not answ: answ='y'
         if answ.lower() in ['y','yes']:
             print _arm
@@ -401,13 +401,13 @@ def checkwavelength_obj(fitsfile,skyfile,_interactive='yes',_type=1):
     from numpy import arange
     from pylab import ion,show,plot
     _arm=popen(fitsfile)[0].header.get('GRISM')
-    print '\n### Warning: check in wavelenght with sky lines not performed\n'
-    if _interactive in ['yes','YES','Yes','Y','y']:
-        answ=raw_input('\n### Do you want to check the wavelengh calibration with tellurich lines [[y]/n]? ')
+    print '\n### Warning: check in wavelength with sky lines not performed\n'
+    if _interactive.upper() in ['YES','Y']:
+        answ=raw_input('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
         if not answ: answ='y'
     else: answ='y'
     if answ in ['y','yes']:
-        print '\n### check wavelength calibration with tellurich lines \n'
+        print '\n### check wavelength calibration with telluric lines \n'
 #        yy0=popen(fitsfile)[0]
         if _type==1:
             yy1=popen(fitsfile)[0].data[2][0]
@@ -416,7 +416,7 @@ def checkwavelength_obj(fitsfile,skyfile,_interactive='yes',_type=1):
         crval2=popen(fitsfile)[0].header.get('CRVAL1')
         cd2=popen(fitsfile)[0].header.get('CD1_1')
         xx1=arange(len(yy1))
-        if _interactive in ['yes','YES','Yes','Y','y']:
+        if _interactive.upper() in ['YES','Y']:
             ion()
             plot(xx1,yy1)
             show()
@@ -440,8 +440,8 @@ def checkwavelength_obj(fitsfile,skyfile,_interactive='yes',_type=1):
         shift=floyds.floydsspecdef.checkwavelength_arc(aa1,yy1,skyaa,skyff,5500,6500,_interactive)
     else: shift=0
     zro=popen(fitsfile)[0].header.get('CRVAL1')
-    if _interactive in ['yes','YES','Yes','Y','y']:
-        answ=raw_input('\n### do you want to correct the wavelengh calibration with this shift: '+str(shift)+' [[y]/n] ? ')
+    if _interactive.upper() in ['YES','Y']:
+        answ=raw_input('\n### do you want to correct the wavelength calibration with this shift: '+str(shift)+' [[y]/n] ? ')
         if not answ: answ='y'
         if answ.lower() in ['y','yes']:
             floyds.util.updateheader(fitsfile,0,{'CRVAL1':[zro+int(shift),'']})
@@ -547,7 +547,7 @@ def extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,_type,automat
             _extract='yes'
     else:
         if automaticex:
-            if _interactive in ['Yes','yes','YES','y','Y']:
+            if _interactive.upper() in ['YES','Y']:
                 answ='x'
                 while answ not in ['o','n','s']:
                     answ=raw_input('\n### New extraction [n], extraction with old parameters [o], skip extraction [s] ? [o]')
@@ -557,7 +557,7 @@ def extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,_type,automat
                 else: _new,_extract='yes','no'
             else: _new,_extract='no','yes'
         else:
-            if _interactive in ['Yes','yes','YES','y','Y']:
+            if _interactive.upper() in ['YES','Y']:
                 answ='x'
                 while answ not in ['y','n']:
                     answ=raw_input('\n### do you want to extract again [[y]/n] ? ')
@@ -947,7 +947,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                       print arcfile
 #                     _arcclose=floyds.util.searcharc(imgex,arcfile)[0]   # take the closest in time 
                       _arcclose=floyds.util.sortbyJD(arcfile)[-1]               #  take the last arc of the sequence
-                      if _interactive in ['yes','YES','Y','y']:
+                      if _interactive.upper() in ['YES','Y']:
                               for ii in floyds.util.sortbyJD(arcfile):
                                   print '\n### ',ii 
                               arcfile=raw_input('\n### more than one arcfile available, which one to use ['+str(_arcclose)+'] ? ')
@@ -1036,7 +1036,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
               else:
                   imgl=re.sub('_ex.fits','_l.fits',imgex)
                   print imgl
-                  if _interactive in ['yes','YES','Y','y']:
+                  if _interactive.upper() in ['YES','Y']:
                       if os.path.isfile(imgl):  
                           answ=raw_input('\n### wavelength calibrated file already there, do you want to calibrate again [[y]/n] ? ')
                           if not answ: answ='y'
@@ -1073,7 +1073,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                       identific=iraf.specred.reidentify(referenc=arcref, images= arcfile, interac=_interactive, section= 'middle line',\
                                                   coordli='FLOYDS_lines.txt', overrid='yes', cradius=_cradius, step=0,\
                                                         newaps= 'no', nsum=5, nlost=2, mode='h',verbose='yes',Stdout=1)
-                      if _interactive in ['yes','YES','Y','y']:
+                      if _interactive.upper() in ['YES','Y']:
                           answ=raw_input('### do you like the identification [[y]/n]')
                           if not answ: answ='y'
                       else:

@@ -51,6 +51,7 @@ def gettar(img):
     import floyds
     from urllib import urlopen
     import re,string,os
+    from datetime import datetime, timedelta
     data, hdr = pyfits.getdata(img, 0, header=True)
 
     #
@@ -58,46 +59,74 @@ def gettar(img):
     #   need to be change depending what we are doing downloding from floyds machine
     #
     #
-         
-    imgg=re.sub(string.split(img,'_')[3],re.sub('0','',string.split(img,'_')[3]),img)
-    img1=re.sub(string.split(imgg,'_')[4],re.sub('0','',string.split(imgg,'_')[4]),imgg)
+#    print "DEBUG: img=", img
+    if '_' in img:
+        # Old-style filenames
+        imgg=re.sub(string.split(img,'_')[3],re.sub('0','',string.split(img,'_')[3]),img)
+        img1=re.sub(string.split(imgg,'_')[4],re.sub('0','',string.split(imgg,'_')[4]),imgg)
+    else:
+        imgg = ''
+        img1 = img.replace('e00', 'e02')   
+#    print "DEBUG: imgg,img1=", imgg,img1
 
+    # FTN filenames will be the day prior
     _tel=hdr['TELID']
     if _tel=='fts':delta=0
     else:          delta=1
-    import datetime
+
+    # Extract date from header. We only want the whole seconds part (not sure 
+    # why, could be read by .%f in strptime)
     _date=floyds.readkey3(hdr,'DATE-OBS')
-    a=(datetime.datetime.strptime(string.split(_date,'.')[0],"20%y-%m-%dT%H:%M:%S")-datetime.timedelta(delta)).isoformat()
-    p=re.sub('-','',string.split(a,'T')[0])
+    _date_wholesecs = _date
+    # Check if there is a '.' (Previous version will break if the header already
+    # has whole seconds and there is no period)
+    if '.' in _date:
+      _date_wholesecs = _date.split('.')[0]
+    # Parse the string, subtract off any delta and reformat to YYYYMMDD (without hyphens)
+    _date_dt = datetime.strptime(_date_wholesecs,"%Y-%m-%dT%H:%M:%S")
+    _date_dt = _date_dt - timedelta(days=delta)
+    p=_date_dt.strftime('%Y%m%d')
 
     obj=hdr['object']
     propid=hdr['PROPID']
-    if _tel in ['fts']: 
+    if 'fts' in _tel: 
         i=r'http://floyds.coj.lco.gtn/night_summary/%s/' % (p)
     else:
         i=r'http://floyds.ogg.lco.gtn/night_summary/%s/' % (p)
 
     try:
-        aa=urlopen(i).read()
-        for ii in string.split(aa,'href='):
-            if propid in ii: 
-                bb=re.sub('"','',string.split(ii,'>')[0])
-                cc=urlopen(i+bb).read()
+        webpage=urlopen(i).read()
+        for data_dir in webpage.split('href='):
+            if propid in data_dir: 
+                dir_name = data_dir.split('>')[0]
+                dir_name = dir_name.replace('"','')
+                dir_url = i+dir_name
+                cc=urlopen(dir_url).read()
                 if img1 in cc:
                     for jj in string.split(cc,'href='):  
                         if '.tar' in jj:
-                            kk=re.sub('"','',string.split(jj,'>')[0])
-                            if os.path.isfile(kk): floyds.util.delete(kk)
-                            com='wget %s%s ' % (i+bb, kk)
-        try:           os.system(com)
-        except:        kk=''
-        line='xhtml2pdf  '+i+bb+re.sub('.tar','.html',kk)+' '+re.sub('.tar','.pdf',kk) 
+                            # Store url of directory where we found tarfile so 
+                            # we can get to HTML file later
+                            dir_url_for_tar = dir_url
+                            tar_name=jj.split(jj,'>')[0].replace('"','')
+                            if os.path.isfile(tar_name): floyds.util.delete(tar_name)
+                            com='wget %s%s ' % (dir_url, tar_name)
+        try:           
+            os.system(com)
+        except:        
+            tar_name=''
+
+        # print "DEBUG: ", tar_name, dir_url, dir_url_for_tar
+        htmlfile_url = dir_url_for_tar + tar_name.replace('.tar', '.html') 
+        pdffile = tar_name.replace('.tar', '.pdf')
+        # Fetch html file from remote URL and convert to PDF
+        line='xhtml2pdf  ' + htmlfile_url + ' ' + pdffile
+        # print "DEBUG: ", line
         try:    
             os.system(line)
-            pdffile=re.sub('.tar','.pdf',kk)
         except:      pdffile=''
-    except:  kk,i,bb,line,pdffile='','','','',''
-    return kk,pdffile
+    except:  tar_name,i,dir_url,line,pdffile='','','','',''
+    return tar_name,pdffile
 
 
 def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_listarc,_cosmic,_ext_trace,_dispersionline,liststandard,listatmo,_automaticex,_classify=False,_verbose=False,smooth=1,fringing=1):
@@ -351,7 +380,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       print arcfile
 #                     _arcclose=floyds.util.searcharc(imgex,arcfile)[0]   # take the closest in time 
                       _arcclose=floyds.sortbyJD(arcfile)[-1]               #  take the last arc of the sequence
-                      if _interactive in ['yes','YES','Y','y']:
+                      if _interactive.upper() in ['YES','Y']:
                               for ii in floyds.floydsspecdef.sortbyJD(arcfile):
                                   print '\n### ',ii 
                               arcfile=raw_input('\n### more than one arcfile available, which one to use ['+str(_arcclose)+'] ? ')
@@ -640,20 +669,20 @@ def badimage(img,_type):
 #########################################
 def writereadme():
     readme='#######################\n#\n#\n#  floyds automatic pipeline \n#\n#######################\n\n\n'+\
-        'The files included in this tar have been redued automatically\n'+\
+        'The files included in this tar have been reduced automatically\n'+\
         'The main steps of the automatic reduction include:\n'+\
         '- rectification of the frames: science,flat,arc along y axes\n'+\
         '- rectification of the frames: science,flat,arc along x axes\n'+\
         '- fringing correction (only for the red part of the spectrum)\n'+\
-        '- wavelengh check using sky line or tellurich lines\n'+\
+        '- wavelength check using sky line or telluric lines\n'+\
         '- flux calibration using sensitivity average function\n'+\
         '- fast extraction\n'+\
         '- if the science file is a standard star, sensitivity function and atmo file are also computed\n\n#####################\n'+\
-        'The user should use the 2D wavelength and flux calibrated files (extenction _2df.fits) and optimize the extraction for his/her science\n\n'+\
+        'The user should use the 2D wavelength and flux calibrated files (extension _2df.fits) and optimize the extraction for his/her science\n\n'+\
         'the file Ntt*****red***.2df.fits has been corrected for fringing using the normalized flat field\n'+\
-        'fringing file, shift applyed to the original flatfield, scale applyed to the original flatfield ar specifyed in the header \n'+\
+        'fringing file, shift applied to the original flatfield, scale applied to the original flatfield are specified in the header \n'+\
         'the file tt*****red***.2df.fits has NOT been corrected for fringing\n'+\
-        'The fast extracted spectra have extenction _2df_ex.fits\n'+\
+        'The fast extracted spectra have extension _2df_ex.fits\n'+\
         'files starting with tt have been rectified along x and y axes\n\n##############\n\n        GO FLOYDS !!!!!!!\n'
     f=open('README','w')
     f.write(readme)
