@@ -139,8 +139,10 @@ if __name__ == "__main__":
                date=floyds.readkey3(hdr,'date-night')
                _instrume=floyds.readkey3(hdr,'TELID')
                nametar='STD_'+str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
-               os.system('cp '+img0+' '+re.sub('.fits','_1.fits',img0))
-               floyds.util.updateheader(re.sub('.fits','_1.fits',img0),0,{'TARFILE':[nametar,'']})
+               outfile = img0.replace('00.fits', '90.fits')
+
+               os.system('cp '+img0+' '+outfile)
+               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
                print nametar,'####################################' 
                imglist=outputlist['std'][img0]
                imglist.append(readme)
@@ -175,8 +177,9 @@ if __name__ == "__main__":
                date=floyds.readkey3(hdr,'date-night')
                _instrume=floyds.readkey3(hdr,'TELID')
                nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
-               os.system('cp '+img0+' '+re.sub('.fits','_1.fits',img0))
-               floyds.util.updateheader(re.sub('.fits','_1.fits',img0),0,{'TARFILE':[nametar,'']})
+               outfile = img0.replace('00.fits', '90.fits')
+               os.system('cp '+img0+' '+outfile)
+               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
                print nametar,'####################################' 
                imglist=outputlist['obj'][img0]
                imglist.append(readme)
