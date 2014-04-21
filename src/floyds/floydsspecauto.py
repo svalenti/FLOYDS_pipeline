@@ -77,7 +77,7 @@ def gettar(img):
     if _tel == 'fts' or _tel == 'coj': delta=0
     else:          delta=1
 
-    # Extract date from header. We only want the whole seconds part (not sure 
+    # Extract date from header. We only want the whole seconds part (not sure
     # why, could be read by .%f in strptime)
     _date=floyds.readkey3(hdr,'DATE-OBS')
     _date_wholesecs = _date
@@ -92,7 +92,7 @@ def gettar(img):
 
     obj=hdr['object']
     propid=hdr['PROPID']
-    if 'fts' or 'coj' in _tel: 
+    if 'fts' in _tel or 'coj' in _tel: 
         i=r'http://floyds.coj.lco.gtn/night_summary/%s/' % (p)
     else:
         i=r'http://floyds.ogg.lco.gtn/night_summary/%s/' % (p)
@@ -100,27 +100,27 @@ def gettar(img):
     try:
         webpage=urlopen(i).read()
         for data_dir in webpage.split('href='):
-            if propid in data_dir: 
+            if propid in data_dir:
                 dir_name = data_dir.split('>')[0]
                 dir_name = dir_name.replace('"','')
                 dir_url = i+dir_name
                 cc=urlopen(dir_url).read()
                 if img1 in cc:
-                    for jj in string.split(cc,'href='):  
+                    for jj in string.split(cc,'href='):
                         if '.tar' in jj:
-                            # Store url of directory where we found tarfile so 
+                            # Store url of directory where we found tarfile so
                             # we can get to HTML file later
                             dir_url_for_tar = dir_url
                             tar_name=jj.split('>')[0].replace('"','')
                             if os.path.isfile(tar_name): floyds.util.delete(tar_name)
-                            com='wget %s%s ' % (dir_url, tar_name)
-        try:           
+                            com='wget -nv %s%s ' % (dir_url, tar_name)
+        try:
             os.system(com)
-        except:        
+        except:
             tar_name=''
 
         # print "DEBUG: ", tar_name, dir_url, dir_url_for_tar
-        htmlfile_url = dir_url_for_tar + tar_name.replace('.tar', '.html') 
+        htmlfile_url = dir_url_for_tar + tar_name.replace('.tar', '.html')
         pdffile = tar_name.replace('.tar', '.pdf')
         # Fetch html file from remote URL and convert to PDF
         line='xhtml2pdf  ' + htmlfile_url + ' ' + pdffile
