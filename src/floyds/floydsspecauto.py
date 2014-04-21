@@ -59,19 +59,22 @@ def gettar(img):
     #   need to be change depending what we are doing downloding from floyds machine
     #
     #
-#    print "DEBUG: img=", img
+    # print "DEBUG: img=", img
     if '_' in img:
         # Old-style filenames
         imgg=re.sub(string.split(img,'_')[3],re.sub('0','',string.split(img,'_')[3]),img)
         img1=re.sub(string.split(imgg,'_')[4],re.sub('0','',string.split(imgg,'_')[4]),imgg)
     else:
         imgg = ''
-        img1 = img.replace('e00', 'e02')   
-#    print "DEBUG: imgg,img1=", imgg,img1
+        img1 = img.replace('e00', 'e02')
+    # print "DEBUG: imgg,img1=", imgg,img1
 
     # FTN filenames will be the day prior
     _tel=hdr['TELID']
-    if _tel=='fts':delta=0
+    if '2m0a' in _tel:
+        _tel = hdr['SITEID']
+    _tel = _tel.lower()
+    if _tel == 'fts' or _tel == 'coj': delta=0
     else:          delta=1
 
     # Extract date from header. We only want the whole seconds part (not sure 
@@ -89,7 +92,7 @@ def gettar(img):
 
     obj=hdr['object']
     propid=hdr['PROPID']
-    if 'fts' in _tel: 
+    if 'fts' or 'coj' in _tel: 
         i=r'http://floyds.coj.lco.gtn/night_summary/%s/' % (p)
     else:
         i=r'http://floyds.ogg.lco.gtn/night_summary/%s/' % (p)
@@ -108,7 +111,7 @@ def gettar(img):
                             # Store url of directory where we found tarfile so 
                             # we can get to HTML file later
                             dir_url_for_tar = dir_url
-                            tar_name=jj.split(jj,'>')[0].replace('"','')
+                            tar_name=jj.split('>')[0].replace('"','')
                             if os.path.isfile(tar_name): floyds.util.delete(tar_name)
                             com='wget %s%s ' % (dir_url, tar_name)
         try:           
