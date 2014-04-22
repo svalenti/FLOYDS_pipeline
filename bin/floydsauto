@@ -36,6 +36,7 @@ if __name__ == "__main__":
      parser.add_option("--archive",action="store_true", dest='archive',default=False, help='archive fast extraction \t\t\t [%default]')
      option,args = parser.parse_args()
 ############################################################
+     _xwindow=option.xwindow
      starttime=time.time()
      if len(args)>1:
           sys.argv.append('--help')
@@ -73,7 +74,10 @@ if __name__ == "__main__":
                          _object=readkey3(hdr0,'object')
                          _filter=readkey3(hdr0,'filter')
                          print img,_object,_imagetype,_filter,_exptime
-                         answ=raw_input('what is it: dark[0], bias [1], lamp[2], flat [3], object[4], not good [5] ?  [5] ')
+                         if  _xwindow:
+                              answ='5'
+                         else:
+                              answ=raw_input('what is it: dark[0], bias [1], lamp[2], flat [3], object[4], not good [5] ?  [5] ')
                          if not answ:  answ='5'
                          _type='not good' # Set default type to bad in case we don't get an expected answer
                          if answ=='0':     _type='dark'
