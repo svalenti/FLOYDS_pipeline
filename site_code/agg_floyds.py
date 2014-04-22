@@ -5,15 +5,16 @@ import matplotlib
 matplotlib.use('Agg')
 
 import pyfits
-import numpy, scipy, pylab, matplotlib, sys, math, signal,subprocess,shlex,time,logging,textwrap,glob
+import numpy, scipy, pylab, sys, math, logging,glob
 import string
-import plot_guideinfo
+# New style
+import plot_xmlguideinfo as plot_guideinfo
 from pyfits import open as popen
-import numpy
 from numpy import array,abs,where
+from datetime import datetime, timedelta
 
 
-def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
+def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 
     """Set up basic logging config"""
     logfile = 'agglog.txt'
@@ -26,6 +27,18 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
 #split the nights up, comma delimited
     night_list = string.split(nightlist,sep=',')
 
+    if 'ogg' in site:
+	acq_cam = 'kb42'
+	spec_cam = 'en06'
+    elif 'coj' in site:
+	acq_cam = 'kb37'
+	spec_cam = 'en05'
+    else:
+	print 'Unrecognized site',site
+	sys.exit(-1)
+
+    acq_root = os.path.join('/mnt/data', acq_cam)
+    spec_root = os.path.join('/mnt/data', spec_cam)
 
 #aggregate data for each night
     i=0
@@ -38,50 +51,32 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
         dir_for_guideimgs = '/var/www/html/images/'+_night
         if not os.path.exists(dirnow):
             os.makedirs(dirnow)
-        acq_images = glob.glob('/icc2/tmp/[s,r]*'+_night+'*.fits')
-        spec_images = glob.glob('/icc/tmp/[g,f]*'+_night+'*.fits')
+	if not os.path.exists(dir_for_guideimgs):
+	    os.makedirs(dir_for_guideimgs)
+
+#        acq_images = glob.glob('/icc2/tmp/[s,r]*'+_night+'*.fits')
+	acq_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits'
+	acq_images = glob.glob(acq_glob)
+        acq_images.sort()
+#        spec_images = glob.glob('/icc/tmp/[g,f]*'+_night+'*.fits')
+        spec_glob = spec_root+'/*'+spec_cam+'*'+_night+'*02.fits'
+	spec_images  = glob.glob(spec_glob)
+        spec_images.sort()
         if (acq_images == []) & (spec_images == []):
             print 'No images take on this night'
             sys.exit(0)
-#Get the guider log
-        if site == 'floyds.ogg.lco.gtn':
-            if _night_four == '0131':
-                guidelog = '/icc2/tmp/'+_night_year+'0201.log'
-            elif _night_four == '0228':
-                guidelog = '/icc2/tmp/'+_night_year+'0301.log'
-            elif _night_four == '0331':
-                guidelog = '/icc2/tmp/'+_night_year+'0401.log'
-            elif _night_four == '0430':
-                guidelog = '/icc2/tmp/'+_night_year+'0501.log'
-            elif _night_four == '0531':
-                guidelog = '/icc2/tmp/'+_night_year+'0601.log'
-            elif _night_four == '0630':
-                guidelog = '/icc2/tmp/'+_night_year+'0701.log'
-            elif _night_four == '0731':
-                guidelog = '/icc2/tmp/'+_night_year+'0801.log'
-            elif _night_four == '0831':
-                guidelog = '/icc2/tmp/'+_night_year+'0901.log'
-            elif _night_four == '0930':
-                guidelog = '/icc2/tmp/'+_night_year+'1001.log'
-            elif _night_four == '1031':
-                guidelog = '/icc2/tmp/'+_night_year+'1101.log'
-            elif _night_four == '1130':
-                guidelog = '/icc2/tmp/'+_night_year+'1201.log'
-            elif _night_four == '1231':
-                guidelog = '/icc2/tmp/'+_night_year+'0101.log'
-            else:
-                guidelog = '/icc2/tmp/'+str(int(_night)+1)+'.log'
+#Make a guider log from the XML files
 
-
-        else:
-            guidelog = '/icc2/tmp/'+str(int(_night))+'.log'
-        if os.path.isfile(guidelog):
-            #print guidelog
-#            pass
+        gxml_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits.inst.guide.xml'
+        gxml_images  = glob.glob(gxml_glob)
+        gxml_images.sort()
+        if len(gxml_images) > 0:
+            if debug: print "No. of guide XML files=", len(gxml_images)
             guidetag = 1
         else:
-            print 'No guide file found!!!'
+            print 'No guide images found!!!'
             guidetag = 0
+	    
 
 #which acquisition images have region files?  acquisition Log files?
 #figure out which ones do and: 1) link them
@@ -89,40 +84,107 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
         os.system('rm -f '+dir_for_guideimgs+'/*.reg')
         os.system('rm -f '+dir_for_guideimgs+'/*.log')
         os.system('rm -f '+dir_for_guideimgs+'/*.cat')
+        os.system('rm -f '+dir_for_guideimgs+'/*.fits')
+        os.system('rm -f '+dir_for_guideimgs+'/*.jpg')
+        
         #print acq_images
+        home = os.path.expanduser('~')
+        guidelog = os.path.join(home, _night + '_guide.log')
+        guide_fh = open(guidelog, 'w')
+        previous_blkuid = ''
+        new_acq_images = []
         for _acqimage in acq_images:
             #print os.path.getsize(_acqimage)
             if os.path.getsize(_acqimage) < 100000:
                 badname = _acqimage
                 acq_images.remove(badname)
 
+            hdulist = pyfits.open(_acqimage)
+            #print _acqimage
+            prihdr = hdulist[0].header
 
-            #try:
-            #    testit = pyfits.info(_acqimage,ignore_missing_end=False)
-            #except:
-            #    badname = _acqimage
-            #    print 'did I make it here'
-            #    acq_images.remove[badname]
-        #print acq_images
+            blkuid_acq = str(prihdr['BLKUID'])
+# Remove manually taken images (which have BLKUID='N/A') and ones where BLKUID 
+# has the same value as the previous frame (which indicates its a guide frame
+# and not an acquisition image
+#
+            if blkuid_acq == 'N/A' or blkuid_acq == previous_blkuid:
+                if debug: print "Rejecting frame", _acqimage,blkuid_acq,previous_blkuid
+#                acq_images.remove(_acqimage)
+            else:
+                if debug: print "Keeping   frame", _acqimage,blkuid_acq,previous_blkuid
+                new_acq_images.append(_acqimage)
+            previous_blkuid = blkuid_acq
+
+# Extract date/time of observation from guide frame header, strip out unwanted
+# characters and write this into our new guidelog
+# Only do this if we have a <foo>-fits.inst.guide.xml file
+
+            guide_xml_file = _acqimage.replace('.fits','.fits.inst.guide.xml')
+            guide_dateobs = prihdr['DATE-OBS']
+	    if guide_dateobs != '' and guide_dateobs != 'N/A' and os.path.exists(guide_xml_file):
+	    	for char in ['T','-',':']:
+		    if char in guide_dateobs:
+	    	    	guide_dateobs = guide_dateobs.replace(char, '')
+            	if '.' in guide_dateobs:
+                    guide_dateobs = guide_dateobs.split('.')[0]
+                print >> guide_fh, "%s %s" % (guide_dateobs, _acqimage)
+            hdulist.close()
+
+
+        guide_fh.close()
+        acq_images = new_acq_images
+        if debug: print "Trimmed acq image list=",  len(acq_images),"images"
+        for _acqimage in acq_images:
+             if debug: print _acqimage
 
         for _acqimage in acq_images:
-#which acquisition images have region files?  acquisition Log files?
-#figure out which ones do and: 1) link them
+#for each acquisition images, link the file & the jpg and any region files, acquisition Log files,
+# and catalog files that might exist and link them too
 
-            yo = _acqimage.replace('/icc2/tmp/','/lco/floyds/tmp/')
-            regfile = yo.replace('.fits','.reg')
+            acqfile = _acqimage
+            acqfile_dest = os.path.basename(acqfile)
+            acqfile_destpath = os.path.join(dir_for_guideimgs, acqfile_dest)
+            
+            yo = _acqimage #.replace(acq_root,'/lco/floyds/tmp/')
+            jpgfile = yo.replace('.fits','.jpg')
+            jpgfile_dest = os.path.basename(yo)
+            jpgfile_dest = jpgfile_dest.replace('.fits', '.jpg')
+            jpgfile_destpath = os.path.join(dir_for_guideimgs, jpgfile_dest)
+            
+            yo = _acqimage #.replace(acq_root,'/lco/floyds/tmp/')
+            regfile = yo.replace('.fits','.fits.regs')
+            regfile_dest = os.path.basename(yo)
+            regfile_dest = regfile_dest.replace('.fits', '.reg')
+            regfile_destpath = os.path.join(dir_for_guideimgs, regfile_dest)
+            
             logfile = yo.replace('.fits','.log')
-            catfile = yo.replace('.fits','.cat')
+            
+            catfile = yo.replace('.fits','.fits.sex')
+            catfile_dest = os.path.basename(yo)
+            catfile_dest = catfile_dest.replace('.fits', '.cat')
+            catfile_destpath = os.path.join(dir_for_guideimgs, catfile_dest)
 
+            if os.path.exists(acqfile):
+                link_cmd = 'cp '+ acqfile +' ' + acqfile_destpath
+                if debug >= 2: print "acq link_cmd=", link_cmd
+                os.system(link_cmd)
+            if os.path.exists(jpgfile):
+                link_cmd = 'cp ' + jpgfile + ' ' + jpgfile_destpath
+                if debug >= 2: print "jpg link_cmd=", link_cmd
+                os.system(link_cmd)
             if os.path.exists(regfile):
-                os.system('ln -s '+regfile+' '+ dir_for_guideimgs+'/')
+                link_cmd = 'ln -s '+regfile+' '+ regfile_destpath
+                if debug >= 2: print "reg link_cmd=", link_cmd
+                os.system(link_cmd)
             if os.path.exists(logfile):
                 os.system('ln -s '+logfile+' '+dir_for_guideimgs+'/')
             if os.path.exists(catfile):
-                os.system('ln -s '+catfile+' '+dir_for_guideimgs+'/')
+                link_cmd = 'ln -s '+catfile+' '+ catfile_destpath
+                if debug >= 2: print "cat link_cmd=", link_cmd
+                os.system(link_cmd)
 
 #read in each acquisition header
-            #print _acqimage
             hdulist = pyfits.open(_acqimage)
             #print _acqimage
             prihdr = hdulist[0].header
@@ -133,25 +195,28 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
             except NameError:
                 propid_acqlist = [propid_acq]
 
-            MJD_acq = prihdr['MJD']
+            MJD_acq = prihdr['MJD-OBS']
             try:
                 MJD_acqlist.append(MJD_acq)
             except NameError:
                 MJD_acqlist = [MJD_acq]
 
-            grpuid_acq = int(prihdr['GRPUID'])
-            try:
+            grpuid_acq = prihdr['BLKUID']
+	    if grpuid_acq == 'N/A':
+		grpuid_acq = -1
+            grpuid_acq = int(grpuid_acq)
+	    try:
                 grpuid_acqlist.append(grpuid_acq)
             except NameError:
                 grpuid_acqlist = [grpuid_acq]
 
-            grpnumob_acq = int(prihdr['GRPNUMOB'])
+            grpnumob_acq = int(prihdr['MOLFRNUM'])
             try:
                 grpnumob_acqlist.append(grpnumob_acq)
             except NameError:
                 grpnumob_acqlist = [grpnumob_acq]
 
-            groupid_acq = prihdr['GROUPID']
+            groupid_acq = prihdr['OBJECT']
             try:
                 grpid_acqlist.append(groupid_acq)
             except NameError:
@@ -173,25 +238,42 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
                 acq_utstartlist = [acq_start]
                 acq_utstart_nocolon = [float(acq_start.replace(':',''))]
 
-
+            hdulist.close()
 
         if guidetag != 0:
             first_guideimage = find_first_guide(_night,acq_images,acq_utstart_nocolon,acq_utstop_nocolon,MJD_acqlist)
         else:
             first_guideimage = 'Null'
-        print first_guideimage
+#        print "First guideimage=",first_guideimage
         print dir_for_guideimgs
-        os.system('rm -f '+dir_for_guideimgs+'/*f.fits')
-        os.system('rm -f '+dir_for_guideimgs+'/*f.jpg')
-        for _first in first_guideimage:
-            if _first != 'Null':
-                print 'ln -s '+_first+' '+dir_for_guideimgs+'/'
-                os.system('ln -s '+_first+' '+dir_for_guideimgs+'/')
-                _first_jpg = _first.replace('.fits','.jpg')
-                os.system('/usr/local/bin/gpp '+_first+' '+_first_jpg+' 2 /usr/local/bin/gpp_cfg.txt')
-                os.system('mv '+_first_jpg+' '+dir_for_guideimgs)
+
+        if first_guideimage != 'Null':
+            for _first in first_guideimage:
+	    	if _first != 'Null':
+        	    print 'ln -s '+_first+' '+dir_for_guideimgs+'/'
+        	    os.system('ln -sf '+_first+' '+dir_for_guideimgs+'/')
+        	    _first_jpg = _first.replace('.fits','.jpg')
+                    if os.path.exists(_first_jpg):
+                        print "Linking",_first_jpg
+                        os.system('ln -sf '+_first_jpg+' '+dir_for_guideimgs+'/')
+                    else:
+                        print "Making",_first_jpg
+        	        os.system('/usr/local/bin/gpp '+_first+' '+_first_jpg+' 2 /usr/local/bin/gpp_cfg.txt')
+        	        os.system('mv '+_first_jpg+' '+dir_for_guideimgs)
 
         for _specimage in spec_images:
+        
+# Copy into same directory as guidaimages
+#
+            if debug >2: print "Specimage=",_specimage
+            copy_cmd = 'cp ' + _specimage +' '+ dir_for_guideimgs + '/'
+            if debug >2: print copy_cmd
+            os.system(copy_cmd)
+            _specimage_jpg = _specimage.replace('.fits', '.jpg') 
+            copy_cmd = 'cp ' + _specimage_jpg +' ' + dir_for_guideimgs+'/'
+            if debug >2: print copy_cmd
+            os.system(copy_cmd)
+           
 #read in and collect header info
             hdulist = pyfits.open(_specimage)
             prihdr = hdulist[0].header
@@ -201,8 +283,11 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
             except NameError:
                 propid_speclist = [propid_spec]
 
-            grpuid_spec = int(prihdr['GRPUID'])
-            try:
+            grpuid_spec = prihdr['BLKUID']
+            if grpuid_spec == 'N/A':
+                grpuid_spec = -1
+            grpuid_spec = int(grpuid_spec)
+	    try:
                 grpuid_speclist.append(grpuid_spec)
             except NameError:
                 grpuid_speclist = [grpuid_spec]
@@ -229,14 +314,23 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
                 exptime_speclist = [float(exptime_spec)]
 
 
+# Fudge time to take off end of expsoure time to work around UTSTOP!=UTSTART+EXPTIME
+# FLOYDS bug
+            end_fudge = 22
+
             utstop_spec = prihdr['UTSTOP']
             try:
+                print "UTSTOP before=", utstop_spec
+                utstop_dt = datetime.strptime(utstop_spec, '%H:%M:%S.%f')
+                utstop_dt = utstop_dt - timedelta(seconds=end_fudge)
+                utstop_spec = utstop_dt.strftime('%H:%M:%S.%f')
+                print "UTSTOP after=", utstop_spec
                 utstop_speclist.append(utstop_spec)
                 utstop_speclist_nocolon.append(float(utstop_spec.replace(':','')))
             except NameError:
                 utstop_speclist = [utstop_spec]
                 utstop_speclist_nocolon = [float(utstop_spec.replace(':',''))]
-
+            hdulist.close()
 
         try:
             grpuid_speclist_arr = array(grpuid_speclist)
@@ -263,8 +357,12 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
         for _acq in acq_images:
             # find those spectra with the same grpuid
             grpuid_curr = grpuid_acqlist[i]
+	    print _acq, grpuid_curr # , type(grpuid_curr)
+#	    print grpuid_speclist
+#	    print grpuid_speclist_arr
             specs_forthis_acq = spec_images_arr[where(grpuid_speclist_arr == grpuid_curr)]
             specs_forthis_acqlist = specs_forthis_acq.tolist()
+	    print "specs_forthis_acqlist=",specs_forthis_acqlist
 
             science_cull = (grpuid_speclist_arr == grpuid_curr) * (obstype_speclist_arr == 'SPECTRUM')
 
@@ -281,8 +379,8 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
             for _utstart in utstart_science:
 
                 sciencespecnow = sciencespecs_forthis_acq[j]
-                junk1 = sciencespecnow.replace('.fits','')
-                guideplot_rootname = junk1.replace('/icc/tmp/','')
+                junk1 = os.path.basename(sciencespecnow)
+                guideplot_rootname = os.path.splitext(junk1)[0]
                 #print guidetag
                 if guidetag > 0:
                     #print guideplot_rootname
@@ -294,7 +392,9 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./"):
                     pass
                 j=j+1
 
-            mk_obs_website(acq_images[i],grpid_acqlist[i],propid_acqlist[i],acq_utstart_nocolon[i],_night,first_guideimage[i],dir_for_guideimgs,specs_forthis_acqlist,sciencespecs_forthis_acq)
+            mk_obs_website(acq_images[i],grpid_acqlist[i],propid_acqlist[i],
+                acq_utstart_nocolon[i],_night,first_guideimage[i],dir_for_guideimgs,
+                specs_forthis_acqlist,sciencespecs_forthis_acq)
             i=i+1
 
 
@@ -310,47 +410,15 @@ def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd):
 
     from numpy import array,abs,where
 
-    imgdir = '/icc2/tmp/'
+    imgdir = '/mnt/data/kb42/' # XXX Hardwired, fix
 
-#I need a kludge in here to include nights one day before and after.  there is some weird timing issue at FTN.
-
-    night_year = night[:4]
-    night_four = night[4:]
-
-    if night_four == '0131':
-        nightnext = night_year+'0201'
-    elif night_four == '0228':
-        nightnext = night_year+'0301'
-    elif night_four == '0331':
-        nightnext = night_year+'0401'
-    elif night_four == '0430':
-        nightnext = night_year+'0501'
-    elif night_four == '0531':
-        nightnext = night_year+'0601'
-    elif night_four == '0630':
-        nightnext = night_year+'0701'
-    elif night_four == '0731':
-        nightnext = night_year+'0801'
-    elif night_four == '0831':
-        nightnext = night_year+'0901'
-    elif night_four == '0930':
-        nightnext = night_year+'1001'
-    elif night_four == '1031':
-        nightnext = night_year+'1101'
-    elif night_four == '1130':
-        nightnext = night_year+'1201'
-    elif night_four == '1231':
-        nightnext = night_year+'0101'
-    else:
-        nightnext = str(int(night)+1)
-    
 
 #find full frame guide images from the night in question
 
 
     #print imgdir+nightnext+'*f.fits'
-    full_guides_all = glob.glob(imgdir+night+'*f.fits')+glob.glob(imgdir+nightnext+'*f.fits')
-    #print full_guides_all
+    full_guides_all = glob.glob(imgdir+'*'+night+'*g01.fits') # +glob.glob(imgdir+nightnext+'*f.fits') # no longer needed, same root
+    print "No. of full guide images=", len(full_guides_all)
     acq_utstop_arr = array(acq_utstop)
     acq_mjd_arr = array(acq_mjd)
 
@@ -359,7 +427,7 @@ def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd):
         hdulist = pyfits.open(_guides)
         prihdr = hdulist[0].header
         utstart_guides = prihdr['UTSTART']
-        MJD_guides = prihdr['MJD']
+        MJD_guides = prihdr['MJD-OBS']
         try:
             utstart_guidelist.append(float(utstart_guides.replace(':','')))
         except NameError:
@@ -368,8 +436,9 @@ def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd):
             MJD_guideslist.append(MJD_guides)
         except NameError:
             MJD_guideslist = [MJD_guides]
+        hdulist.close()
 
-
+    print "UTSTART, MJD lists=", len(utstart_guidelist), len(MJD_guideslist)
     full_guides_arr = array(full_guides_all)
     i=0
     utstart_guide_arr = array(utstart_guidelist)
@@ -408,19 +477,25 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     new_dir = '/var/www/html/night_summary/'+night+'/'+grpid+'_'+str(UTstartnocolon)+'_'+propid
     if not os.path.exists(new_dir):
         os.makedirs(new_dir)
-    
 
+#   acq_root = '/icc2/tmp/'
+#    spec_root='/icc/tmp/'
+    acq_root  = os.path.dirname(acqimage)
+    print sciencespecs
+    spec_root='/icc/tmp/'
+    if len(sciencespecs) > 0:
+    	spec_root = os.path.dirname(sciencespecs[0])
+    print acq_root, spec_root
 
-
-    acqimage = acqimage.replace('/icc2/tmp/',data_dir+'/')
+    acqimage = acqimage.replace(acq_root,data_dir+'/')
     acq_jpg = acqimage.replace('.fits','.jpg')
     acq_reg = acq_jpg.replace('.jpg','.reg')
     acq_cat = acq_jpg.replace('.jpg','.cat')
     acq_log = acq_jpg.replace('.jpg','.log')
-    guideimage = guideimage.replace('/icc2/tmp/',data_dir+'/')
+    guideimage = guideimage.replace(acq_root,data_dir+'/')
     guide_jpg = guideimage.replace('.fits','.jpg')
-    print "guideimage,guide_jpg",guideimage,guide_jpg
-
+    print "  acqimage,jpg=",acqimage,acq_jpg
+    print "guideimage,jpg=",guideimage,guide_jpg
 
     yoindex = acqimage.rfind('/')
     acq_in_curr = acqimage[yoindex+1:]
@@ -434,7 +509,6 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     guide_in_curr = guideimage[yoyoindex+1:]
     guidejpg_in_curr = guide_in_curr.replace('.fits','.jpg')
 
-    print "guide_in_curr,guidejpg_in_curr",guide_in_curr,guidejpg_in_curr
     try:
         os.remove(new_dir+'/'+acqjpg_in_curr)
     except:
@@ -464,13 +538,27 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     except:
         pass
 
-    os.system('ln -s '+acqimage+' '+new_dir+'/')
-    os.system('ln -s '+acq_jpg+' '+new_dir+'/')
-    os.system('ln -s '+guideimage+' '+new_dir+'/')
-    os.system('ln -s '+guide_jpg+' '+new_dir+'/')
-    os.system('ln -s '+acq_reg+' '+new_dir+'/')
-    os.system('ln -s '+acq_cat+' '+new_dir+'/')
-    os.system('ln -s '+acq_log+' '+new_dir+'/')
+    link_cmd = 'ln -s '+acqimage+' '+new_dir+'/'
+    print "link_cmd1=", link_cmd
+    os.system(link_cmd)
+    link_cmd = 'ln -s '+acq_jpg+' '+new_dir+'/'
+    print "link_cmd2=", link_cmd
+    os.system(link_cmd)
+    link_cmd = 'ln -s '+guideimage+' '+new_dir+'/'
+    print "link_cmd3=", link_cmd
+    os.system(link_cmd)
+    link_cmd = 'ln -s '+guide_jpg+' '+new_dir+'/'
+    print "link_cmd4=", link_cmd
+    os.system(link_cmd)
+    link_cmd = 'ln -s '+acq_reg+' '+new_dir+'/'
+    print "link_cmd5=", link_cmd
+    os.system(link_cmd)
+    link_cmd = 'ln -s '+acq_cat+' '+new_dir+'/'
+    print "link_cmd6=", link_cmd
+    os.system(link_cmd)
+    link_cmd = 'ln -s '+acq_log+' '+new_dir+'/'
+    print "link_cmd7=", link_cmd
+    os.system(link_cmd)
 
     tarname = new_dir+'/'+grpid+'_'+propid+'.tar'
 #    os.system('rm -f *guide*.png')
@@ -482,13 +570,15 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         os.system('cp '+guideimage+' ./')
         tarfiles = tarfiles+' '+guide_in_curr
         print tarfiles
+    home = os.path.expanduser('~')
 
     for _sciencespec in sciencespecs:
-        science_name = _sciencespec.replace('/icc/tmp/','')
-        guidecounts_pl = _sciencespec.replace('.fits','_guidecounts.png')
-        guidecounts_pl = guidecounts_pl.replace('/icc/tmp/f_','/home/eng/f_')
-        guidecounts_pl = guidecounts_pl.replace('/icc/tmp/g_','/home/eng/g_')
-        guidecounts_curr = guidecounts_pl.replace('/home/eng/','')
+        science_name = os.path.basename(_sciencespec)
+        guidecounts_pl = science_name.replace('.fits','_guidecounts.png')
+        print "guidecounts_pl =", guidecounts_pl
+        guidecounts_pl = os.path.join(home, guidecounts_pl)
+        print "guidecounts_pl =", guidecounts_pl
+        guidecounts_curr = os.path.basename(guidecounts_pl)
         guidefwhmt_pl = guidecounts_pl.replace('guidecounts.png','guidefwhmt.png')
         guidext_pl = guidecounts_pl.replace('guidecounts.png','guidext.png')
         guideyt_pl = guidecounts_pl.replace('guidecounts.png','guideyt.png')
@@ -499,20 +589,35 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         guideyt_curr = guidecounts_curr.replace('guidecounts.png','guideyt.png')
         guidexy_curr = guidecounts_curr.replace('guidecounts.png','guidexy.png')
 
+#        science_name = os.path.basename(_sciencespec)
+#        guidecounts_pl = _sciencespec.replace('.fits','_guidecounts.png')
+#        guidecounts_pl = guidecounts_pl.replace(spec_root + 'f_','/home/eng/f_')
+#        guidecounts_pl = guidecounts_pl.replace(spec_root + 'g_','/home/eng/g_')
+#        guidecounts_curr = guidecounts_pl.replace('/home/eng/','')
+#        guidefwhmt_pl = guidecounts_pl.replace('guidecounts.png','guidefwhmt.png')
+#        guidext_pl = guidecounts_pl.replace('guidecounts.png','guidext.png')
+#        guideyt_pl = guidecounts_pl.replace('guidecounts.png','guideyt.png')
+#        guidexy_pl = guidecounts_pl.replace('guidecounts.png','guidexy.png')
+
+#        guidefwhmt_curr = guidecounts_curr.replace('guidecounts.png','guidefwhmt.png')
+#        guidext_curr = guidecounts_curr.replace('guidecounts.png','guidext.png')
+#        guideyt_curr = guidecounts_curr.replace('guidecounts.png','guideyt.png')
+#        guidexy_curr = guidecounts_curr.replace('guidecounts.png','guidexy.png')
+
         if os.path.exists(guidecounts_pl):
-            guidecounts_tar = guidecounts_pl.replace('/home/eng/','')
+            guidecounts_tar = os.path.basename(guidecounts_pl)
             tarfiles = tarfiles+' '+guidecounts_tar
         if os.path.exists(guidefwhmt_curr):
-            guidefwhm_tar = guidefwhmt_curr.replace('/home/eng/','')
+            guidefwhm_tar = os.path.basename(guidefwhmt_curr)
             tarfiles = tarfiles+' '+guidefwhm_tar
         if os.path.exists(guidext_curr):
-            guidext_tar = guidext_curr.replace('/home/eng/','')
+            guidext_tar = os.path.basename(guidext_curr)
             tarfiles = tarfiles+' '+guidext_tar
         if os.path.exists(guideyt_curr):
-            guideyt_tar = guideyt_curr.replace('/home/eng/','')
+            guideyt_tar = os.path.basename(guideyt_curr)
             tarfiles = tarfiles+' '+guideyt_tar
         if os.path.exists(guidexy_curr):
-            guidexy_tar = guidexy_curr.replace('/home/eng/','')
+            guidexy_tar = os.path.basename(guidexy_curr)
             tarfiles = tarfiles+' '+guidexy_tar
 
 
@@ -529,10 +634,10 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     guide_wpath = data_dir+'/'+guideimage
     guidejpg_wpath = data_dir+'/'+guide_jpg
 
-
-    if os.path.exists(new_dir+'/'+grpid+'_'+propid+'.html'):
-        os.remove(new_dir+'/'+grpid+'_'+propid+'.html')
-    outfile = open(new_dir+'/'+grpid+'_'+propid+'.html','w')
+    html_file = new_dir+'/'+grpid+'_'+propid+'.html'
+    if os.path.exists(html_file):
+        os.remove(html_file)
+    outfile = open(html_file,'w')
     name = grpid+'_'+propid    
 
 
@@ -585,12 +690,14 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     outfile.write('</table>')
 
 #search for guide plots corresponding to each science spec
+    home = os.path.expanduser('~')
     for _sciencespec in sciencespecs:
-        science_name = _sciencespec.replace('/icc/tmp/','')
-        guidecounts_pl = _sciencespec.replace('.fits','_guidecounts.png')
-        guidecounts_pl = guidecounts_pl.replace('/icc/tmp/f_','/home/eng/f_')
-        guidecounts_pl = guidecounts_pl.replace('/icc/tmp/g_','/home/eng/g_')
-        guidecounts_curr = guidecounts_pl.replace('/home/eng/','')
+        science_name = os.path.basename(_sciencespec)
+        guidecounts_pl = science_name.replace('.fits','_guidecounts.png')
+        print "guidecounts_pl =", guidecounts_pl
+        guidecounts_pl = os.path.join(home, guidecounts_pl)
+        print "guidecounts_pl =", guidecounts_pl
+        guidecounts_curr = os.path.basename(guidecounts_pl)
         guidefwhmt_pl = guidecounts_pl.replace('guidecounts.png','guidefwhmt.png')
         guidext_pl = guidecounts_pl.replace('guidecounts.png','guidext.png')
         guideyt_pl = guidecounts_pl.replace('guidecounts.png','guideyt.png')
@@ -648,7 +755,7 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
 
 
     for _specs in specslist:
-        _specs = _specs.replace('/icc/tmp/',data_dir+'/')
+        _specs = _specs.replace(spec_root,data_dir+'/')
         _specsjpg = _specs.replace('.fits','.jpg')
         specindex = _specs.rfind('/')
         spec_in_curr = _specs[specindex+1:]
@@ -662,8 +769,12 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         except:
             pass
 
-        os.system('ln -s '+_specs+' '+new_dir+'/')
-        os.system('ln -s '+_specsjpg+' '+new_dir+'/')
+        link_spec = 'ln -s '+_specs+' '+new_dir+'/'
+        retval = os.system(link_spec)
+        print "Spec link cmd,status=",link_spec, retval
+        link_spec='ln -s '+_specsjpg+' '+new_dir+'/'
+        retval = os.system(link_spec)
+        print "Spec link cmd,status=",link_spec, retval
 
         outfile.write('<tr>')
         outfile.write('<th ROWSPAN=2>')
@@ -712,12 +823,15 @@ if __name__ == '__main__':
     parser.add_option("-n", "--nightlist", dest="nightlist", help="Nights to aggregate data",default='now')
     parser.add_option('-t', '--tmp', dest="tmp_dir", help="Temporary directory", default="./")
     parser.add_option('-s', '--site', dest="site", help="site name, ogg or coj", default="floyds.coj.lco.gtn")
+    parser.add_option('-d', dest="debug", help="debug output enabled", action="store_true", default=False)
 
 
     # Add others
     (options, args) = parser.parse_args()
     site = options.site
     nightlist = options.nightlist
+    debug = options.debug
+
     if nightlist == 'now':
         yo = str(datetime.date(datetime.now()))
         yo = yo.replace('-','')
@@ -757,4 +871,4 @@ if __name__ == '__main__':
 
     tmp_dir = options.tmp_dir
 
-    agg_floyds(nightlist,site=site,tmp_dir=tmp_dir)
+    agg_floyds(nightlist,site=site,tmp_dir=tmp_dir,debug=debug)

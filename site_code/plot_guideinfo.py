@@ -13,7 +13,14 @@ def mk_guideinfo_plots(rootname,utstart,utstop,logname):
 
 
 #    timeimg = scipy.array(guideinfo[0]); fileimg = scipy.array(guideinfo[1]); totcnts = scipy.array(guideinfo[9]); xguide = scipy.array(guideinfo[2]); yguide = scipy.array(guideinfo[3]); guideval = scipy.array(guideinfo[4]); xcen = scipy.array(guideinfo[5]); ycen = scipy.array(guideinfo[6]); fwhm = scipy.array(guideinfo[7]); status = scipy.array(guideinfo[8])
-    timeimg = scipy.array(guideinfo[0]); fileimg = scipy.array(guideinfo[1]); totcnts = scipy.array(guideinfo[7]); guideval = scipy.array(guideinfo[2]); xcen = scipy.array(guideinfo[3]); ycen = scipy.array(guideinfo[4]); fwhm = scipy.array(guideinfo[5]); status = scipy.array(guideinfo[6])
+    timeimg = scipy.array(guideinfo[0]) 
+    fileimg = scipy.array(guideinfo[1]) 
+    totcnts = scipy.array(guideinfo[7]) 
+    guideval = scipy.array(guideinfo[2])
+    xcen = scipy.array(guideinfo[3]) 
+    ycen = scipy.array(guideinfo[4]) 
+    fwhm = scipy.array(guideinfo[5])
+    status = scipy.array(guideinfo[6])
 
 
 #pull out all lines from the guide file that happened between utstart and utstop
