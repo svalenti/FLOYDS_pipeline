@@ -1255,15 +1255,17 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
         _output=re.sub('_red_','_merge_',lista[0])
         _output=re.sub('_blue_','_merge_',_output)
         #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-        try:            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-        except:         print 'Warning: problem combining the red and blu spectra'
+        _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+        #try:            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+        #except:         print 'Warning: problem combining the red and blu spectra'
         print _output
         if '_e.fits' in _output:
             _output=re.sub('_e.fits','_f.fits',_output)
             if '_e.fits' in lista[0]: lista[0]=re.sub('_e.fits','_f.fits',lista[0])
             if '_e.fits' in lista[1]: lista[1]=re.sub('_e.fits','_f.fits',lista[1])
-            try:            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-            except:         print 'Warning: problem combining the red and blu spectra'
+            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+#            try:            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+#            except:         print 'Warning: problem combining the red and blu spectra'
         if '_e.fits' and _classify:
             aa,bb,cc=floyds.util.classifyfast(_output,program='snid')
     return outputfile
@@ -1389,7 +1391,11 @@ def combspec(_img0,_img1,_output,scale=True,num=None):
     for hed in listahed:
         for hh in [hdr0,hdr1]:
             if hed in hh:
-                dicto[hed]=[hh[hed],hh.comments[hed]]
+                try:
+                    dicto[hed]=[hh[hed],hh.comments[hed]]
+                except:
+                    dicto[hed]=[hh[hed],'']
+
     if 'XMIN' in hdr0 and 'XMIN' in hdr1: _xmin=min(hdr0['XMIN'],hdr1['XMIN'])
     if 'XMAX' in hdr0 and 'XMAX' in hdr1: _xmax=max(hdr0['XMAX'],hdr1['XMAX'])
     dicto['XMIN']=[_xmin,'']
