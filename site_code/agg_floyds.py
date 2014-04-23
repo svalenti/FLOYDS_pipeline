@@ -7,12 +7,28 @@ matplotlib.use('Agg')
 import pyfits
 import numpy, scipy, pylab, sys, math, logging,glob
 import string
-# New style
+# New style plotting
 import plot_xmlguideinfo as plot_guideinfo
 from pyfits import open as popen
 from numpy import array,abs,where
 from datetime import datetime, timedelta
 
+def determine_camnames(site):
+    '''Method to use the site name (only do a partial match to each 2m site) to
+    determine what our acquisition/guide and spectrograph camera codes are. Halts
+    if the passed site isn't a recognized 2m site.'''
+
+    if 'ogg' in site:
+	acq_cam = 'kb42'
+	spec_cam = 'en06'
+    elif 'coj' in site:
+	acq_cam = 'kb37'
+	spec_cam = 'en05'
+    else:
+	print 'Unrecognized site',site
+	sys.exit(-1)
+
+    return acq_cam, spec_cam
 
 def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 
@@ -27,15 +43,8 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 #split the nights up, comma delimited
     night_list = string.split(nightlist,sep=',')
 
-    if 'ogg' in site:
-	acq_cam = 'kb42'
-	spec_cam = 'en06'
-    elif 'coj' in site:
-	acq_cam = 'kb37'
-	spec_cam = 'en05'
-    else:
-	print 'Unrecognized site',site
-	sys.exit(-1)
+    acq_cam, spec_cam = determine_camnames(site)
+    if debug: print "Cameras are:", acq_cam, spec_cam
 
     acq_root = os.path.join('/mnt/data', acq_cam)
     spec_root = os.path.join('/mnt/data', spec_cam)
@@ -241,7 +250,7 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
             hdulist.close()
 
         if guidetag != 0:
-            first_guideimage = find_first_guide(_night,acq_images,acq_utstart_nocolon,acq_utstop_nocolon,MJD_acqlist)
+            first_guideimage = find_first_guide(_night,acq_images,acq_utstart_nocolon,acq_utstop_nocolon,MJD_acqlist,site)
         else:
             first_guideimage = 'Null'
 #        print "First guideimage=",first_guideimage
@@ -263,7 +272,7 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 
         for _specimage in spec_images:
         
-# Copy into same directory as guidaimages
+# Copy into same directory as guideimages
 #
             if debug >2: print "Specimage=",_specimage
             copy_cmd = 'cp ' + _specimage +' '+ dir_for_guideimgs + '/'
@@ -406,11 +415,13 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 
 # for each acquisition image, look for acquisition log 
 
-def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd):
+def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd,site):
 
     from numpy import array,abs,where
 
-    imgdir = '/mnt/data/kb42/' # XXX Hardwired, fix
+# Determine acquisition camera name and therefore path
+    acq_cam, spec_cam = determine_camnames(site)
+    imgdir = os.path.join('/mnt/data/', acq_cam)
 
 
 #find full frame guide images from the night in question
