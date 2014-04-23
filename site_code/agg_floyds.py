@@ -421,7 +421,8 @@ def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd,site):
 
 # Determine acquisition camera name and therefore path
     acq_cam, spec_cam = determine_camnames(site)
-    imgdir = os.path.join('/mnt/data/', acq_cam)
+    imgdir = os.path.join('/mnt/data/', acq_cam + os.sep)
+#    print acq_cam, imgdir
 
 
 #find full frame guide images from the night in question
