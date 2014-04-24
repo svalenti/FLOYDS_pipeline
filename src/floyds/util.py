@@ -224,6 +224,7 @@ def readkey3(hdr,keyword):
                       value=(float(value0[0])+((float(value0[1])+(float(value0[2])/60.))/60.))
             elif keyword=='slit':     
                  value=re.sub('\"','',re.sub('slit','',str(value)))
+                 if value=='UNKNOWN': value='1.6'
             elif keyword=='object':
                  value=re.sub('\}','',value)
                  value=re.sub('\{','',value)
