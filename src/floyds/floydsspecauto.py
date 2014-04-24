@@ -581,12 +581,20 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           floyds.util.delete(stdusedclean)
                           _function='spline3'
                           iraf.specred.sarith(input1=imgnex,op='/',input2=atmofile,output=stdusedclean, format='multispec')
-                          _outputsens2=floyds.floydsspecdef.sensfunction(stdusedclean,_outputsens2,_function,8,_interactive)
+                          try:
+                              _outputsens2=floyds.floydsspecdef.sensfunction(stdusedclean,_outputsens2,_function,8,_interactive)
+                          except:
+                              print 'Warning: problem computing sensitivity function'
+                              _outputsens2=''
                           if setup not in atmo: atmo[setup]=[atmofile]
                           else: atmo[setup].append(atmofile)
                     else:
                           _function='spline3'
-                          _outputsens2=floyds.floydsspecdef.sensfunction(imgnex,_outputsens2,_function,12,_interactive,'3400:4700')#,3600:4300')
+                          try:
+                              _outputsens2=floyds.floydsspecdef.sensfunction(imgnex,_outputsens2,_function,12,_interactive,'3400:4700')#,3600:4300')
+                          except:
+                              print 'Warning: problem computing sensitivity function'
+                              _outputsens2=''
                     if _outputsens2  and _outputsens2 not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(_outputsens2)
     ###################################################
     print outputfile

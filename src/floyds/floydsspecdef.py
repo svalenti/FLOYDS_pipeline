@@ -385,7 +385,6 @@ def checkwavestd(imgex,_interactive,_type=1):
         answ=raw_input('\n### do you want to correct the wavelength calibration with this shift: '+str(shift)+' [[y]/n] ? ')
         if not answ: answ='y'
         if answ.lower() in ['y','yes']:
-            print _arm
             floyds.util.updateheader(imgex,0,{'CRVAL1':[zro+int(shift),'']})
             floyds.util.updateheader(imgex,0,{'shift'+_arm[0]:[float(shift),'']})
     else:
@@ -490,7 +489,6 @@ def atmofile(imgstd,imgout=''):
     import pyfits,os
     import numpy as np
     data, hdr = pyfits.getdata(imgstd, 0, header=True)
-    print len(data)
     print '#####',imgstd
     if len(data)<10:   yy=data[0][0]
     else:              yy=data
@@ -788,10 +786,8 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             _tel=readkey3(hdr0,'TELID')
             _type=readkey3(hdr0,'OBSTYPE')
             if not _type:    _type=readkey3(hdr0,'imagetyp')
-            print _type
             _slit=readkey3(hdr0,'slit')
             if _type:
-                print _type
                 if _type.lower() in ['expose','sky','spectrum']:
                     nameoutb=str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr=str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
@@ -915,11 +911,9 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                               flatgood.append(ii)
               else: flatgood=[]
               if len(flatgood)!=0:
-                  print 
                   if len(flatgood)>1:
                       f=open('_oflatlist','w')
                       for fimg in flatgood:
-                          print fimg
                           f.write(fimg+'\n')
                       f.close()
                       floyds.util.delete('flat'+img)
@@ -944,7 +938,6 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                                 arcfile.append(ii)                   
               if arcfile:
                   if len(arcfile)>1:                           # more than one arc available
-                      print arcfile
 #                     _arcclose=floyds.util.searcharc(imgex,arcfile)[0]   # take the closest in time 
                       _arcclose=floyds.util.sortbyJD(arcfile)[-1]               #  take the last arc of the sequence
                       if _interactive.upper() in ['YES','Y']:
@@ -1009,7 +1002,6 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
 ###############     flat correction methid 2  ###############
               if fringing==2:
                   if setup[0]=='red' and flatfile:
-                      print flatfile,img
                       floyds.util.delete('flat'+imgex)                  
                       iraf.specred.apsum(flatfile,output='flat'+imgex,referen=imgn,interac='no',find='no',recente='no',resize='no',\
                                              edit='no',trace='no',fittrac='no',extract='yes',extras='no',review='no',backgro='none')
@@ -1035,7 +1027,6 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                   imgl=''
               else:
                   imgl=re.sub('_ex.fits','_l.fits',imgex)
-                  print imgl
                   if _interactive.upper() in ['YES','Y']:
                       if os.path.isfile(imgl):  
                           answ=raw_input('\n### wavelength calibrated file already there, do you want to calibrate again [[y]/n] ? ')
@@ -1056,7 +1047,6 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                         _cradius=10
 
                     arcref=floyds.util.searcharc(imgex,'')[0]
-                    print arcref
                     os.system('cp '+floyds.__path__[0]+'/standard/ident/FLOYDS_lines.txt .')
 
                     if not arcref:
@@ -1086,7 +1076,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                           yy2=popen(arcfile)[0].data
                           xx2=arange(len(yy2))
                           _shift=floyds.floydsspecdef.checkwavelength_arc(xx1,yy1,xx2,yy2,'','',_interactive)#*(-1)
-                          print _shift
+                          print '\n### computed shift= '+str(_shift)
                           identific=iraf.specred.reidentify(referenc=arcref, images= arcfile, interac=_interactive, section= 'middle line', shift=_shift,\
                                                             coordli='FLOYDS_lines.txt', overrid='yes', cradius=_cradius, step=0, newaps= 'no',\
                                                             nsum=5, nlost=2, mode='h',verbose='yes',Stdout=1)
