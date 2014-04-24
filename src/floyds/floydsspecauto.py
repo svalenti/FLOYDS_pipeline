@@ -199,8 +199,6 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
     _overscan='[2049:'+str(_naxis1)+',1:'+str(_naxis2)+']'
     _biassecblu='[380:2048,325:'+str(_naxis2)+']'    
     _biassecred='[1:1800,1:350]'    
-    print _biassecblu
-    print _biassecred
     lista={}
     objectlist={}
     biaslist={}
@@ -223,7 +221,6 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             _tel=floyds.util.readkey3(hdr0,'TELID')
             _type=floyds.util.readkey3(hdr0,'OBSTYPE')
             if not _type:    _type=floyds.util.readkey3(hdr0,'imagetyp')
-            print _type
             _slit=floyds.util.readkey3(hdr0,'slit')
             if _type:
                 _type = _type.lower()
@@ -237,8 +234,8 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                     nameoutb='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
                     nameoutr='flat_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
                 else:
-                    nameoutb=_type+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
-                    nameoutr=_type+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
+                    nameoutb=str(_type.lower())+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_blue_'+str(_slit)+'_'+str(MJDtoday)
+                    nameoutr=str(_type.lower())+'_'+str(_object0)+'_'+_tel+'_'+str(_date0)+'_red_'+str(_slit)+'_'+str(MJDtoday)
 
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
                 rimg=floyds.util.name_duplicate(img,nameoutr,'')
@@ -267,9 +264,16 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                 print 'warning type not defined'
     for arm in lista.keys():
         for img in lista[arm]:
+            print img
             hdr=floyds.util.readhdr(img)
-            _type=floyds.util.readkey3(hdr,'obstype')
-            if not _type or _type=='EXPOSE':    _type=floyds.util.readkey3(hdr,'imagetyp')
+            _type=floyds.util.readkey3(hdr,'OBSTYPE')
+            if _type=='EXPOSE':  
+                      _type=floyds.util.readkey3(hdr,'imagetyp')
+                      if not _type: _type='EXPOSE'
+
+            if _type=='EXPOSE':  
+                print 'warning obstype still EXSPOSE, are this old data ?  run manually floydsfixheader'
+
             _slit=floyds.util.readkey3(hdr,'slit')
             _grpid=floyds.util.readkey3(hdr,'grpid')
             if _type.lower() in ['flat','f','lamp-flat'] :
@@ -589,7 +593,6 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
     if 'obj' in outputfile:
       for imm in outputfile['obj']:
         lista= outputfile['obj'][imm]
-        print lista
         lista1=[]
         for i in lista: 
             if '_ex.fits' in i:  
