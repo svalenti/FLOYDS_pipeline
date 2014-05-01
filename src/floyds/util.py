@@ -214,20 +214,27 @@ def readkey3(hdr,keyword):
             elif keyword=='RA':
                  import string,re
                  value0=string.split(value,':')
-                 value=((float(value0[0])+((float(value0[1])+(float(value0[2])/60.))/60.))*15)
+                 try:
+                      value=((float(value0[0])+((float(value0[1])+(float(value0[2])/60.))/60.))*15)
+                 except:
+                      value=0
             elif keyword=='DEC':
                  import string,re
                  value0=string.split(value,':')
-                 if '-' in str(value0[0]):
-                      value=((-1)*(abs(float(value0[0]))+((float(value0[1])+(float(value0[2])/60.))/60.)))
-                 else:
-                      value=(float(value0[0])+((float(value0[1])+(float(value0[2])/60.))/60.))
+                 try:
+                      if '-' in str(value0[0]):
+                           value=((-1)*(abs(float(value0[0]))+((float(value0[1])+(float(value0[2])/60.))/60.)))
+                      else:
+                           value=(float(value0[0])+((float(value0[1])+(float(value0[2])/60.))/60.))
+                 except:
+                      value=0
             elif keyword=='slit':     
-                 value=re.sub('\"','',re.sub('slit','',str(value.lower())))
+                 value=re.sub('\"','',re.sub('slit','',str(value).lower()))
                  value=re.sub('as','',re.sub('_','',str(value.lower())))
                  if value=='UNKNOWN': value='1.6'
             elif keyword=='object':
                  value=re.sub('\}','',value)
+                 value=re.sub('\+','',value)
                  value=re.sub('\{','',value)
                  value=re.sub('\[','',value)
                  value=re.sub('\]','',value)
