@@ -143,7 +143,10 @@ if __name__ == "__main__":
                hdr=floyds.readhdr(img0)
                prop=floyds.readkey3(hdr,'PROPID')
                #grpid=floyds.readkey3(hdr,'GRPUID')
-               grpid=str(floyds.readkey3(hdr,'JD'))[0:9]
+               #grpid=str(floyds.readkey3(hdr,'JD'))[0:9]
+               grpid = str(floyds.readkey3(hdr,'REQNUM'))
+               if grpid == 'N/A':
+                  grpid = 'UNKNOWN'
                date=floyds.readkey3(hdr,'date-night')
                _instrume=floyds.readkey3(hdr,'TELID')
                nametar='STD_'+str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
@@ -181,7 +184,10 @@ if __name__ == "__main__":
                hdr=floyds.readhdr(img0)
                prop=floyds.readkey3(hdr,'PROPID')
                #grpid=floyds.readkey3(hdr,'GRPUID')
-               grpid=str(floyds.readkey3(hdr,'JD'))[0:9]
+               #grpid=str(floyds.readkey3(hdr,'JD'))[0:9]
+               grpid = str(floyds.readkey3(hdr,'REQNUM'))
+               if grpid == 'N/A':
+                  grpid = 'UNKNOWN'
                date=floyds.readkey3(hdr,'date-night')
                _instrume=floyds.readkey3(hdr,'TELID')
                nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
