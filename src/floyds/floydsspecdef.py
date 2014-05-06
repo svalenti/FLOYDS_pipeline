@@ -898,6 +898,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
               _rdnoise=floyds.readkey3(hdr,'ron')
               _grism=floyds.readkey3(hdr,'grism')
               _grpid=floyds.readkey3(hdr,'grpid')
+              print _grpid
 #####################      flat   ###############
               if _listflat:   flatgood=_listflat    # flat list from reducer
               elif setup in flatlist:  

@@ -154,7 +154,7 @@ def readkey3(hdr,keyword):
                              'DEC'       : 'DEC',\
                              'datamin'   : -100,\
                              'datamax'   : 60000,\
-                             'grpid'     : 'GRPUID',\
+                             'grpid'     : 'BLKUID',\
                              'exptime'   : 'EXPTIME',\
                              'JD'        : 'MJD',\
                              'MJD'        : 'MJD',\
@@ -175,7 +175,7 @@ def readkey3(hdr,keyword):
                              'DEC'       : 'DEC',\
                              'datamin'   : -100,\
                              'datamax'   : 60000,\
-                             'grpid'     : 'GRPUID',\
+                             'grpid'     : 'BLKUID',\
                              'exptime'   : 'EXPTIME',\
                              'JD'        : 'MJD-OBS',\
                              'MJD'        : 'MJD-OBS',\
