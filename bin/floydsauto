@@ -157,8 +157,12 @@ if __name__ == "__main__":
                print nametar,'####################################' 
                imglist=outputlist['std'][img0]
                imglist.append(readme)
-               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
-               imglist.append('floyds.pdf')
+#
+#                 remove pdf from tar file
+#
+#               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
+#               imglist.append('floyds.pdf')
+
                bb,kk=floyds.gettar(img0)
                if bb: imglist.append(bb)
                if kk: imglist.append(kk)
@@ -197,8 +201,11 @@ if __name__ == "__main__":
                print nametar,'####################################' 
                imglist=outputlist['obj'][img0]
                imglist.append(readme)
-               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
-               imglist.append('floyds.pdf')
+#
+#               remove pdf from tar file
+#
+#               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
+#               imglist.append('floyds.pdf')
                try:
                     bb,kk=floyds.gettar(img0)
                except: 
