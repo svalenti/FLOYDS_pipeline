@@ -182,6 +182,10 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
                 link_cmd = 'cp ' + jpgfile + ' ' + jpgfile_destpath
                 if debug >= 2: print "jpg link_cmd=", link_cmd
                 os.system(link_cmd)
+            else:
+                print "Acquisition jpg missing, creating"
+                status = make_jpg_image(jpgfile, jpgfile_destpath)
+                print "JPG creation status =", status
             if os.path.exists(regfile):
                 link_cmd = 'ln -s '+regfile+' '+ regfile_destpath
                 if debug >= 2: print "reg link_cmd=", link_cmd
@@ -806,7 +810,90 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     except:
         pass
 
+def which(program):
+    import os
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+def make_jpg_image(jpgfile, jpgfile_destname, debug=True):
+    '''Create a JPG in <jpgfile_destpath> in the same way as the reduction agent should have done:
+    /usr/local/astrometry/bin/image2pnm.py -i $1 -o $1.tmp1.pnm
+    pnmtojpeg --greyscale --quality=85 $1.tmp1.pnm > $1.tmp1.jpg
+    jpegtran -copy none -optimize -flip vertical -outfile $1.tmp2.jpg $1.tmp1.jpg
+    jpegtran -copy none -progressive -outfile $2 $1.tmp2.jpg
+    rm $1.tmp*
+    '''
+    
+    if debug: print jpgfile, jpgfile_destname
+
+    needed_programs = ['/usr/local/astrometry/bin/image2pnm.py', 'pnmtojpeg', 'jpegtran']
+    status = 0 
+    for prog in needed_programs:
+        if debug: print "Checking for", prog
+        if which(prog) == None:
+            if debug: print "Not found"
+            status = -1
+
+    if status != -1:
+        fitsfilepath = jpgfile.replace('.jpg', '.fits')
+        fitsfile = os.path.basename(fitsfilepath)
+        jpgfile_destpath = os.path.dirname(jpgfile_destname) + os.path.sep
+
+# Convert FITS to PNM
+        infile = fitsfilepath
+        outfile = os.path.join(jpgfile_destpath, fitsfile+'.tmp1.pnm')
+        cmd = '/usr/local/astrometry/bin/image2pnm.py -i ' + fitsfilepath + ' -o ' + outfile
+        if debug:
+            print cmd
+        else:
+            status = os.system(cmd)    
+
+# Convert PNM to greyscale JPG
+        infile = outfile
+        outfile = os.path.join(jpgfile_destpath, fitsfile+'.tmp1.jpg')
+        cmd = 'pnmtojpeg --greyscale --quality=85 ' + infile + ' > ' + outfile
+        if debug:
+            print cmd
+        else:
+            status = os.system(cmd)    
+
+# Optimize and flip JPG
+        infile = outfile
+        outfile = outfile.replace('.tmp1.jpg', '.tmp2.jpg')
+        cmd = 'jpegtran -copy none -optimize -flip vertical -outfile ' + outfile + ' ' + infile
+        if debug:
+            print cmd
+        else:
+           status =  os.system(cmd)    
+
+# Convert JPG to progressive format
+        infile = outfile
+        outfile = jpgfile_destname
+        cmd = 'jpegtran -copy none -progressive -outfile ' + outfile + ' ' + infile
+        if debug:
+            print cmd
+        else:
+           status =  os.system(cmd)    
+# Cleanup
+        cmd = 'rm ' + jpgfile_destpath + fitsfile + '.tmp*'
+        if debug:
+            print cmd
+        else:
+           status =  os.system(cmd)
+    return status
 
 def readlogfile(logname):
     import csv
@@ -883,4 +970,5 @@ if __name__ == '__main__':
 
     tmp_dir = options.tmp_dir
 
+    print "Running for nightlist", nightlist
     agg_floyds(nightlist,site=site,tmp_dir=tmp_dir,debug=debug)
