@@ -828,7 +828,7 @@ def which(program):
 
     return None
 
-def make_jpg_image(jpgfile, jpgfile_destname, debug=True):
+def make_jpg_image(jpgfile, jpgfile_destname, debug=False):
     '''Create a JPG in <jpgfile_destpath> in the same way as the reduction agent should have done:
     /usr/local/astrometry/bin/image2pnm.py -i $1 -o $1.tmp1.pnm
     pnmtojpeg --greyscale --quality=85 $1.tmp1.pnm > $1.tmp1.jpg
