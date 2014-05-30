@@ -230,6 +230,13 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
                 grpnumob_acqlist = [grpnumob_acq]
 
             groupid_acq = prihdr['OBJECT']
+
+# Turn any brackets and other odd chars into underscores
+	    for badchar in ['(', ')']:
+	    	groupid_acq = groupid_acq.replace(badchar, '')
+	    for badchar in [ ' ', "'" ]:
+	    	groupid_acq = groupid_acq.replace(badchar, '_')
+
             try:
                 grpid_acqlist.append(groupid_acq)
             except NameError:
@@ -560,12 +567,21 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     link_cmd = 'ln -s '+acq_jpg+' '+new_dir+'/'
     print "link_cmd2=", link_cmd
     os.system(link_cmd)
-    link_cmd = 'ln -s '+guideimage+' '+new_dir+'/'
+
+    if guideimage != 'Null':
+    	link_cmd = 'ln -s '+guideimage+' '+new_dir+'/'
+    else:
+        link_cmd = 'ln -s /var/www/html/images/no_guide.png '+new_dir+'/'
+    os.system(link_cmd)
     print "link_cmd3=", link_cmd
-    os.system(link_cmd)
-    link_cmd = 'ln -s '+guide_jpg+' '+new_dir+'/'
+    
+    if guide_jpg != 'Null':
+    	link_cmd = 'ln -s '+guide_jpg+' '+new_dir+'/'
+	os.system(link_cmd)
+    else:
+        link_cmd = "No guide image"
     print "link_cmd4=", link_cmd
-    os.system(link_cmd)
+
     link_cmd = 'ln -s '+acq_reg+' '+new_dir+'/'
     print "link_cmd5=", link_cmd
     os.system(link_cmd)
@@ -657,7 +673,7 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     name = grpid+'_'+propid    
 
 
-
+    no_image_html = '<IMG src="no_guide.png" height="400">\n'
     outfile.write('<html>\n')
     outfile.write('<head>\n')
     outfile.write('<title>'+name+'</title>\n')
@@ -678,6 +694,8 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     outfile.write('<th ROWSPAN=2>\n')
     if guidejpg_in_curr != 'Null':
         outfile.write('<IMG src="'+guidejpg_in_curr+'" height="400">\n')
+    else:
+        outfile.write(no_image_html)
     outfile.write('</th>\n')
     outfile.write('</tr>\n')
     outfile.write('<tr></tr><tr></tr>\n')
@@ -685,6 +703,8 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     outfile.write('<td COLSPAN=1> <a href=./'+acq_in_curr+'> '+acq_in_curr+'</td>\n')
     if guide_in_curr != 'Null':
         outfile.write('<td COLSPAN=1> <a href=./'+guide_in_curr+'> '+guide_in_curr+'</td>')
+    else:
+        outfile.write('<td COLSPAN=1></td>')
     outfile.write('</tr>')
     outfile.write('<tr></tr><tr></tr>\n')
     outfile.write('<tr ALIGN="center">\n')
@@ -738,32 +758,36 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         outfile.write('<tr>')
         outfile.write('<th ROWSPAN=2>')
 #if guide
-        outfile.write('<IMG src="'+guidecounts_curr+'" height="400">')
-        outfile.write('</th>')
-        outfile.write('<th ROWSPAN=2>')
+        if guidejpg_in_curr != 'Null':
+            outfile.write('<IMG src="'+guidecounts_curr+'" height="300">')
+            outfile.write('</th>')
+            outfile.write('<th ROWSPAN=2>')
 
-        outfile.write('<IMG src="'+guidefwhmt_curr+'" height="400">')
-        outfile.write('</th>')
-        outfile.write('</tr>')
-        outfile.write('<tr>')
-        outfile.write('</tr>')
-        outfile.write('</table>')
+            outfile.write('<IMG src="'+guidefwhmt_curr+'" height="300">')
+            outfile.write('</th>')
+            outfile.write('</tr>')
+            outfile.write('<tr>')
+            outfile.write('</tr>')
+            outfile.write('</table>')
 
-        outfile.write('<table>')
-        outfile.write('<tr>')
-        outfile.write('<th ROWSPAN=2>')
-        outfile.write('<IMG src="'+guidexy_curr+'" height="300">')
-        outfile.write('</th>')
-        outfile.write('<th ROWSPAN=2>')
+            outfile.write('<table>')
+            outfile.write('<tr>')
+            outfile.write('<th ROWSPAN=2>')
+            outfile.write('<IMG src="'+guidexy_curr+'" height="300">')
+            outfile.write('</th>')
+            outfile.write('<th ROWSPAN=2>')
 
-        outfile.write('<IMG src="'+guidext_curr+'" height="300">')
-        outfile.write('</th>')
-        outfile.write('<th ROWSPAN=2>')
+            outfile.write('<IMG src="'+guidext_curr+'" height="300">')
+            outfile.write('</th>')
+            outfile.write('<th ROWSPAN=2>')
 
-        outfile.write('<IMG src="'+guideyt_curr+'" height="300">')
-        outfile.write('</th>')
-        outfile.write('</tr>')
-
+            outfile.write('<IMG src="'+guideyt_curr+'" height="300">')
+            outfile.write('</th>')
+            outfile.write('</tr>')
+        else:
+            outfile.write('<td COLSPAN=2>' + no_image_html + '</td>')
+            outfile.write('</th>')
+            outfile.write('</tr>')
 
         outfile.write('</table>')
 
