@@ -612,11 +612,13 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         print "guidecounts_pl =", guidecounts_pl
         guidecounts_curr = os.path.basename(guidecounts_pl)
         guidefwhmt_pl = guidecounts_pl.replace('guidecounts.png','guidefwhmt.png')
+        guidestate_pl = guidecounts_pl.replace('guidecounts.png','guidestate.png')
         guidext_pl = guidecounts_pl.replace('guidecounts.png','guidext.png')
         guideyt_pl = guidecounts_pl.replace('guidecounts.png','guideyt.png')
         guidexy_pl = guidecounts_pl.replace('guidecounts.png','guidexy.png')
 
         guidefwhmt_curr = guidecounts_curr.replace('guidecounts.png','guidefwhmt.png')
+        guidestate_curr = guidecounts_curr.replace('guidecounts.png','guidestate.png')
         guidext_curr = guidecounts_curr.replace('guidecounts.png','guidext.png')
         guideyt_curr = guidecounts_curr.replace('guidecounts.png','guideyt.png')
         guidexy_curr = guidecounts_curr.replace('guidecounts.png','guidexy.png')
@@ -651,6 +653,9 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         if os.path.exists(guidexy_curr):
             guidexy_tar = os.path.basename(guidexy_curr)
             tarfiles = tarfiles+' '+guidexy_tar
+        if os.path.exists(guidestate_curr):
+            guidestate_tar = os.path.basename(guidestate_curr)
+            tarfiles = tarfiles+' '+guidestate_tar
 
 
     os.system('rm -f '+tarname)
@@ -735,11 +740,13 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         print "guidecounts_pl =", guidecounts_pl
         guidecounts_curr = os.path.basename(guidecounts_pl)
         guidefwhmt_pl = guidecounts_pl.replace('guidecounts.png','guidefwhmt.png')
+        guidestate_pl = guidecounts_pl.replace('guidecounts.png','guidestate.png')
         guidext_pl = guidecounts_pl.replace('guidecounts.png','guidext.png')
         guideyt_pl = guidecounts_pl.replace('guidecounts.png','guideyt.png')
         guidexy_pl = guidecounts_pl.replace('guidecounts.png','guidexy.png')
 
         guidefwhmt_curr = guidecounts_curr.replace('guidecounts.png','guidefwhmt.png')
+        guidestate_curr = guidecounts_curr.replace('guidecounts.png','guidestate.png')
         guidext_curr = guidecounts_curr.replace('guidecounts.png','guidext.png')
         guideyt_curr = guidecounts_curr.replace('guidecounts.png','guideyt.png')
         guidexy_curr = guidecounts_curr.replace('guidecounts.png','guidexy.png')
@@ -748,6 +755,7 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
 
         os.system('mv '+guidecounts_pl+' '+new_dir)
         os.system('mv '+guidefwhmt_pl+' '+new_dir)
+        os.system('mv '+guidestate_pl+' '+new_dir)
         os.system('mv '+guidext_pl+' '+new_dir)
         os.system('mv '+guideyt_pl+' '+new_dir)
         os.system('mv '+guidexy_pl+' '+new_dir)
@@ -761,11 +769,16 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         if guidejpg_in_curr != 'Null':
             outfile.write('<IMG src="'+guidecounts_curr+'" height="300">')
             outfile.write('</th>')
-            outfile.write('<th ROWSPAN=2>')
 
+            outfile.write('<th ROWSPAN=2>')
             outfile.write('<IMG src="'+guidefwhmt_curr+'" height="300">')
             outfile.write('</th>')
+	    
+            outfile.write('<th ROWSPAN=2>')
+            outfile.write('<IMG src="'+guidestate_curr+'" height="300">')
+            outfile.write('</th>')
             outfile.write('</tr>')
+
             outfile.write('<tr>')
             outfile.write('</tr>')
             outfile.write('</table>')

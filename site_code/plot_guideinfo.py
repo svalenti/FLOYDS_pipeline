@@ -247,6 +247,51 @@ def SY(plcolor):  ###################################    define plot symbol
             _sy.append(c+s)
     return _sy
 
+def plot_guidestate(mjd,guidestate):
+
+    uniq_guidestates = ['ACQUIRING', 
+                        'GUIDE_SOURCE_LOST', 
+                        'GUIDE_SOURCE_LOST_TEMP', 
+                        'GUIDING_CLOSED_LOOP', 
+                        'IDLE',
+                       ]
+    plot_text = [ 'UNKNOWN', 
+                  'ACQUIRING', 
+                  'GUIDE_SOURCE_LOST', 
+                  'GUIDE_SOURCE_LOST_TEMP', 
+                  'GUIDING_CLOSED_LOOP', 
+                  'IDLE',
+                ]
+
+    y = []
+    for i in range(len(mjd)):        
+
+        # translate the states to indices to plot
+        try:
+#            print guidestate[i], uniq_guidestates.index(guidestate[i])+1
+            y.append(uniq_guidestates.index(guidestate[i])+1)
+        except:
+            y.append(0)
+
+    plcolor=True
+    ioff()
+    # rename the tick labels to be the states
+    fig, ax = subplots()
+    subplots_adjust(left=0.25)
+    locator_params(nbins=len(plot_text))
+    ax.set_yticklabels(plot_text, size='x-small')
+
+    pl_gs = plot(mjd,y,'bo')
+    xlabel('Seconds')
+    ylabel('Guide state')
+    ylim([0,len(uniq_guidestates)+1])
+    #show()
+    #SetPlot()
+    #raw_input('press enter to close')
+    os.system('rm -f yo.png')
+    savefig('yo.png')
+
+    close()
 
 if __name__ == '__main__':
     from optparse import OptionParser

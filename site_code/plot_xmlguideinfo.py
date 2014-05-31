@@ -7,7 +7,7 @@ import os
 import scipy
 from numpy import array, where, nan
 from xml.dom import minidom
-from plot_guideinfo import plot_guideflux, plot_guidepos, plot_xposwtime, plot_yposwtime, plot_fwhmwtime
+from plot_guideinfo import plot_guideflux, plot_guidepos, plot_xposwtime, plot_yposwtime, plot_fwhmwtime, plot_guidestate
 
 def mk_guideinfo_plots(rootname, utstart, utstop, logname, debug=True):
     '''Generate plots from FITS guide images'''
@@ -33,6 +33,13 @@ def mk_guideinfo_plots(rootname, utstart, utstop, logname, debug=True):
         mjd_arr = mjd_arr - (min(mjd_arr)-0.1/60.0/24.0)
         mjd_arr_sec = mjd_arr*24.0*60.0*60.0
         if debug >2: print mjd_list
+
+        guidestate_list = read_guidestate_from_guide_fits(fileimg_gd)
+
+        plot_guidestate(mjd_arr_sec,guidestate_list)
+        guidestateplotname = rootname+'_guidestate.png'
+        retval = os.system('mv yo.png '+guidestateplotname)
+        if debug: print "mv from yo.png to",guidestateplotname,"had status",retval
 
         xmlfiles_gd = [f.replace('.fits', '.fits.inst.guide.xml') for f in fileimg_gd]
         if debug: print xmlfiles_gd
@@ -103,6 +110,26 @@ def read_mjd_from_guide_fits(fits_images):
         headlist.close()
 
     return mjd_list
+
+
+def read_guidestate_from_guide_fits(fits_images):
+    '''Loops through the <fits_images> list of FITS guide frames, reading in 
+    the AGSTATE and returning this as a list of strings'''
+
+    guidestate_list = []    
+    for _fileimg in fits_images:
+        headlist = pyfits.open(_fileimg)
+        headnow = headlist[0].header
+
+        guidestatenow = headnow['AGSTATE']
+        try:
+            guidestate_list.append(guidestatenow)
+        except NameError:
+            guidestate_list = [guidestatenow]
+
+        headlist.close()
+
+    return guidestate_list
 
 def read_stats_from_xml_files(xmlfiles):
 
