@@ -1,4 +1,4 @@
-#!/opt/epd/bin/python
+#!/usr/bin/env python
 
 import os
 import matplotlib
@@ -234,7 +234,7 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 # Turn any brackets and other odd chars into underscores
 	    for badchar in ['(', ')']:
 	    	groupid_acq = groupid_acq.replace(badchar, '')
-	    for badchar in [ ' ', "'" ]:
+	    for badchar in [ ' ', "'" ,"/"]:
 	    	groupid_acq = groupid_acq.replace(badchar, '_')
 
             try:
@@ -898,38 +898,39 @@ def make_jpg_image(jpgfile, jpgfile_destname, debug=False):
         else:
             status = os.system(cmd)    
 
+        if status == 0:
 # Convert PNM to greyscale JPG
-        infile = outfile
-        outfile = os.path.join(jpgfile_destpath, fitsfile+'.tmp1.jpg')
-        cmd = 'pnmtojpeg --greyscale --quality=85 ' + infile + ' > ' + outfile
-        if debug:
-            print cmd
-        else:
-            status = os.system(cmd)    
+            infile = outfile
+            outfile = os.path.join(jpgfile_destpath, fitsfile+'.tmp1.jpg')
+            cmd = 'pnmtojpeg --greyscale --quality=85 ' + infile + ' > ' + outfile
+            if debug:
+                print cmd
+            else:
+                status = os.system(cmd)    
 
 # Optimize and flip JPG
-        infile = outfile
-        outfile = outfile.replace('.tmp1.jpg', '.tmp2.jpg')
-        cmd = 'jpegtran -copy none -optimize -flip vertical -outfile ' + outfile + ' ' + infile
-        if debug:
-            print cmd
-        else:
-           status =  os.system(cmd)    
+            infile = outfile
+            outfile = outfile.replace('.tmp1.jpg', '.tmp2.jpg')
+            cmd = 'jpegtran -copy none -optimize -flip vertical -outfile ' + outfile + ' ' + infile
+            if debug:
+                print cmd
+            else:
+               status =  os.system(cmd)    
 
 # Convert JPG to progressive format
-        infile = outfile
-        outfile = jpgfile_destname
-        cmd = 'jpegtran -copy none -progressive -outfile ' + outfile + ' ' + infile
-        if debug:
-            print cmd
-        else:
-           status =  os.system(cmd)    
+            infile = outfile
+            outfile = jpgfile_destname
+            cmd = 'jpegtran -copy none -progressive -outfile ' + outfile + ' ' + infile
+            if debug:
+                print cmd
+            else:
+               status =  os.system(cmd)    
 # Cleanup
-        cmd = 'rm ' + jpgfile_destpath + fitsfile + '.tmp*'
-        if debug:
-            print cmd
-        else:
-           status =  os.system(cmd)
+            cmd = 'rm ' + jpgfile_destpath + fitsfile + '.tmp*'
+            if debug:
+                print cmd
+            else:
+               status =  os.system(cmd)
     return status
 
 def readlogfile(logname):
