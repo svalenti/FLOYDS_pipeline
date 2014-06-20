@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/opt/epd/bin/python 
 
 import glob
 import floyds
@@ -6,7 +6,7 @@ import os
 listfile1=glob.glob('g*_e_*_0.fits')
 listfile2=glob.glob('f*_e_*_0.fits')
 listfile3=glob.glob('ogg2m001*0.fits')
-listfile4=glob.glob('coj2m001*0.fits')
+listfile4=glob.glob('coj2m002*0.fits')
 imglist=listfile1+listfile2+listfile3+listfile4
 for img in imglist:
   hdr=floyds.util.readhdr(img)
@@ -36,8 +36,7 @@ for img in imglist:
 #        floyds.util.updateheader(img,0,{'IMAGETYP':['lamp','type']})
         floyds.util.updateheader(img,0,{'OBSTYPE':['ARC','What type of observation has been taken']})
     elif ans in ['Bad','BAD','B','bad','b']:
-        if not os.path.isdir('./bad/'): os.system('mkdir bad/')
-        os.system('mv '+img+' bad/')
+        os.system('markbad '+img)
     _grp=floyds.util.readkey3(hdr,'GRPUID')
     if _grp==-1:
         _ra=floyds.util.readkey3(hdr,'RA')

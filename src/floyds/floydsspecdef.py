@@ -1245,17 +1245,17 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
         lista=coppie[mjd]
         _output=re.sub('_red_','_merge_',lista[0])
         _output=re.sub('_blue_','_merge_',_output)
-        #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-        _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-        #try:            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+        #_output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
+        _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
+        #try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #except:         print 'Warning: problem combining the red and blu spectra'
         print _output
         if '_e.fits' in _output:
             _output=re.sub('_e.fits','_f.fits',_output)
             if '_e.fits' in lista[0]: lista[0]=re.sub('_e.fits','_f.fits',lista[0])
             if '_e.fits' in lista[1]: lista[1]=re.sub('_e.fits','_f.fits',lista[1])
-            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-#            try:            _output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
+#            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
 #            except:         print 'Warning: problem combining the red and blu spectra'
         if '_e.fits' and _classify:
             aa,bb,cc=floyds.util.classifyfast(_output,program='snid')
@@ -1284,8 +1284,7 @@ def cutstd(stdfile,start=1,end=1e10,out=True):
                 f.write(line)
     f.close()
 
-#############################################
-
+######## currently using combspec2 instead of combspec ########
 def combspec(_img0,_img1,_output,scale=True,num=None):
     import numpy as np 
 #    from numpy import compress, array, trapz, argsort
@@ -1402,6 +1401,117 @@ def combspec(_img0,_img1,_output,scale=True,num=None):
     import time
     time.sleep(1)
     return _output
+
+######## currently using combspec2 instead of combspec ########
+def combspec2(_img0,_img1,_output,scale=True,num=None):
+	import numpy as np 
+	import re,string,os,floyds,pyfits
+	from pyraf import iraf
+
+	# read in spectra and headers, determine third dimension of images
+	_x0,_y0=floyds.util.readspectrum(_img0)
+	_x1,_y1=floyds.util.readspectrum(_img1)
+	hdr0=pyfits.getheader(_img0)
+	hdr1=pyfits.getheader(_img1)
+	if 'NAXIS3' in hdr0 and 'NAXIS3' in hdr1 and hdr0['NAXIS3']==hdr1['NAXIS3']:
+		dimension=hdr1['NAXIS3'] # will be 4 for Floyds spectra
+	else:
+		dimension=1
+
+	# rename so that 0 = blue and 1 = red
+	if min(_x0) < min(_x1):
+		x0,y0=_x0,_y0
+		x1,y1=_x1,_y1
+		img0,img1=_img0,_img1
+	else:
+		x0,y0=_x1,_y1
+		x1,y1=_x0,_y0
+		img0,img1=_img1,_img0
+
+	# extract overlapping region
+	limmin=max(min(x0),min(x1)) # lower limit of overlap
+	limmax=min(max(x0),max(x1)) # upper limit of overlap
+	x01=np.compress((np.array(x0)>limmin)&(np.array(x0)<limmax),x0) # x of overlap
+	y01=np.compress((np.array(x0)>limmin)&(np.array(x0)<limmax),y0) # y of overlap from blue side
+	x11=x01 # use x of blue part in overlap
+	y11=np.interp(x01,x1,y1) # resample red spectrum over x of blue
+	if not num:
+		num=len(x01)/10 # divide overlapping region into tenths
+
+	# rescale red & blue to match
+	if scale:
+		integral0=np.trapz(y01,x01) # flux in blue
+		integral1=np.trapz(y11,x11) # flux in red
+		if integral0<integral1: # scale to side with higher flux
+			A0,A1=integral1/integral0,1
+		else:
+			A0,A1=1,integral0/integral1
+	else:
+		A0,A1=1,1
+
+	floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
+	floyds.util.delete(_output)
+
+	if dimension==1:
+		iraf.scopy(img0,'s1.fits',w1='INDEF',w2=x01[2*num],rebin='no')   # take blue part up to 20% of overlapping region
+		iraf.scopy(img1,'s2.fits',w1=x01[num],w2='INDEF',rebin='no')     # take red part starting from 10% of overlapping region
+		iraf.sarith(input1='s1.fits',op='*',input2=A0,output='s11.fits') # rescale
+		iraf.sarith(input1='s2.fits',op='*',input2=A1,output='s22.fits')
+		iraf.specred.scombine(input='s11.fits,s22.fits',w1='INDEF',w2='INDEF',output=_output) # combine by averaging 2nd tenth of overlap
+	else:
+		print 'more than one dimension'
+		data2d=[]
+		hdrvec=[]
+		for layer in range(dimension):
+			outputn=re.sub('.fits','',_output)+'_'+str(layer+1)+'.fits'
+			floyds.util.delete(outputn)
+			floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
+			iraf.scopy(img0+'[*,1,'+str(layer+1)+']','s1.fits',w1='INDEF',w2=x01[2*num],rebin='no')
+			iraf.scopy(img1+'[*,1,'+str(layer+1)+']','s2.fits',w1=x01[num],w2='INDEF',rebin='no')
+			iraf.sarith(input1='s1.fits',op='*',input2=A0,output='s11.fits')
+			iraf.sarith(input1='s2.fits',op='*',input2=A1,output='s22.fits')
+			iraf.specred.scombine(input='s11.fits,s22.fits',w1='INDEF',w2='INDEF',output=outputn)
+			datavec,head = pyfits.getdata(outputn, 0, header=True)
+			data2d.append(datavec)
+			hdrvec.append(head)
+		floyds.util.delete(_output)
+		try:
+			hdr0.update('NAXIS1',hdrvec[1]['NAXIS1'],hdrvec[1].comments['NAXIS1'])
+			hdr0.update('CRVAL1',hdrvec[1]['CRVAL1'],hdrvec[1].comments['CRVAL1'])
+			hdr0.update('CD1_1',hdrvec[1]['CD1_1'],hdrvec[1].comments['CD1_1'])
+			hdr0.update('CRPIX1',hdrvec[1]['CRPIX1'],hdrvec[1].comments['CRPIX1'])
+		except:
+			hdr0.update('NAXIS1',hdrvec[1]['NAXIS1'],'Width of image data')
+			hdr0.update('CRVAL1',hdrvec[1]['CRVAL1'],'wavelength ref.')
+			hdr0.update('CD1_1',hdrvec[1]['CD1_1'],'')
+			hdr0.update('CRPIX1',hdrvec[1]['CRPIX1'],'Pixel ref.')
+		pyfits.writeto(_output,np.reshape(data2d,[dimension,1,-1]),hdr0)
+
+	floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
+	for layer in range(dimension):
+		outputn=re.sub('.fits','',_output)+'_'+str(layer+1)+'.fits'
+		floyds.util.delete(outputn)
+		header={}
+		keywords=['ATMOR','ATMOB','SENSFUNB','SENSFUNR','ARCBLU','ARCRED','FLATRED','FLATBLUE',\
+              'SHIFTR','SHIFTB','LAMRMS_R','LAMNLINR','SPE_ER_R','LAMRMS_B','LAMNLINB','SPE_ER_B',\
+              'SPERES_R','SPERES_B']
+    
+	for key in keywords:
+		for hdr in [hdr0,hdr1]:
+			if key in hdr:
+				try:
+					header[key]=[hdr[key],hdr.comments[key]]
+				except:
+					header[key]=[hdr[key],'']
+
+	if 'XMIN' in hdr0 and 'XMIN' in hdr1: _xmin=min(hdr0['XMIN'],hdr1['XMIN'])
+	if 'XMAX' in hdr0 and 'XMAX' in hdr1: _xmax=max(hdr0['XMAX'],hdr1['XMAX'])
+	header['XMIN']=[_xmin,'']
+	header['XMAX']=[_xmax,'']
+	header['GRISM']=['red/blu','full range spectrum']
+	floyds.util.updateheader(_output,0,header)
+
+	return _output
 
 #############################################################
 def combineblusens(imglist,imgout='pippo.fits'):
