@@ -43,10 +43,10 @@ if __name__ == "__main__":
      elif len(args)==1: 
           files=floyds.util.readlist(args[0])
      else:
-          listfile1=glob.glob('g_e_*0.fits')
-          listfile2=glob.glob('f_e_*0.fits')
-          listfile3=glob.glob('ogg2m001*0.fits')
-          listfile4=glob.glob('coj2m002*0.fits')
+          listfile1=glob.glob('g_e_*00.fits')
+          listfile2=glob.glob('f_e_*00.fits')
+          listfile3=glob.glob('ogg2m001*00.fits')
+          listfile4=glob.glob('coj2m002*00.fits')
           listfile=listfile1+listfile2+listfile3+listfile4
           files=[]
           print 'making the list with raw data in the current directory ...... please wait'
