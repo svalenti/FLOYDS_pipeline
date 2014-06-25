@@ -803,6 +803,8 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
 
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
                 rimg=floyds.util.name_duplicate(img,nameoutr,'')
+                #print bimg
+                #print rimg
 ####
                 floyds.util.delete(bimg)
                 floyds.util.delete(rimg)
@@ -860,9 +862,9 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                 if _verbose:
                     print _ra,_dec
                     print std[argmin(dd)],min(dd)
-                if min(dd)<5200: _typeobj='std'
+                if min(dd)<1200: _typeobj='std'
                 else: _typeobj='obj'
-                if min(dd)<5200:
+                if min(dd)<1200:
                     floyds.util.updateheader(img,0,{'stdname':[std[argmin(dd)],'']})
                     floyds.util.updateheader(img,0,{'magstd':[float(magstd[argmin(dd)]),'']})
                 if _typeobj not in objectlist:      objectlist[_typeobj]={}

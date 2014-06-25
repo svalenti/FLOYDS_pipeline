@@ -241,6 +241,7 @@ def readkey3(hdr,keyword):
                  value=re.sub('\(','',value)
                  value=re.sub('\)','',value)
                  value=re.sub('-','',value)
+                 value=re.sub('\,','',value)
                  value=re.sub(' ','',value)
     else:
        if keyword=='date-night':
