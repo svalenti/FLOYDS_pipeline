@@ -1247,7 +1247,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
         lista=coppie[mjd]
         _output=re.sub('_red_','_merge_',lista[0])
         _output=re.sub('_blue_','_merge_',_output)
-        #_output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
+        #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
         _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #except:         print 'Warning: problem combining the red and blu spectra'
@@ -1256,6 +1256,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             _output=re.sub('_e.fits','_f.fits',_output)
             if '_e.fits' in lista[0]: lista[0]=re.sub('_e.fits','_f.fits',lista[0])
             if '_e.fits' in lista[1]: lista[1]=re.sub('_e.fits','_f.fits',lista[1])
+            #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
             _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
 #            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
 #            except:         print 'Warning: problem combining the red and blu spectra'
@@ -1462,7 +1463,7 @@ def combspec2(_img0,_img1,_output,scale=True,num=None):
 		iraf.specred.scombine(input='s11.fits,s22.fits',w1='INDEF',w2='INDEF',output=_output) # combine by averaging 2nd tenth of overlap
 	else:
 		print 'more than one dimension'
-		data2d=[]
+		datavecs=np.empty(0,dtype='float32')
 		hdrvec=[]
 		for layer in range(dimension):
 			outputn=re.sub('.fits','',_output)+'_'+str(layer+1)+'.fits'
@@ -1474,7 +1475,7 @@ def combspec2(_img0,_img1,_output,scale=True,num=None):
 			iraf.sarith(input1='s2.fits',op='*',input2=A1,output='s22.fits')
 			iraf.specred.scombine(input='s11.fits,s22.fits',w1='INDEF',w2='INDEF',output=outputn)
 			datavec,head = pyfits.getdata(outputn, 0, header=True)
-			data2d.append(datavec)
+			datavecs=np.append(datavecs,datavec)
 			hdrvec.append(head)
 		floyds.util.delete(_output)
 		try:
@@ -1487,7 +1488,8 @@ def combspec2(_img0,_img1,_output,scale=True,num=None):
 			hdr0.update('CRVAL1',hdrvec[1]['CRVAL1'],'wavelength ref.')
 			hdr0.update('CD1_1',hdrvec[1]['CD1_1'],'')
 			hdr0.update('CRPIX1',hdrvec[1]['CRPIX1'],'Pixel ref.')
-		pyfits.writeto(_output,np.reshape(data2d,[dimension,1,-1]),hdr0)
+		data3d=np.reshape(datavecs,[dimension,1,-1])
+		pyfits.writeto(_output,data3d,hdr0)
 
 	floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
 	for layer in range(dimension):
