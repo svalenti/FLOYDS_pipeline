@@ -1408,7 +1408,7 @@ def combspec(_img0,_img1,_output,scale=True,num=None):
 ######## currently using combspec2 instead of combspec ########
 def combspec2(_img0,_img1,_output,scale=True,num=None):
 	import numpy as np 
-	import re,string,os,floyds,pyfits
+	import re,string,os,floyds,pyfits,time
 	from pyraf import iraf
 
 	# read in spectra and headers, determine third dimension of images
@@ -1515,6 +1515,7 @@ def combspec2(_img0,_img1,_output,scale=True,num=None):
 	header['GRISM']=['red/blu','full range spectrum']
 	floyds.util.updateheader(_output,0,header)
 
+	time.sleep(1)
 	return _output
 
 #############################################################
