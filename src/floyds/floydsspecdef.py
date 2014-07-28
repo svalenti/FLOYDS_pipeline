@@ -1515,7 +1515,7 @@ def combspec2(_img0,_img1,_output,scale=True,num=None):
 	header['GRISM']=['red/blu','full range spectrum']
 	floyds.util.updateheader(_output,0,header)
 
-	time.sleep(1)
+	time.sleep(1) # needed for iraf.specred.scombine to work reliably
 	return _output
 
 #############################################################
