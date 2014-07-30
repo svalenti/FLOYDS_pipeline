@@ -276,7 +276,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
 
             _slit=floyds.util.readkey3(hdr,'slit')
             _grpid=floyds.util.readkey3(hdr,'grpid')
-            if _type.lower() in ['flat','f','lamp-flat'] :
+            if _type.lower() in ['flat','f','lamp-flat','lampflat'] :
                 if (arm,_slit) not in flatlist:  flatlist[arm,_slit]={}
                 if _grpid not in flatlist[arm,_slit]: flatlist[arm,_slit][_grpid]=[img]
                 else: flatlist[arm,_slit][_grpid].append(img)
@@ -416,7 +416,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if img      and not img in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
-
+              print outputfile
 ###################################################################         check wavecalib  
               if tpe=='std' or floyds.util.readkey3(floyds.util.readhdr(img),'exptime') < 300:
                   if setup[0]=='red':

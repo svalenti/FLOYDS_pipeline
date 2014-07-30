@@ -46,8 +46,8 @@ if __name__ == "__main__":
      else:
           listfile1=glob.glob('g_e_*0.fits')
           listfile2=glob.glob('f_e_*0.fits')
-          listfile3=glob.glob('ogg2m001*0.fits')
-          listfile4=glob.glob('coj2m002*0.fits')
+          listfile3=glob.glob('ogg2m001*00.fits')
+          listfile4=glob.glob('coj2m002*00.fits')
           listfile=listfile1+listfile2+listfile3+listfile4
           files=[]
           print 'making the list with raw data in the current directory ...... please wait'
@@ -142,11 +142,9 @@ if __name__ == "__main__":
             for img0 in outputlist['std'].keys():
                hdr=floyds.readhdr(img0)
                prop=floyds.readkey3(hdr,'PROPID')
-               #grpid=floyds.readkey3(hdr,'GRPUID')
-               #grpid=str(floyds.readkey3(hdr,'JD'))[0:9]
                grpid = str(floyds.readkey3(hdr,'REQNUM'))
-               if grpid == 'N/A':
-                  grpid = 'UNKNOWN'
+               if grpid == 'N/A':     grpid = 'UNKNOWN'
+
                date=floyds.readkey3(hdr,'date-night')
                _instrume=floyds.readkey3(hdr,'TELID')
                nametar='STD_'+str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
@@ -156,7 +154,16 @@ if __name__ == "__main__":
                floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
                print nametar,'####################################' 
                imglist=outputlist['std'][img0]
+               if img0 not in imglist:      imglist.append(img0)
                imglist.append(readme)
+
+#              add raw data
+               for im in files:
+                    hdr1=floyds.readhdr(img0)
+                    if 'REQNUM' in hdr1.keys():
+                         if hdr1['REQNUM']==grpid and im not in imglist:
+                              imglist.append(im)
+
 #
 #                 remove pdf from tar file
 #
@@ -187,11 +194,8 @@ if __name__ == "__main__":
             for img0 in outputlist['obj'].keys():
                hdr=floyds.readhdr(img0)
                prop=floyds.readkey3(hdr,'PROPID')
-               #grpid=floyds.readkey3(hdr,'GRPUID')
-               #grpid=str(floyds.readkey3(hdr,'JD'))[0:9]
                grpid = str(floyds.readkey3(hdr,'REQNUM'))
-               if grpid == 'N/A':
-                  grpid = 'UNKNOWN'
+               if grpid == 'N/A':     grpid = 'UNKNOWN'
                date=floyds.readkey3(hdr,'date-night')
                _instrume=floyds.readkey3(hdr,'TELID')
                nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
@@ -200,7 +204,15 @@ if __name__ == "__main__":
                floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
                print nametar,'####################################' 
                imglist=outputlist['obj'][img0]
+               if img0 not in imglist:      imglist.append(img0)
                imglist.append(readme)
+
+#              add raw data
+               for im in files:
+                    hdr1=floyds.readhdr(img0)
+                    if 'REQNUM' in hdr1.keys():
+                         if hdr1['REQNUM']==grpid and im not in imglist:
+                              imglist.append(im)
 #
 #               remove pdf from tar file
 #
