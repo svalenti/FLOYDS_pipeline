@@ -246,7 +246,9 @@ if __name__ == "__main__":
                floyds.archivingtar(imglist,nametar)
                deletefile=deletefile+list(imglist)
 
-          for img in deletefile: floyds.util.delete(img)
+          for img in deletefile:
+               if img not in listfile:
+                    floyds.util.delete(img)
           listadel=glob.glob('*flat*fits')
           listadel1=glob.glob('*_ex.fits')
           listadel2=glob.glob('*clean.fits')
