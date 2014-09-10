@@ -34,8 +34,14 @@ if __name__ == "__main__":
                   help='use for the arc the raw frames in the arc list \t [%default]')
      parser.add_option("--listatmo",dest="listatmo",default='',type="str",  
                     help='use for tellurich correction the closest tellurich file from this list')
+     parser.add_option("--typeobject",dest="typeobject",default='obj',type="str",
+                       help='chose exstraction parameters depending on the type of object [obj,agn]')
      option,args = parser.parse_args()
 ############################################################
+     _typefromuser=option.typeobject
+     if _typefromuser not in ['obj','agn','std']:
+          sys.argv.append('--help')
+     option,args = parser.parse_args()
      starttime=time.time()
      if len(args)>1:
           sys.argv.append('--help')
@@ -91,7 +97,6 @@ if __name__ == "__main__":
      else:                         _interactive='yes' 
      _cosmic=option.cosmic
      if not _cosmic:   _cosmic=False 
-
 #     if option.dobias==None:    _dobias=True
 #     else:    _dobias=option.dobias
 #     if option.listbias:    listbias=floyds.util.readlist(option.listbias)
@@ -119,7 +124,7 @@ if __name__ == "__main__":
      if len(files)>0:
           outputlist=floyds.floydsspecdef.floydsspecreduction(files,_interactive,_dobias,_doflat,listflat,\
                                                               listbias,listarc,_cosmic,_trace,_dispersionline,\
-                                                              listsens,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing)
+                                                              listsens,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing,_typefromuser)
      else:  outputlist=[]
      stoptime=time.time()
      print 'runnning time '+str(stoptime-starttime)

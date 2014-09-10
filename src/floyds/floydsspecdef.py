@@ -611,9 +611,14 @@ def extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,_type,automat
             _edit='yes'
             _review='yes'
             _resize=dv[_type]['_resize']
+#   extraction for agn or std, we always reset the parameters 
+        if _type in ['agn','std']:   
+            if os.path.isfile('database/ap'+re.sub('.fits','',img)):
+                              os.system('rm database/ap'+re.sub('.fits','',img))
+
         iraf.specred.apall(img,output=imgex, referen=_reference, trace=_trace, fittrac=_fittrac, find=_find, recenter=_recenter, edit=_edit,\
                                nfind=1, extract='yes', backgro='fit', gain=_gain, readnoi=_rdnoise, lsigma=4, usigma=4, format='multispec',\
-                               b_function='legendre',b_sample=dv[_type]['_b_sample'], clean='yes', pfit = 'fit2d', \
+                               b_function='legendre',b_sample=dv[_type]['_b_sample'], clean='yes', pfit = 'fit2d', b_naver=dv[_type]['_b_naver'],\
                                lower=dv[_type]['_lower'], upper=dv[_type]['_upper'], t_niter=dv[_type]['_t_niter'], width=dv[_type]['_width'],\
                                radius=dv[_type]['_radius'], line = dist, nsum=dv[_type]['_nsum'], t_step=dv[_type]['_t_step'], t_nsum=dv[_type]['_t_nsum'],\
                                t_nlost=dv[_type]['_t_nlost'], t_sample=dv[_type]['_t_sample'], resize=_resize, t_order=dv[_type]['_t_order'],\
@@ -693,7 +698,7 @@ def imreplace_region(img):
             print '### replace pixel 1:200 with 1 (y axes)'
         else:   print '### no replace '
 #####################################################
-def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_listarc,_cosmic,_ext_trace,_dispersionline,liststandard,listatmo,_automaticex,_classify=False,_verbose=False,smooth=1,fringing=1):
+def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_listarc,_cosmic,_ext_trace,_dispersionline,liststandard,listatmo,_automaticex,_classify=False,_verbose=False,smooth=1,fringing=1,_typefromuser='obj'):
     import floyds
     from floyds.util import  delete, correctcard, updateheader, readhdr, readkey3, display_image
     import string,re,os,glob,sys,pickle
@@ -803,13 +808,25 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
 
                 bimg=floyds.util.name_duplicate(img,nameoutb,'')
                 rimg=floyds.util.name_duplicate(img,nameoutr,'')
-                #print bimg
-                #print rimg
 ####
                 floyds.util.delete(bimg)
                 floyds.util.delete(rimg)
+                
                 iraf.imcopy(img,bimg,verbose='no')
                 iraf.imcopy(img,rimg,verbose='no')
+
+                if _type.lower() in ['expose','sky','spectrum']:
+#                    iraf.noao.observatory.observa='ftn'
+#                    iraf.noao.observatory.name='ftn'
+#                    iraf.noao.observatory.latitude='20:42:29.88'
+#                    iraf.noao.observatory.longitude='156:15:25.56'
+#                    iraf.noao.observatory.timezone='10'
+#                    iraf.noao.observatory.altitude='3050'
+                    _observatory={'ftn':'cfht','ogg':'cfht','fts':'sso','coj':'sso'}
+#                    _observatory={'ftn':'obspars','ogg':'obspars','fts':'sso','coj':'sso'}
+                    iraf.specred.setjd(bimg,date='DATE-OBS',time='UTSTART',exposure='EXPTIME',ra='ra',dec='dec',epoch='',observa=_observatory[_tel])
+                    iraf.specred.setjd(img,date='DATE-OBS',time='UTSTART',exposure='EXPTIME',ra='ra',dec='dec',epoch='',observa=_observatory[_tel])
+
 
                 aaa=iraf.hedit(bimg,'CCDSEC',delete='yes',update='yes',verify='no',Stdout=1)
                 aaa=iraf.hedit(bimg,'TRIMSEC',delete='yes',update='yes',verify='no',Stdout=1)
@@ -862,8 +879,14 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                 if _verbose:
                     print _ra,_dec
                     print std[argmin(dd)],min(dd)
+
                 if min(dd)<1200: _typeobj='std'
-                else: _typeobj='obj'
+                else:
+                    if not _typefromuser:
+                        _typeobj='obj'
+                    else:
+                        _typeobj=_typefromuser
+
                 if min(dd)<1200:
                     floyds.util.updateheader(img,0,{'stdname':[std[argmin(dd)],'']})
                     floyds.util.updateheader(img,0,{'magstd':[float(magstd[argmin(dd)]),'']})
@@ -1174,9 +1197,11 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
         print wavecalib
         print sens
         print atmo
-    if 'obj' in wavecalib.keys():
-      for setup in wavecalib['obj'].keys():
-        for img in wavecalib['obj'][setup]:
+
+    for tpe in ['obj','agn']:
+     if tpe in wavecalib.keys():
+      for setup in wavecalib[tpe].keys():
+        for img in wavecalib[tpe][setup]:
             hdr=floyds.util.readhdr(img)
             _sens=''
             if liststandard:  _sens=floyds.util.searchsens(img,liststandard)[0]   # search in the list from reducer
