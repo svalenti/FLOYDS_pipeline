@@ -1278,15 +1278,40 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
         #except:         print 'Warning: problem combining the red and blu spectra'
         print _output
         if '_e.fits' in _output:
-            _output=re.sub('_e.fits','_f.fits',_output)
+            _output_f=re.sub('_e.fits','_f.fits',_output)
             if '_e.fits' in lista[0]: lista[0]=re.sub('_e.fits','_f.fits',lista[0])
             if '_e.fits' in lista[1]: lista[1]=re.sub('_e.fits','_f.fits',lista[1])
             #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
-            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
+            _output_f=combspec2(lista[0],lista[1],_output_f,scale=True,num=None)
 #            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
 #            except:         print 'Warning: problem combining the red and blu spectra'
         if '_e.fits' and _classify:
             aa,bb,cc=floyds.util.classifyfast(_output,program='snid')
+    trimmed = 'trim_'+_output
+    _i = _interactive.lower() in ['y','yes']
+    if _i: _trim = raw_input('Do you want to trim the edges of the spectrum? [[y]/n] ')
+    if not _i or _trim != 'n':
+        floyds.util.delete(trimmed)
+        while True:
+            if _i:
+                print "Find the lower and upper wavelength limits. Then press 'q' to continue."
+                iraf.onedspec.splot(_output+'[*,1,1]')
+                low = raw_input('Lower limit (in angstroms) [3200]: ')
+                up  = raw_input('Upper limit (in angstroms) [10000]: ')
+            if not _i or not low: low = 3200
+            if not _i or not up:  up = 10000
+            iraf.scopy(_output,trimmed,w1=low,w2=up,rebin='no')
+            if _i:
+                print "See if this looks better. Then press 'q' to continue."
+                iraf.onedspec.splot(trimmed+'[*,1,1]')
+                okay = raw_input('Is this okay? [[y]/n] ')
+            if not _i or okay != 'n': break
+            else:
+                floyds.util.delete(trimmed)
+                again = raw_input('Do you want to try again? [[y]/n] ')
+                if again=='n': break
+        print 'Output saved as',trimmed
+    else: print 'Output saved as',_output
     return outputfile
 
 ##############################################################################
