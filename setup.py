@@ -26,7 +26,7 @@ try:
     parentdir=os.getcwd()+'/'
     verstrline = open(parentdir+'/src/floyds/_version.py', "rt").read()
 except EnvironmentError:
-    pass # Okay, there is no version file.
+    pass #  Okay, there is no version file.
 else:
     VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
     mo = re.search(VSRE, verstrline, re.M)
