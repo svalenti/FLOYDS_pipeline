@@ -129,55 +129,71 @@ if __name__ == "__main__":
           capable.OF_GRAPHICS = False
 
      if len(files)>0:
-         raw_input('ff')
-          outputlist,readme=floyds.floydsspecauto.floydsautoredu(files,_interactive,_dobias,_doflat,listflat,\
+        outputlist,readme=floyds.floydsspecauto.floydsautoredu(files,_interactive,_dobias,_doflat,listflat,\
                          listbias,listarc,_cosmic,_trace,_dispersionline,liststand,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing)
      else:  outputlist=''
      print outputlist
+     #############   group the files by groupid, not science frame
      if outputlist:
-          now=datetime.datetime.now()
-          datenow=now.strftime('20%y%m%d%H%M')
-          MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
-          deletefile=[]
-          if 'std' in outputlist.keys():
-            for img0 in outputlist['std'].keys():
-               hdr=floyds.readhdr(img0)
-               prop=floyds.readkey3(hdr,'PROPID')
-               grpid = str(floyds.readkey3(hdr,'REQNUM'))
-               if grpid == 'N/A':     grpid = 'UNKNOWN'
+       now=datetime.datetime.now()
+       datenow=now.strftime('20%y%m%d%H%M')
+       MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
+       deletefile=[]
 
-               date=floyds.readkey3(hdr,'date-night')
-               _instrume=floyds.readkey3(hdr,'TELID')
-               nametar='STD_'+str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
-               outfile = img0.replace('00.fits', '90.fits')
+       typeobs=outputlist.keys()
+       outputlist['grpid']={}
+       for _type in typeobs:
+         for img0 in outputlist[_type].keys():
+            hdr=floyds.readhdr(img0)
+            grpid = str(floyds.readkey3(hdr,'REQNUM'))
+            if grpid == 'N/A':     grpid = 'UNKNOWN'
+            prop=floyds.readkey3(hdr,'PROPID')
+            if (grpid,prop) not in outputlist['grpid']:
+                    outputlist['grpid'][(grpid,prop)]={}
+            if img0 not in outputlist['grpid'][(grpid,prop)]:
+                outputlist['grpid'][(grpid,prop)][img0]=outputlist[_type][img0]
 
-               os.system('cp '+img0+' '+outfile)
-               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
-               print nametar,'####################################' 
-               imglist=outputlist['std'][img0]
-               if img0 not in imglist:      imglist.append(img0)
-               imglist.append(readme)
+       for oblock in outputlist['grpid']:
+           img0=outputlist['grpid'][oblock].keys()[0]
+           hdr=floyds.readhdr(img0)
+           date=floyds.readkey3(hdr,'date-night')
+           grpid=oblock[0]
+           prop=oblock[1]
+           _instrume=floyds.readkey3(hdr,'TELID')
+           nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
 
-#              add raw data
-               for im in files:
-                    hdr1=floyds.readhdr(im)
-                    if 'REQNUM' in hdr1.keys():
-                         if hdr1['REQNUM']==grpid and im not in imglist:
-                              imglist.append(im)
+           for img0 in outputlist['grpid'][oblock]:
+                outfile = img0.replace('00.fits', '90.fits')
+                os.system('cp '+img0+' '+outfile)
+                floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
 
-#
-#                 remove pdf from tar file
-#
-#               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
-#               imglist.append('floyds.pdf')
+           imglist=[readme]
+           for img0 in outputlist['grpid'][oblock].keys():
+               imglist.append(img0)
+               for img in outputlist['grpid'][oblock][img0]:
+                    if img not in imglist: imglist.append(img)
 
-               bb,kk=floyds.gettar(img0)
-               if bb: imglist.append(bb)
-               if kk: imglist.append(kk)
+#######################    add raw data
+           for im in files:
+                hdr1=floyds.readhdr(im)
+                if 'REQNUM' in hdr1.keys():
+                    if hdr1['REQNUM']==grpid and im not in imglist:
+                        imglist.append(im)
 
-               ff=open(readme,'w')
-               ff.write('\n\n###  list of files   ####\n\n ')
-               for img in imglist:
+           try:
+                    bb,kk=floyds.gettar(img0)
+           except:
+                    bb,kk='',''
+           if bb: imglist.append(bb)
+           if kk: imglist.append(kk)
+################# archiving   ##########################
+           if _archive:
+                    for img in imglist:
+                         if 'merge' in img:
+                                   floyds.floydsspecauto.archivespectrum(img)
+           ff=open(readme,'w')
+           ff.write('\n\n###  list of files   ####\n\n ')
+           for img in imglist:
                     ff.write('%80s' % (img))
                     if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
                     if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
@@ -186,74 +202,125 @@ if __name__ == "__main__":
                     if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
                     if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
                     ff.write('\n')
-               ff.close()
+           ff.close()
+           floyds.archivingtar(imglist,nametar)
+           deletefile=deletefile+list(imglist)
+           for img in deletefile:
+               if img not in listfile:
+                    floyds.util.delete(img)
+           listadel=glob.glob('*flat*fits')
+           listadel1=glob.glob('*_ex.fits')
+           listadel2=glob.glob('*clean.fits')
+           for img in listadel: floyds.util.delete(img)
+           for img in listadel1: floyds.util.delete(img)
+           for img in listadel2: floyds.util.delete(img)
 
-               floyds.archivingtar(imglist,nametar)
-               deletefile=deletefile+list(imglist)
-####################################################################
-          if 'obj' in outputlist.keys():
-            for img0 in outputlist['obj'].keys():
-               hdr=floyds.readhdr(img0)
-               prop=floyds.readkey3(hdr,'PROPID')
-               grpid = str(floyds.readkey3(hdr,'REQNUM'))
-               if grpid == 'N/A':     grpid = 'UNKNOWN'
-               date=floyds.readkey3(hdr,'date-night')
-               _instrume=floyds.readkey3(hdr,'TELID')
-               nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
-               outfile = img0.replace('00.fits', '90.fits')
-               os.system('cp '+img0+' '+outfile)
-               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
-               print nametar,'####################################' 
-               imglist=outputlist['obj'][img0]
-               if img0 not in imglist:      imglist.append(img0)
-               imglist.append(readme)
+     stoptime=time.time()
+     print 'runnning time '+str(stoptime-starttime)
 
+#     if outputlist:
+#          now=datetime.datetime.now()
+#          datenow=now.strftime('20%y%m%d%H%M')
+#          MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
+#          deletefile=[]
+#          if 'std' in outputlist.keys():
+#            for img0 in outputlist['std'].keys():
+#               hdr=floyds.readhdr(img0)
+#               prop=floyds.readkey3(hdr,'PROPID')
+#               grpid = str(floyds.readkey3(hdr,'REQNUM'))
+#               if grpid == 'N/A':     grpid = 'UNKNOWN'
+#
+#               date=floyds.readkey3(hdr,'date-night')
+#               _instrume=floyds.readkey3(hdr,'TELID')
+#               nametar='STD_'+str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
+#               outfile = img0.replace('00.fits', '90.fits')
+#               os.system('cp '+img0+' '+outfile)
+#               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
+#               print nametar,'####################################'
+#               imglist=outputlist['std'][img0]
+#               if img0 not in imglist:      imglist.append(img0)
+#               imglist.append(readme)
 #              add raw data
-               for im in files:
-                    hdr1=floyds.readhdr(im)
-                    if 'REQNUM' in hdr1.keys():
-                         if hdr1['REQNUM']==grpid and im not in imglist:
-                              imglist.append(im)
+#               for im in files:
+#                    hdr1=floyds.readhdr(im)
+#                    if 'REQNUM' in hdr1.keys():
+#                         if hdr1['REQNUM']==grpid and im not in imglist:
+#                              imglist.append(im)
+#               bb,kk=floyds.gettar(img0)
+#               if bb: imglist.append(bb)
+#               if kk: imglist.append(kk)
+#               ff=open(readme,'w')
+#               ff.write('\n\n###  list of files   ####\n\n ')
+#               for img in imglist:
+#                    ff.write('%80s' % (img))
+#                    if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
+#                    if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
+#                    if '_2df'     in img:    ff.write('\t  2D  wave & flux calib ')
+#                    if '_ex.fits' in img:         ff.write('\t  fast extraction ')
+#                    if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
+#                    if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
+#                    ff.write('\n')
+#               ff.close()
+#               floyds.archivingtar(imglist,nametar)
+#               deletefile=deletefile+list(imglist)
+####################################################################
+#          if 'obj' in outputlist.keys():
+#            for img0 in outputlist['obj'].keys():
+#               hdr=floyds.readhdr(img0)
+#               prop=floyds.readkey3(hdr,'PROPID')
+#               grpid = str(floyds.readkey3(hdr,'REQNUM'))
+#               if grpid == 'N/A':     grpid = 'UNKNOWN'
+#               date=floyds.readkey3(hdr,'date-night')
+#               _instrume=floyds.readkey3(hdr,'TELID')
+#               nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
+#               outfile = img0.replace('00.fits', '90.fits')
+#               os.system('cp '+img0+' '+outfile)
+#               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
+#               print nametar,'####################################'
+#               imglist=outputlist['obj'][img0]
+#               if img0 not in imglist:      imglist.append(img0)
+#               imglist.append(readme)
+#              add raw data
+#               for im in files:
+#                    hdr1=floyds.readhdr(im)
+#                    if 'REQNUM' in hdr1.keys():
+#                         if hdr1['REQNUM']==grpid and im not in imglist:
+#                              imglist.append(im)
 #
 #               remove pdf from tar file
 #               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
 #               imglist.append('floyds.pdf')
-               try:
-                    bb,kk=floyds.gettar(img0)
-               except: 
-                    bb,kk='',''
-               if bb: imglist.append(bb)
-               if kk: imglist.append(kk)
-               ################# archiving   ##########################
-               if _archive:
-                    for img in imglist:
-                         if 'merge' in img:
-                                   floyds.floydsspecauto.archivespectrum(img)
-
-               ff=open(readme,'w')
-               ff.write('\n\n###  list of files   ####\n\n ')
-               for img in imglist:
-                    ff.write('%80s' % (img))
-                    if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
-                    if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
-                    if '_2df'     in img:    ff.write('\t  2D  wave & flux calib ')
-                    if '_ex.fits' in img:         ff.write('\t  fast extraction ')
-                    if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
-                    if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
-                    ff.write('\n')
-               ff.close()
-
-               floyds.archivingtar(imglist,nametar)
-               deletefile=deletefile+list(imglist)
-
-          for img in deletefile:
-               if img not in listfile:
-                    floyds.util.delete(img)
-          listadel=glob.glob('*flat*fits')
-          listadel1=glob.glob('*_ex.fits')
-          listadel2=glob.glob('*clean.fits')
-          for img in listadel: floyds.util.delete(img)
-          for img in listadel1: floyds.util.delete(img)
-          for img in listadel2: floyds.util.delete(img)
-     stoptime=time.time()
-     print 'runnning time '+str(stoptime-starttime)
+#               try:
+#                    bb,kk=floyds.gettar(img0)
+#               except:
+#                    bb,kk='',''
+#               if bb: imglist.append(bb)
+#               if kk: imglist.append(kk)
+#               ################# archiving   ##########################
+#               if _archive:
+#                    for img in imglist:
+#                         if 'merge' in img:
+#                                   floyds.floydsspecauto.archivespectrum(img)
+#               ff=open(readme,'w')
+#               ff.write('\n\n###  list of files   ####\n\n ')
+#               for img in imglist:
+#                    ff.write('%80s' % (img))
+#                    if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
+#                    if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
+#                    if '_2df'     in img:    ff.write('\t  2D  wave & flux calib ')
+#                    if '_ex.fits' in img:         ff.write('\t  fast extraction ')
+#                    if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
+#                    if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
+#                    ff.write('\n')
+#               ff.close()
+#               floyds.archivingtar(imglist,nametar)
+#               deletefile=deletefile+list(imglist)
+#          for img in deletefile:
+#               if img not in listfile:
+#                    floyds.util.delete(img)
+#          listadel=glob.glob('*flat*fits')
+#          listadel1=glob.glob('*_ex.fits')
+#          listadel2=glob.glob('*clean.fits')
+#          for img in listadel: floyds.util.delete(img)
+#          for img in listadel1: floyds.util.delete(img)
+#          for img in listadel2: floyds.util.delete(img)
