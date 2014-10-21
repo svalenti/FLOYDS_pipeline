@@ -129,6 +129,7 @@ if __name__ == "__main__":
           capable.OF_GRAPHICS = False
 
      if len(files)>0:
+         raw_input('ff')
           outputlist,readme=floyds.floydsspecauto.floydsautoredu(files,_interactive,_dobias,_doflat,listflat,\
                          listbias,listarc,_cosmic,_trace,_dispersionline,liststand,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing)
      else:  outputlist=''
@@ -159,7 +160,7 @@ if __name__ == "__main__":
 
 #              add raw data
                for im in files:
-                    hdr1=floyds.readhdr(img0)
+                    hdr1=floyds.readhdr(im)
                     if 'REQNUM' in hdr1.keys():
                          if hdr1['REQNUM']==grpid and im not in imglist:
                               imglist.append(im)
@@ -209,13 +210,12 @@ if __name__ == "__main__":
 
 #              add raw data
                for im in files:
-                    hdr1=floyds.readhdr(img0)
+                    hdr1=floyds.readhdr(im)
                     if 'REQNUM' in hdr1.keys():
                          if hdr1['REQNUM']==grpid and im not in imglist:
                               imglist.append(im)
 #
 #               remove pdf from tar file
-#
 #               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
 #               imglist.append('floyds.pdf')
                try:
