@@ -1206,9 +1206,11 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             _sens=''
             if liststandard:  _sens=floyds.util.searchsens(img,liststandard)[0]   # search in the list from reducer
             if not _sens:
-                try:      _sens=floyds.util.searchsens(img,sens[setup])[0]        # search in the reduced data
-                except:   _sens=floyds.util.searchsens(img,'')[0]              # search in tha archive
-
+                if setup in sens: senslist = sens[setup]                             # use same slit if available
+                else:             senslist = sum([sens[setup] for setup in sens],[]) # otherwise use any slit
+                try:      _sens=floyds.util.searchsens(img,senslist)[0]        # search in the reduced data
+                except:   _sens=floyds.util.searchsens(img,'')[0]              # search in the archive
+            print 'Using sensitivity function',_sens
             _atmo=''
             if listatmo:  _atmo=floyds.util.searchatmo(img,listatmo)[0]     # search atmo in the list from reducer 
             if not _atmo: 
