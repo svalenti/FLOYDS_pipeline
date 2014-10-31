@@ -1,326 +1,290 @@
 #!/usr/bin/env python
 
-import os,string,sys,re
-from pyfits import getheader
-import string,os,re,math,sys,shutil,glob
-import floyds, time,datetime
+import os
+import sys
+import glob
+import floyds
+import time
+import datetime
 from floyds.util import delete, readhdr, readkey3
 from optparse import OptionParser
 
-description="> Automatic Specroscopic pre-reduction of floyds data " 
-usage= "%prog  \t [listfile -B bias (use this bias) -F flatlist (use these flats) .....]"
+description = "> Automatic Specroscopic pre-reduction of floyds data "
+usage = "%prog  \t [listfile -B bias (use this bias) -F flatlist (use these flats) .....]"
 
 if __name__ == "__main__":
-     parser = OptionParser(usage=usage,description=description, version="%prog "+str(floyds.__version__))
-     parser.add_option("-i", "--interactive",dest="interactive",action="store_true", help='run the script in interactive mode [recommended] ')
-     parser.add_option("-c", "--classify",dest="classify",action="store_true", help=' try to classifyed the reduced spectrum using SNID (if installed) ')
-     parser.add_option("-C", "--cosmic",dest="cosmic",action="store_true", help=' using this option cosmic rays are removed from the images ')
-     parser.add_option("-v", "--verbose",dest="verbose",action="store_true")
-     parser.add_option("-f", "--flat",dest="doflat",action="store_false", help=' skip flat correction ')
-     parser.add_option("-F", "--listflat",dest="listflat",default='',type="str",
-                  help='use flat in the flat list \t [%default]')
-     parser.add_option("-b", "--bias",dest="dobias",action="store_false", help= ' skip bias corection')
-     parser.add_option("-B", "--listbias",dest="listbias",default='',type="str",
-                  help='use bias in the list \t [%default]')
-     parser.add_option("-l", "--listarc",dest="listarc",default='',type="str",
-                  help='use arc from the list \t [%default]')
-     parser.add_option("-A", "--Automatic",dest="automatic",action="store_true", help='extract spectrum with previous parameters in the database')
-     parser.add_option("-a", "--atmo",dest="listatmo",default='',type="str",  help='use sensitivity curve from this list')
-     parser.add_option("-t", "--trace",dest="trace",action="store_true", help='trace extraction with another frame ')
-     parser.add_option("-d", "--dispersion",dest="dispersionline",action="store_true", help='chose interctively the disperasion line')
-     parser.add_option("-s", "--standard",dest="liststand",default='',type="str",  help='use sensitivity curve from this list')
-     parser.add_option("-r", "--rebin",dest="rebin",default=1,type=int,  help='rebin blue part')
-     parser.add_option("--fringing",dest="fringing",default=1,type=int,  help='fringing correction \t [1] using response, '+\
-                       '\t [2] computed on 1d images minimizing scatter, \t [3] using apflatten')
-     parser.add_option("-X", "--xwindow",action="store_true", dest='xwindow',default=False, help='xwindow \t\t\t [%default]')
-     parser.add_option("--archive",action="store_true", dest='archive',default=False, help='archive fast extraction \t\t\t [%default]')
-     option,args = parser.parse_args()
-############################################################
-     _xwindow=option.xwindow
-     starttime=time.time()
-     if len(args)>1:
-          sys.argv.append('--help')
-          option,args = parser.parse_args()
-     elif len(args)==1: 
-          files=floyds.util.readlist(args[0])
-     else:
-          listfile1=glob.glob('g_e_*0.fits')
-          listfile2=glob.glob('f_e_*0.fits')
-          listfile3=glob.glob('ogg2m001*00.fits')
-          listfile4=glob.glob('coj2m002*00.fits')
-          listfile=listfile1+listfile2+listfile3+listfile4
-          files=[]
-          print 'making the list with raw data in the current directory ...... please wait'
-          for img in listfile:
-               _type=''
-               hdr0=readhdr(img)
-               _naxis1=readkey3(hdr0,'NAXIS1')
-               _naxis2=readkey3(hdr0,'NAXIS2')
-               _imagetype=readkey3(hdr0,'OBSTYPE')
-               if not _imagetype:  _imagetype=readkey3(hdr0,'imagetyp')
-               if _naxis1!=2079 or (_naxis2!=511 and _naxis2!=512):         _type='not standard dimension 2079x511'
-               if not _type and readkey3(hdr0,'instrume') not in ['en05','en06']:                _type='not efosc intrument'
-               if _imagetype and not _type:
-                    if _imagetype.lower() in ['lamp-flat','flat','f','lampflat']: _type='flat'
-                    elif _imagetype.lower() in ['spectrum','sky','s','expose']: _type='sky'
-                    elif _imagetype.lower() in ['arc','lamp','l']: _type='lamp'
-                    elif _imagetype.lower() in ['dark']: _type='dark'
-               if not _type:
-                    _exptime=readkey3(hdr0,'exptime')
-                    if not _type:
-                         if float(_exptime)==0.0:                       _type='bias'
-                    if not _type:  
-                         print 'warning: object not recognized '
-                         _object=readkey3(hdr0,'object')
-                         _filter=readkey3(hdr0,'filter')
-                         print img,_object,_imagetype,_filter,_exptime
-                         if  _xwindow:
-                              answ='5'
-                         else:
-                              answ=raw_input('what is it: dark[0], bias [1], lamp[2], flat [3], object[4], not good [5] ?  [5] ')
-                         if not answ:  answ='5'
-                         _type='not good' # Set default type to bad in case we don't get an expected answer
-                         if answ=='0':     _type='dark'
-                         elif answ=='1':   _type='bias'
-                         elif answ=='2':   _type='lamp'
-                         elif answ=='3':   _type='flat'
-                         elif answ=='4':   _type='object'
-                         elif answ=='5':   _type='not good'
-               if _type in ['flat','lamp']:   # reject bad flat ,arc
-                    good=floyds.floydsspecauto.badimage(img,_type)
-               else:  
-                    good=1
-               if good and _type in ['flat','sky','lamp','bias','object']:                 files.append(img)
-     _verbose=option.verbose
-     _xwindow=option.xwindow
-     _archive=option.archive
-     if not _verbose: _verbose=False
-     _classify=option.classify
-     if not _classify: _classify=False
-     if option.interactive==None:  _interactive='no' 
-     else:                         _interactive='yes' 
-     _cosmic=option.cosmic
-     if not _cosmic:   _cosmic=False 
+    parser = OptionParser(usage=usage, description=description, version="%prog " + str(floyds.__version__))
+    parser.add_option("-i", "--interactive", dest="interactive", action="store_true",
+                      help='run the script in interactive mode [recommended] ')
+    parser.add_option("-c", "--classify", dest="classify", action="store_true",
+                      help=' try to classifyed the reduced spectrum using SNID (if installed) ')
+    parser.add_option("-C", "--cosmic", dest="cosmic", action="store_true",
+                      help=' using this option cosmic rays are removed from the images ')
+    parser.add_option("-v", "--verbose", dest="verbose", action="store_true")
+    parser.add_option("-f", "--flat", dest="doflat", action="store_false", help=' skip flat correction ')
+    parser.add_option("-F", "--listflat", dest="listflat", default='', type="str",
+                      help='use flat in the flat list \t [%default]')
+    parser.add_option("-b", "--bias", dest="dobias", action="store_false", help=' skip bias corection')
+    parser.add_option("-B", "--listbias", dest="listbias", default='', type="str",
+                      help='use bias in the list \t [%default]')
+    parser.add_option("-l", "--listarc", dest="listarc", default='', type="str",
+                      help='use arc from the list \t [%default]')
+    parser.add_option("-A", "--Automatic", dest="automatic", action="store_true",
+                      help='extract spectrum with previous parameters in the database')
+    parser.add_option("-a", "--atmo", dest="listatmo", default='', type="str",
+                      help='use sensitivity curve from this list')
+    parser.add_option("-t", "--trace", dest="trace", action="store_true", help='trace extraction with another frame ')
+    parser.add_option("-d", "--dispersion", dest="dispersionline", action="store_true",
+                      help='chose interctively the disperasion line')
+    parser.add_option("-s", "--standard", dest="liststand", default='', type="str",
+                      help='use sensitivity curve from this list')
+    parser.add_option("-r", "--rebin", dest="rebin", default=1, type=int, help='rebin blue part')
+    parser.add_option("--fringing", dest="fringing", default=1, type=int,
+                      help='fringing correction \t [1] using response, ' + \
+                           '\t [2] computed on 1d images minimizing scatter, \t [3] using apflatten')
+    parser.add_option("-X", "--xwindow", action="store_true", dest='xwindow', default=False,
+                      help='xwindow \t\t\t [%default]')
+    parser.add_option("--archive", action="store_true", dest='archive', default=False,
+                      help='archive fast extraction \t\t\t [%default]')
+    option, args = parser.parse_args()
+    # ###########################################################
+    _xwindow = option.xwindow
+    starttime = time.time()
+    if len(args) > 1:
+        sys.argv.append('--help')
+        option, args = parser.parse_args()
+    elif len(args) == 1:
+        files = floyds.util.readlist(args[0])
+    else:
+        listfile1 = glob.glob('g_e_*0.fits')
+        listfile2 = glob.glob('f_e_*0.fits')
+        listfile3 = glob.glob('ogg2m001*00.fits')
+        listfile4 = glob.glob('coj2m002*00.fits')
+        listfile = listfile1 + listfile2 + listfile3 + listfile4
+        files = []
+        print 'making the list with raw data in the current directory ...... please wait'
+        for img in listfile:
+            _type = ''
+            hdr0 = readhdr(img)
+            _naxis1 = readkey3(hdr0, 'NAXIS1')
+            _naxis2 = readkey3(hdr0, 'NAXIS2')
+            _imagetype = readkey3(hdr0, 'OBSTYPE')
+            if not _imagetype:
+                _imagetype = readkey3(hdr0, 'imagetyp')
+            if _naxis1 != 2079 or (_naxis2 != 511 and _naxis2 != 512):
+                _type = 'not standard dimension 2079x511'
+            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06']:
+                _type = 'not efosc intrument'
+            if _imagetype and not _type:
+                if _imagetype.lower() in ['lamp-flat', 'flat', 'f', 'lampflat']:
+                    _type = 'flat'
+                elif _imagetype.lower() in ['spectrum', 'sky', 's', 'expose']:
+                    _type = 'sky'
+                elif _imagetype.lower() in ['arc', 'lamp', 'l']:
+                    _type = 'lamp'
+                elif _imagetype.lower() in ['dark']:
+                    _type = 'dark'
+            if not _type:
+                _exptime = readkey3(hdr0, 'exptime')
+                if not _type:
+                    if float(_exptime) == 0.0:
+                        _type = 'bias'
+                if not _type:
+                    print 'warning: object not recognized '
+                    _object = readkey3(hdr0, 'object')
+                    _filter = readkey3(hdr0, 'filter')
+                    print img, _object, _imagetype, _filter, _exptime
+                    if _xwindow:
+                        answ = '5'
+                    else:
+                        answ = raw_input('what is it: dark[0], bias [1], lamp[2], flat [3],'
+                                         ' object[4], not good [5] ?  [5] ')
+                    if not answ:  answ = '5'
+                    _type = 'not good'  # Set default type to bad in case we don't get an expected answer
+                    if answ == '0':
+                        _type = 'dark'
+                    elif answ == '1':
+                        _type = 'bias'
+                    elif answ == '2':
+                        _type = 'lamp'
+                    elif answ == '3':
+                        _type = 'flat'
+                    elif answ == '4':
+                        _type = 'object'
+                    elif answ == '5':
+                        _type = 'not good'
+            if _type in ['flat', 'lamp']:  # reject bad flat ,arc
+                good = floyds.floydsspecauto.badimage(img, _type)
+            else:
+                good = 1
+            if good and _type in ['flat', 'sky', 'lamp', 'bias', 'object']:
+                files.append(img)
+    _verbose = option.verbose
+    _xwindow = option.xwindow
+    _archive = option.archive
+    if not _verbose:
+        _verbose = False
+    _classify = option.classify
+    if not _classify:
+        _classify = False
+    if option.interactive == None:
+        _interactive = 'no'
+    else:
+        _interactive = 'yes'
+    _cosmic = option.cosmic
+    if not _cosmic:
+        _cosmic = False
 
-     if option.dobias==None:    _dobias=True
-     else:    _dobias=option.dobias
-     if option.doflat==None:    _doflat=True
-     else:    _doflat=option.doflat
-     if option.listbias:    listbias=floyds.util.readlist(option.listbias)
-     else:                  listbias=''
-     if option.listflat:    listflat=floyds.util.readlist(option.listflat)
-     else:                  listflat=''
-     if option.listarc:     listarc=floyds.util.readlist(option.listarc)
-     else:                  listarc=''
-     if option.trace==None:      _trace='no'
-     else:                       _trace='yes'
-     if option.dispersionline==None:     _dispersionline=False
-     else:                               _dispersionline=option.dispersionline
-     if option.automatic==None:     _automaticex=False
-     else:                               _automaticex=option.automatic
-     if option.liststand: liststand = floyds.util.readlist(option.liststand)
-     else: liststand=''
-     if option.listatmo: listatmo = floyds.util.readlist(option.listatmo)
-     else: listatmo=''
-     _rebin=option.rebin
-     _fringing=option.fringing
-     if _xwindow:
-          from stsci.tools import capable
-          capable.OF_GRAPHICS = False
+    if option.dobias == None:
+        _dobias = True
+    else:
+        _dobias = option.dobias
+    if option.doflat == None:
+        _doflat = True
+    else:
+        _doflat = option.doflat
+    if option.listbias:
+        listbias = floyds.util.readlist(option.listbias)
+    else:
+        listbias = ''
+    if option.listflat:
+        listflat = floyds.util.readlist(option.listflat)
+    else:
+        listflat = ''
+    if option.listarc:
+        listarc = floyds.util.readlist(option.listarc)
+    else:
+        listarc = ''
+    if option.trace == None:
+        _trace = 'no'
+    else:
+        _trace = 'yes'
+    if option.dispersionline == None:
+        _dispersionline = False
+    else:
+        _dispersionline = option.dispersionline
+    if option.automatic == None:
+        _automaticex = False
+    else:
+        _automaticex = option.automatic
+    if option.liststand:
+        liststand = floyds.util.readlist(option.liststand)
+    else:
+        liststand = ''
+    if option.listatmo:
+        listatmo = floyds.util.readlist(option.listatmo)
+    else:
+        listatmo = ''
+    _rebin = option.rebin
+    _fringing = option.fringing
+    if _xwindow:
+        from stsci.tools import capable
 
-     if len(files)>0:
-        outputlist,readme=floyds.floydsspecauto.floydsautoredu(files,_interactive,_dobias,_doflat,listflat,\
-                         listbias,listarc,_cosmic,_trace,_dispersionline,liststand,listatmo,_automaticex,_classify,_verbose,_rebin,_fringing)
-     else:  outputlist=''
-     print outputlist
-     #############   group the files by groupid, not science frame
-     if outputlist:
-       now=datetime.datetime.now()
-       datenow=now.strftime('20%y%m%d%H%M')
-       MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
-       deletefile=[]
+        capable.OF_GRAPHICS = False
 
-       typeobs=outputlist.keys()
-       outputlist['grpid']={}
-       for _type in typeobs:
-         for img0 in outputlist[_type].keys():
-            hdr=floyds.readhdr(img0)
-            grpid = str(floyds.readkey3(hdr,'REQNUM'))
-            if grpid == 'N/A':     grpid = 'UNKNOWN'
-            prop=floyds.readkey3(hdr,'PROPID')
-            if (grpid,prop) not in outputlist['grpid']:
-                    outputlist['grpid'][(grpid,prop)]={}
-            if img0 not in outputlist['grpid'][(grpid,prop)]:
-                outputlist['grpid'][(grpid,prop)][img0]=outputlist[_type][img0]
+    if len(files) > 0:
+        outputlist, readme = floyds.floydsspecauto.floydsautoredu(files, _interactive, _dobias, _doflat, listflat,
+                                                                  listbias, listarc, _cosmic, _trace, _dispersionline,
+                                                                  liststand, listatmo, _automaticex, _classify,
+                                                                  _verbose,
+                                                                  _rebin, _fringing)
+    else:
+        outputlist = ''
+    print outputlist
+    #############   group the files by groupid, not science frame
+    if outputlist:
+        now = datetime.datetime.now()
+        datenow = now.strftime('20%y%m%d%H%M')
+        MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 01, 01)).days
+        deletefile = []
 
-       for oblock in outputlist['grpid']:
-           img0=outputlist['grpid'][oblock].keys()[0]
-           hdr=floyds.readhdr(img0)
-           date=floyds.readkey3(hdr,'date-night')
-           grpid=oblock[0]
-           prop=oblock[1]
-           _instrume=floyds.readkey3(hdr,'TELID')
-           nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
+        typeobs = outputlist.keys()
+        outputlist['grpid'] = {}
+        for _type in typeobs:
+            for img0 in outputlist[_type].keys():
+                hdr = floyds.readhdr(img0)
+                grpid = str(floyds.readkey3(hdr, 'REQNUM'))
+                if grpid == 'N/A':     grpid = 'UNKNOWN'
+                prop = floyds.readkey3(hdr, 'PROPID')
+                if (grpid, prop) not in outputlist['grpid']:
+                    outputlist['grpid'][(grpid, prop)] = {}
+                if img0 not in outputlist['grpid'][(grpid, prop)]:
+                    outputlist['grpid'][(grpid, prop)][img0] = outputlist[_type][img0]
 
-           for img0 in outputlist['grpid'][oblock]:
+        for oblock in outputlist['grpid']:
+            img0 = outputlist['grpid'][oblock].keys()[0]
+            hdr = floyds.readhdr(img0)
+            date = floyds.readkey3(hdr, 'date-night')
+            grpid = oblock[0]
+            prop = oblock[1]
+            _instrume = floyds.readkey3(hdr, 'TELID')
+            nametar = str(prop) + '_' + str(grpid) + '_' + str(_instrume) + '_' + str(date) + '_' + str(
+                MJDtoday) + '.tar.gz'
+
+            for img0 in outputlist['grpid'][oblock]:
                 outfile = img0.replace('00.fits', '90.fits')
-                os.system('cp '+img0+' '+outfile)
-                floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
+                os.system('cp ' + img0 + ' ' + outfile)
+                floyds.util.updateheader(outfile, 0, {'TARFILE': [nametar, '']})
 
-           imglist=[readme]
-           for img0 in outputlist['grpid'][oblock].keys():
-               imglist.append(img0)
-               for img in outputlist['grpid'][oblock][img0]:
-                    if img not in imglist: imglist.append(img)
+            imglist = [readme]
+            for img0 in outputlist['grpid'][oblock].keys():
+                imglist.append(img0)
+                for img in outputlist['grpid'][oblock][img0]:
+                    if img not in imglist:
+                        imglist.append(img)
 
-#######################    add raw data
-           for im in files:
-                hdr1=floyds.readhdr(im)
+                    #######################    add raw data
+            for im in files:
+                hdr1 = floyds.readhdr(im)
                 if 'REQNUM' in hdr1.keys():
-                    if hdr1['REQNUM']==grpid and im not in imglist:
+                    if hdr1['REQNUM'] == grpid and im not in imglist:
                         imglist.append(im)
 
-           try:
-                    bb,kk=floyds.gettar(img0)
-           except:
-                    bb,kk='',''
-           if bb: imglist.append(bb)
-           if kk: imglist.append(kk)
-################# archiving   ##########################
-           if _archive:
-                    for img in imglist:
-                         if 'merge' in img:
-                                   floyds.floydsspecauto.archivespectrum(img)
-           ff=open(readme,'w')
-           ff.write('\n\n###  list of files   ####\n\n ')
-           for img in imglist:
-                    ff.write('%80s' % (img))
-                    if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
-                    if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
-                    if '_2df'     in img:    ff.write('\t  2D  wave & flux calib ')
-                    if '_ex.fits' in img:         ff.write('\t  fast extraction ')
-                    if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
-                    if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
-                    ff.write('\n')
-           ff.close()
-           floyds.archivingtar(imglist,nametar)
-           deletefile=deletefile+list(imglist)
-           for img in deletefile:
-               if img not in listfile:
+            try:
+                bb, kk = floyds.gettar(img0)
+            except:
+                bb, kk = '', ''
+            if bb:
+                imglist.append(bb)
+            if kk:
+                imglist.append(kk)
+            ################# archiving   ##########################
+            if _archive:
+                for img in imglist:
+                    if 'merge' in img:
+                        floyds.floydsspecauto.archivespectrum(img)
+            ff = open(readme, 'w')
+            ff.write('\n\n###  list of files   ####\n\n ')
+            for img in imglist:
+                ff.write('%80s' % (img))
+                if 'tt' in img[0:2]:
+                    ff.write('\t  rectified spectrum ')
+                if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:
+                    ff.write('\t rectified spectrum \t  flat corrected')
+                if '_2df' in img:
+                    ff.write('\t  2D  wave & flux calib ')
+                if '_ex.fits' in img:
+                    ff.write('\t  fast extraction ')
+                if 'sens' in img[0:4]:
+                    ff.write('\t sensitivity function')
+                if 'atmo' in img[0:4]:
+                    ff.write('\t atmosferic extinction ')
+                ff.write('\n')
+            ff.close()
+            floyds.archivingtar(imglist, nametar)
+            deletefile = deletefile + list(imglist)
+            for img in deletefile:
+                if img not in listfile:
                     floyds.util.delete(img)
-           listadel=glob.glob('*flat*fits')
-           listadel1=glob.glob('*_ex.fits')
-           listadel2=glob.glob('*clean.fits')
-           for img in listadel: floyds.util.delete(img)
-           for img in listadel1: floyds.util.delete(img)
-           for img in listadel2: floyds.util.delete(img)
+            listadel = glob.glob('*flat*fits')
+            listadel1 = glob.glob('*_ex.fits')
+            listadel2 = glob.glob('*clean.fits')
+            for img in listadel:
+                floyds.util.delete(img)
+            for img in listadel1:
+                floyds.util.delete(img)
+            for img in listadel2:
+                floyds.util.delete(img)
 
-     stoptime=time.time()
-     print 'runnning time '+str(stoptime-starttime)
-
-#     if outputlist:
-#          now=datetime.datetime.now()
-#          datenow=now.strftime('20%y%m%d%H%M')
-#          MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
-#          deletefile=[]
-#          if 'std' in outputlist.keys():
-#            for img0 in outputlist['std'].keys():
-#               hdr=floyds.readhdr(img0)
-#               prop=floyds.readkey3(hdr,'PROPID')
-#               grpid = str(floyds.readkey3(hdr,'REQNUM'))
-#               if grpid == 'N/A':     grpid = 'UNKNOWN'
-#
-#               date=floyds.readkey3(hdr,'date-night')
-#               _instrume=floyds.readkey3(hdr,'TELID')
-#               nametar='STD_'+str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
-#               outfile = img0.replace('00.fits', '90.fits')
-#               os.system('cp '+img0+' '+outfile)
-#               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
-#               print nametar,'####################################'
-#               imglist=outputlist['std'][img0]
-#               if img0 not in imglist:      imglist.append(img0)
-#               imglist.append(readme)
-#              add raw data
-#               for im in files:
-#                    hdr1=floyds.readhdr(im)
-#                    if 'REQNUM' in hdr1.keys():
-#                         if hdr1['REQNUM']==grpid and im not in imglist:
-#                              imglist.append(im)
-#               bb,kk=floyds.gettar(img0)
-#               if bb: imglist.append(bb)
-#               if kk: imglist.append(kk)
-#               ff=open(readme,'w')
-#               ff.write('\n\n###  list of files   ####\n\n ')
-#               for img in imglist:
-#                    ff.write('%80s' % (img))
-#                    if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
-#                    if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
-#                    if '_2df'     in img:    ff.write('\t  2D  wave & flux calib ')
-#                    if '_ex.fits' in img:         ff.write('\t  fast extraction ')
-#                    if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
-#                    if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
-#                    ff.write('\n')
-#               ff.close()
-#               floyds.archivingtar(imglist,nametar)
-#               deletefile=deletefile+list(imglist)
-####################################################################
-#          if 'obj' in outputlist.keys():
-#            for img0 in outputlist['obj'].keys():
-#               hdr=floyds.readhdr(img0)
-#               prop=floyds.readkey3(hdr,'PROPID')
-#               grpid = str(floyds.readkey3(hdr,'REQNUM'))
-#               if grpid == 'N/A':     grpid = 'UNKNOWN'
-#               date=floyds.readkey3(hdr,'date-night')
-#               _instrume=floyds.readkey3(hdr,'TELID')
-#               nametar=str(prop)+'_'+str(grpid)+'_'+str(_instrume)+'_'+str(date)+'_'+str(MJDtoday)+'.tar.gz'
-#               outfile = img0.replace('00.fits', '90.fits')
-#               os.system('cp '+img0+' '+outfile)
-#               floyds.util.updateheader(outfile,0,{'TARFILE':[nametar,'']})
-#               print nametar,'####################################'
-#               imglist=outputlist['obj'][img0]
-#               if img0 not in imglist:      imglist.append(img0)
-#               imglist.append(readme)
-#              add raw data
-#               for im in files:
-#                    hdr1=floyds.readhdr(im)
-#                    if 'REQNUM' in hdr1.keys():
-#                         if hdr1['REQNUM']==grpid and im not in imglist:
-#                              imglist.append(im)
-#
-#               remove pdf from tar file
-#               os.system('cp '+floyds.__path__[0]+'/doc/floyds.pdf .')
-#               imglist.append('floyds.pdf')
-#               try:
-#                    bb,kk=floyds.gettar(img0)
-#               except:
-#                    bb,kk='',''
-#               if bb: imglist.append(bb)
-#               if kk: imglist.append(kk)
-#               ################# archiving   ##########################
-#               if _archive:
-#                    for img in imglist:
-#                         if 'merge' in img:
-#                                   floyds.floydsspecauto.archivespectrum(img)
-#               ff=open(readme,'w')
-#               ff.write('\n\n###  list of files   ####\n\n ')
-#               for img in imglist:
-#                    ff.write('%80s' % (img))
-#                    if 'tt'       in img[0:2]:    ff.write('\t  rectified spectrum ')
-#                    if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:    ff.write('\t rectified spectrum \t  flat corrected')
-#                    if '_2df'     in img:    ff.write('\t  2D  wave & flux calib ')
-#                    if '_ex.fits' in img:         ff.write('\t  fast extraction ')
-#                    if 'sens' in img[0:4]:    ff.write('\t sensitivity function')
-#                    if 'atmo' in img[0:4]:    ff.write('\t atmosferic extinction ')
-#                    ff.write('\n')
-#               ff.close()
-#               floyds.archivingtar(imglist,nametar)
-#               deletefile=deletefile+list(imglist)
-#          for img in deletefile:
-#               if img not in listfile:
-#                    floyds.util.delete(img)
-#          listadel=glob.glob('*flat*fits')
-#          listadel1=glob.glob('*_ex.fits')
-#          listadel2=glob.glob('*clean.fits')
-#          for img in listadel: floyds.util.delete(img)
-#          for img in listadel1: floyds.util.delete(img)
-#          for img in listadel2: floyds.util.delete(img)
+    stoptime = time.time()
+    print 'runnning time ' + str(stoptime - starttime)
