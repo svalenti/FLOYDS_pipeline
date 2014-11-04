@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7e7804db-0106-4421-9d85-f5f5f02070c0" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/floyds/_version.py" afterPath="$PROJECT_DIR$/src/floyds/_version.py" />
-    </list>
+    <list default="true" id="7e7804db-0106-4421-9d85-f5f5f02070c0" name="Default" comment="" />
     <ignored path="FLOYDS_pipeline.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="TRACKING_ENABLED" value="true" />
