@@ -1298,10 +1298,11 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                 if _i:
                     print "Find the lower and upper wavelength limits. Then press 'q' to continue."
                     iraf.onedspec.splot(_output+'[*,1,1]')
-                    low = raw_input('Lower limit (in angstroms) [3200]: ')
-                    up  = raw_input('Upper limit (in angstroms) [10000]: ')
-                if not _i or not low: low = 3200
-                if not _i or not up:  up = 10000
+                    low = raw_input_num('Lower limit (\xc3\x85)',3200)
+                    up  = raw_input_num('Upper limit (\xc3\x85)',10000)
+                else:
+                    low = 3200
+                    up = 10000
                 iraf.scopy(_output,trimmed,w1=low,w2=up,rebin='no')
                 if _i:
                     print "See if this looks better. Then press 'q' to continue."
@@ -1317,6 +1318,21 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             print 'Output saved as',trimmed
         else: print 'Output saved as',_output # only not trimmed if you specifically say no
     return outputfile
+
+def raw_input_num(base_prompt,default=None):
+    if default is None:
+        prompt = base_prompt+': '
+    else:
+        prompt = base_prompt+' ['+str(default)+']: '
+    while True:
+        num = raw_input(prompt)
+        try: # if there was a response, cast to float and continue
+            if num: num = float(num)
+            else:   num = default
+            break
+        except ValueError: # if response can't be cast to float, reprompt
+            print 'Not a valid number.'
+    return num
 
 ##############################################################################
 
