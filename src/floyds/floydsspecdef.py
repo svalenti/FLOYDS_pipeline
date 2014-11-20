@@ -1207,7 +1207,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             if liststandard:  _sens=floyds.util.searchsens(img,liststandard)[0]   # search in the list from reducer
             if not _sens:
                 if setup in sens: senslist = sens[setup]                             # use same slit if available
-                else:             senslist = sum([sens[setup] for setup in sens],[]) # otherwise use any slit
+                else:             senslist = sum([sens[_setup] for _setup in sens],[]) # otherwise use any slit
                 try:      _sens=floyds.util.searchsens(img,senslist)[0]        # search in the reduced data
                 except:   _sens=floyds.util.searchsens(img,'')[0]              # search in the archive
             print 'Using sensitivity function',_sens
@@ -1255,6 +1255,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
                 iraf.onedspec(_doprint=0)
                 iraf.onedspec.wspectext(imgin+'[*,1,1]',imgasci,header='no')
                 if imgasci not in outputfile: outputfile.append(imgasci)
+            else: print 'WARNING: SENSFUNC NOT FOUND, FLUX CALIBRATION NOT PERFORMED'
     coppie={}
     for obj in outputfile:
         if obj[-4:]=='fits':
