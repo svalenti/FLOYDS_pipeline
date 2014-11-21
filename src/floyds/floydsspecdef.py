@@ -787,6 +787,7 @@ def floydsspecreduction(files,_interactive,_dobias,_doflat,_listflat,_listbias,_
             _object0=re.sub('\[' ,'',_object0)
             _object0=re.sub('\)' ,'',_object0)
             _object0=re.sub('\]' ,'',_object0)
+            if len(_object0) > 27: _object0 = _object0[:27] # long object names can make filenames exceed max fits header length
             _date0=readkey3(hdr0,'date-night')
             _tel=readkey3(hdr0,'TELID')
             _type=readkey3(hdr0,'OBSTYPE')
