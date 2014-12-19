@@ -757,6 +757,12 @@ def dvex():
     dv['agn'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 40, '_t_step': 10, '_t_nsum': 10, '_lower': -13, '_upper': 13,
                  '_b_sample': '-35:-20,20:35', '_resize': 'no', '_b_naver': -3}
+#  -3, -15  
+#  order of fit 
+#  sigma clipping 
+#  linear polynomial 
+#  cleaning
+#  sigma clipping 
     return dv
 
 

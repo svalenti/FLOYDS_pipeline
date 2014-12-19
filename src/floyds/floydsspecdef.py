@@ -195,7 +195,6 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
     import floyds
     import datetime
     # import matplotlib
-    #    JDtoday=55928.00+date2num(datetime.datetime.utcnow())-matplotlib.dates.date2num(datetime.datetime(2012, 01, 01,12,0,0))
     MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 01, 01)).days
     from floyds.util import delete, readhdr, readkey3, updateheader, name_duplicate
     from pyfits import open as popen
@@ -505,12 +504,12 @@ def checkwavelength_arc(xx1, yy1, xx2, yy2, xmin, xmax, _interactive='yes'):
     from numpy import array, trapz, compress
     from numpy import interp as ninterp
 
-    minimo = max(min(xx1), min(xx2)) + 50
-    massimo = min(max(xx1), max(xx2)) - 50
+    minimo = max(min(xx1), min(xx2)) + 60
+    massimo = min(max(xx1), max(xx2)) - 60
     yy1 = [0 if e < 0 else e for e in array(yy1)]
     yy2 = [0 if e < 0 else e for e in array(yy2)]
     _shift, integral = [], []
-    for shift in range(-500, 500, 1):
+    for shift in range(-600, 600, 1):
         xxnew = xx1 + shift / 10.
         yy2interp = ninterp(xxnew, xx2, yy2)
         yy2timesyy = yy2interp * yy1
