@@ -1035,13 +1035,14 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         print 'external standard, raw standard not used'
         del objectlist['std']
 
-    sens = {}
+    sens = []
     outputfile = []
     atmo = {}
     wavecalib = {}
     for tpe in objectlist:
         for setup in objectlist[tpe]:
-            if setup not in sens:   sens[setup] = []
+#            if setup not in sens:   
+#                sens[setup] = []
             print '\n### setup= ', setup, '\n### objects= ', objectlist[tpe][setup], '\n'
             for img in objectlist[tpe][setup]:
                 print '\n\n### next object= ', img, ' ', floyds.util.readkey3(readhdr(img), 'object'), '\n'
@@ -1119,12 +1120,27 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_blue'
                     fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_blue'
                     print fcfile
+
                 if not img:  # or not arcfile:
                     print '\n### no calibration for this setup available'
                 else:
                     print img, arcfile, flatfile, fcfile, fcfile1, _cosmic
                     img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum(img, arcfile, flatfile, fcfile,
                                                                                   fcfile1, 'no', _cosmic)
+                import time
+                if setup[0] == 'red':
+                    cut='[10:1750,*]'
+                else:
+                    cut='[20:1665,*]'
+
+                for ll in [img, arcfile, flatfile]:
+                        if ll:
+                            print ll,'ddd'
+                            floyds.util.delete('_tmp.fits')
+                            iraf.imcopy(ll+cut, '_tmp.fits', verbose='no')
+                            floyds.util.delete(ll)
+                            iraf.imrename('_tmp.fits',ll,verbose='no')
+                            time.sleep(1)
 
                 ###############     flat correction  method 1 or 3  ###############
                 print img, arcfile, flatfile, setup
@@ -1301,13 +1317,17 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             hedvec = {'REFSPEC1': [re.sub('.fits', '', arcfile), ' reference arc'],
                                       'arc' + setup[0]: [re.sub('.fits', '', arcfile), ' reference arc']}
 
-                        if specred:         hedvec['SPERES_' + setup[0][0]] = [specred, 'Spectral resolving power']
+                        if specred:         
+                            hedvec['SPERES_' + setup[0][0]] = [specred, 'Spectral resolving power']
 
                         floyds.util.updateheader(imgex, 0, hedvec)
 
                         floyds.util.delete(imgl)
+
                         iraf.specred.dispcor(imgex, output=imgl, flux='yes')
-                        if imgl not in outputfile: outputfile.append(imgl)
+
+                        if imgl not in outputfile: 
+                            outputfile.append(imgl)
                         if tpe == 'std' or floyds.util.readkey3(floyds.util.readhdr(imgex), 'exptime') < 300:
                             if setup[0] == 'red':
                                 print '\n### check standard wave calib'
@@ -1320,7 +1340,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             _skyfile = floyds.__path__[0] + '/standard/ident/sky_' + setup[0] + '.fits'
                             floyds.floydsspecdef.checkwavelength_obj(imgl, _skyfile, _interactive)
                 if imgl:
-                    if tpe not in wavecalib: wavecalib[tpe] = {}
+                    if tpe not in wavecalib: 
+                        wavecalib[tpe] = {}
                     if setup not in wavecalib[tpe]:
                         wavecalib[tpe][setup] = [imgl]
                     else:
@@ -1328,11 +1349,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                 ###################################
     print wavecalib
-    sens = {}
+    #sens = {}
     atmo = {}
     if 'std' in wavecalib.keys():
         for setup in wavecalib['std']:
-            if setup not in sens:   sens[setup] = []
+#            if setup not in sens:   
+#                sens[setup] = []
             print '\n### setup= ', setup, '\n### objects= ', wavecalib['std'][setup], '\n'
             for imgl in wavecalib['std'][setup]:
                 ######################################################
@@ -1365,10 +1387,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive,
                                                                      '3400:4700')  #,3600:4300')
 
-                if setup not in sens:
-                    sens[setup] = [_outputsens2]
-                else:
-                    sens[setup].append(_outputsens2)
+                if _outputsens2 not in sens:
+                    sens.append(_outputsens2)
+#                if setup not in sens:
+#                    sens[setup] = [_outputsens2]
+#                else:
+#                    sens[setup].append(_outputsens2)
 
     if _verbose:
         print wavecalib
@@ -1381,12 +1405,15 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 for img in wavecalib[tpe][setup]:
                     hdr = floyds.util.readhdr(img)
                     _sens = ''
-                    if liststandard:  _sens = floyds.util.searchsens(img, liststandard)[
-                        0]  # search in the list from reducer
+                    if liststandard:  
+                        _sens = floyds.util.searchsens(img, liststandard)[0]  # search in the list from reducer
                     if not _sens:
                         try:
-                            _sens = floyds.util.searchsens(img, sens[setup])[0]  # search in the reduced data
+#                            _sens = floyds.util.searchsens(img, sens[setup])[0]  # search in the reduced data
+                            _sens = floyds.util.searchsens(img, sens)[0]  # search in the reduced data
                         except:
+                            print setup
+                            print 'no standard'
                             _sens = floyds.util.searchsens(img, '')[0]  # search in tha archive
 
                     _atmo = ''
@@ -1441,20 +1468,22 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                 iraf.imutil.imcopy(input=imgf + '[*,1,4]', output=imge + '[*,1,4]', verbose='no')
                             except:
                                 pass
-                            if imge not in outputfile: outputfile.append(imge)
+                            if imge not in outputfile: 
+                                outputfile.append(imge)
                             floyds.util.updateheader(imge, 0,
                                                      {'ATMO' + setup[0][0]: [string.split(_atmo, '/')[-1], '']})
                             imgin = imge
-                            if _atmo not in outputfile: outputfile.append(_atmo)
+                            if _atmo not in outputfile: 
+                                outputfile.append(_atmo)
                         else:
                             imgin = imgf
                         imgasci = re.sub('.fits', '.asci', imgin)
                         floyds.util.delete(imgasci)
                         iraf.onedspec(_doprint=0)
                         iraf.onedspec.wspectext(imgin + '[*,1,1]', imgasci, header='no')
-                        if imgasci not in outputfile: outputfile.append(imgasci)
+                        if imgasci not in outputfile: 
+                            outputfile.append(imgasci)
     coppie = {}
->>>>>>> b36020fa625c2ee849efa87db5571cfdd9648e58
     for obj in outputfile:
         if obj[-4:] == 'fits':
             hdr = floyds.util.readhdr(obj)
@@ -1478,7 +1507,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         lista = coppie[mjd]
         _output = re.sub('_red_', '_merge_', lista[0])
         _output = re.sub('_blue_', '_merge_', _output)
-        #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+#        _output = combspec(lista[0], lista[1], _output, scale=True, num=None)
         _output = combspec2(lista[0], lista[1], _output, scale=True, num=None)
         #try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #except:         print 'Warning: problem combining the red and blu spectra'
@@ -1487,7 +1516,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             _output_f = re.sub('_e.fits', '_f.fits', _output)
             if '_e.fits' in lista[0]: lista[0] = re.sub('_e.fits', '_f.fits', lista[0])
             if '_e.fits' in lista[1]: lista[1] = re.sub('_e.fits', '_f.fits', lista[1])
-            #_output=combspec(lista[0],lista[1],_output,scale=True,num=None)
+#            _output_f = combspec(lista[0], lista[1], _output, scale=True, num=None)
             _output_f = combspec2(lista[0], lista[1], _output_f, scale=True, num=None)
         #            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #            except:         print 'Warning: problem combining the red and blu spectra'
@@ -1609,7 +1638,8 @@ def combspec(_img0, _img1, _output, scale=True, num=None):
     x01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limup), x0)
     y01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limup), y0)
     x11 = x01
-    if not num:   num = int(len(x01) / 7)
+    if not num:   
+        num = int(len(x01) / 7)
     y11 = np.interp(x01, x1, y1)
     if scale:
         integral0 = np.trapz(y01, x01)
@@ -1814,7 +1844,6 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
     header['XMAX'] = [_xmax, '']
     header['GRISM'] = ['red/blu', 'full range spectrum']
     floyds.util.updateheader(_output, 0, header)
-
     time.sleep(1)  # needed for iraf.specred.scombine to work reliably
     return _output
 
