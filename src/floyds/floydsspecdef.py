@@ -1135,11 +1135,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                 for ll in [img, arcfile, flatfile]:
                         if ll:
-                            print ll,'ddd'
                             floyds.util.delete('_tmp.fits')
-                            iraf.imcopy(ll+cut, '_tmp.fits', verbose='no')
+                            time.sleep(1)
+                            iraf.imcopy(ll+cut, '_tmp.fits', verbose='yes')
+                            time.sleep(1)
                             floyds.util.delete(ll)
-                            iraf.imrename('_tmp.fits',ll,verbose='no')
+                            iraf.imrename('_tmp.fits',ll,verbose='yes')
                             time.sleep(1)
 
                 ###############     flat correction  method 1 or 3  ###############
@@ -1156,7 +1157,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             imgn = floyds.fringing_classicmethod2(flatfile, img, 'no', '*', 15, setup[0])
                     else:
                         floyds.util.delete(imgn)
-                        iraf.imcopy(img, imgn, verbose='no')
+                        iraf.imcopy(img, imgn, verbose='yes')
                 else:
                     floyds.util.delete(imgn)
                     iraf.imcopy(img, imgn, verbose='no')
