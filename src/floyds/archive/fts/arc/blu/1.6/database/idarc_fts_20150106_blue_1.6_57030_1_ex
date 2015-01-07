@@ -1,0 +1,33 @@
+# Wed 07:00:40 07-Jan-2015
+begin	identify arc_fts_20150106_blue_1.6_57030_1_ex - Ap 1
+	id	arc_fts_20150106_blue_1.6_57030_1_ex
+	task	identify
+	image	arc_fts_20150106_blue_1.6_57030_1_ex - Ap 1
+	aperture	1
+	aplow	49.8
+	aphigh	68.65
+	units	Angstroms
+	features	5
+	        517.39 4046.56307   4046.563   7.0 1 1 Hg
+	        696.81 4358.32786   4358.328   7.0 1 1 Hg
+	       1331.65  5460.7354  5460.7348   7.0 1 1 Hg
+	       1509.72 5769.59222  5769.5982   7.0 1 1 Hg
+	       1521.88 5790.66845   5790.663   7.0 1 1 Hg
+	function spline3
+	order 1
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	8
+		3.
+		1.
+		1.
+		1669.
+		42.82882219346641
+		524.579525646365
+		1008.320375850843
+		1487.765731445691
+
