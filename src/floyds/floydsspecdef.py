@@ -2326,6 +2326,7 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
 def aperture(img):
     import pyfits
     import re
+    import time
 
     hdr = pyfits.open(img)[0].header
     xmax = hdr['NAXIS2']
@@ -2342,5 +2343,6 @@ def aperture(img):
     f = open('database/ap' + img2, 'w')
     f.write(line)
     f.close()
+    time.sleep(1)
 
 ##########################################################################
