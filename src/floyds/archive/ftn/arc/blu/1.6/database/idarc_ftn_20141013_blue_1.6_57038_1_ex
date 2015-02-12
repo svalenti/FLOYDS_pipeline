@@ -1,0 +1,32 @@
+# Thu 11:20:30 15-Jan-2015
+begin	identify arc_ftn_20141013_blue_1.6_57038_1_ex - Ap 1
+	id	arc_ftn_20141013_blue_1.6_57038_1_ex
+	task	identify
+	image	arc_ftn_20141013_blue_1.6_57038_1_ex - Ap 1
+	aperture	1
+	aplow	43.09
+	aphigh	53.09
+	units	Angstroms
+	features	4
+	        292.76   3650.153   3650.153   4.0 1 1 Hg
+	        520.31   4046.563   4046.563   4.0 1 1 Hg
+	        698.93   4358.328   4358.328   4.0 1 1 Hg
+	       1332.34  5460.7348  5460.7348   4.0 1 1 Hg
+	function spline3
+	order 1
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	8
+		3.
+		1.
+		1.
+		1646.
+		60.01662584842852
+		519.6660330951376
+		1005.978118438019
+		1456.53959000417
+

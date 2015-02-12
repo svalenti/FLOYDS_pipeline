@@ -695,7 +695,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
                            recenter=_recenter, edit=_edit,
                            nfind=1, extract='yes', backgro='fit', gain=_gain, readnoi=_rdnoise, lsigma=4, usigma=4,
                            format='multispec',
-                           b_function='legendre', b_sample=dv[_type]['_b_sample'], clean='yes', pfit='fit2d',
+                           b_function='legendre', b_sample=dv[_type]['_b_sample'], clean='yes', pfit='fit1d',
                            b_naver=dv[_type]['_b_naver'],
                            lower=dv[_type]['_lower'], upper=dv[_type]['_upper'], t_niter=dv[_type]['_t_niter'],
                            width=dv[_type]['_width'],
@@ -2326,6 +2326,7 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
 def aperture(img):
     import pyfits
     import re
+    import time
 
     hdr = pyfits.open(img)[0].header
     xmax = hdr['NAXIS2']
@@ -2342,5 +2343,6 @@ def aperture(img):
     f = open('database/ap' + img2, 'w')
     f.write(line)
     f.close()
+    time.sleep(1)
 
 ##########################################################################

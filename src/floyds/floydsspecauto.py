@@ -465,6 +465,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       _grpid1=floyds.util.readkey3(hdr1,'grpid')
                       _grpid2=floyds.util.readkey3(hdr2,'grpid')
                       if _grpid1==_grpid2:
+                          print flatfile,img,setup[0]
                           imgn=floyds.fringing_classicmethod2(flatfile,img,'no','*',15,setup[0])
                       else:
                           print 'Warning flat not the same OB'
@@ -673,7 +674,7 @@ def badimage(img,_type):
         if _type in ['flat']:
             if rr1/bg1<20 and bb1/bg1>2.5 and 'South' in _tel:
                 good=0
-            if bb1/bg1<1.1:
+            if bb1/bg1<1.0:
                 good=0
             if rr1<1000:
                 good=0
