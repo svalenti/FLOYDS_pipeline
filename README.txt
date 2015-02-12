@@ -6,7 +6,7 @@
 ###########################################################################
 
 
-NTT is written in python and requires the following package:
+FLOYDS is written in python and requires the following package:
 
 - Python 2.5 or Python 2.6 or Python 2.7
    these modules have to be installed:
@@ -31,8 +31,8 @@ extract the files from the tarball
 ##########################################################################
 To uninstall a previus version 
 
-- delete the ntt directory in your site-package path
-- delete the ntt****.egg-info from the same directory
+- delete the floyds directory in your site-package path
+- delete the floyds****.egg-info from the same directory
 - delete the floyd executable: floydsspec 
 
 or if during installation  you used the option: --record files.txt
