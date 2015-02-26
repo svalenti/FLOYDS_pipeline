@@ -41,7 +41,8 @@ def mk_guideinfo_plots(rootname, utstart, utstop, logname, debug=True):
         retval = os.system('mv yo.png '+guidestateplotname)
         if debug: print "mv from yo.png to",guidestateplotname,"had status",retval
 
-        xmlfiles_gd = [f.replace('.fits', '.fits.inst.guide.xml') for f in fileimg_gd]
+#        xmlfiles_gd = [f.replace('.fits', '.fits.inst.guide.xml') for f in fileimg_gd]
+        xmlfiles_gd = [f.replace('.fits', '.fits.guide.xml') for f in fileimg_gd]
         if debug: print xmlfiles_gd
         (totcnts_gd, xcen_gd, ycen_gd, fwhm_gd) = read_stats_from_xml_files(xmlfiles_gd)
 

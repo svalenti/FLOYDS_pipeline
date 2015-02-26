@@ -76,7 +76,8 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
             sys.exit(0)
 #Make a guider log from the XML files
 
-        gxml_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits.inst.guide.xml'
+#        gxml_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits.inst.guide.xml'
+        gxml_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits.guide.xml'
         gxml_images  = glob.glob(gxml_glob)
         gxml_images.sort()
         if len(gxml_images) > 0:
@@ -129,7 +130,8 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 # characters and write this into our new guidelog
 # Only do this if we have a <foo>-fits.inst.guide.xml file
 
-            guide_xml_file = _acqimage.replace('.fits','.fits.inst.guide.xml')
+#            guide_xml_file = _acqimage.replace('.fits','.fits.inst.guide.xml')
+            guide_xml_file = _acqimage.replace('.fits','.fits.guide.xml')
             guide_dateobs = prihdr['DATE-OBS']
 	    if guide_dateobs != '' and guide_dateobs != 'N/A' and os.path.exists(guide_xml_file):
 	    	for char in ['T','-',':']:
