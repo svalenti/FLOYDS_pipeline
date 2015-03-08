@@ -16,6 +16,8 @@ src/floyds/archive/fts/arc/red/2.0/arc_fts_20130713_red_2.0_56489_1_ex.fits
 src/floyds/archive/fts/arc/red/2.0/database/idarc_fts_20130713_red_2.0_56489_1_ex
 src/floyds/archive/fts/sens/blu/sens_blu_merge_1.fits
 src/floyds/archive/fts/sens/red/sens_red_merge_1.fits
+src/floyds/archive/fts/sens/red/sens_fts_red_2015.fits
+src/floyds/archive/fts/sens/blu/sens_fts_blue_2015.fits
 src/floyds/archive/ftn/sens/blu/sens_blu_merge_1.fits
 src/floyds/archive/ftn/sens/red/sens_red_merge_1.fits
 src/floydsN/archive/ftn/arc/blu/1.6/arc_ftn_20130723_blue_1.6_56498_1_ex.fits

@@ -426,10 +426,10 @@ def checkwavestd(imgex, _interactive, _type=1):
                          str(shift) + ' [[y]/n] ? ')
         if not answ: answ = 'y'
         if answ.lower() in ['y', 'yes']:
-            floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + int(shift), '']})
+            floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + float(shift), '']})
             floyds.util.updateheader(imgex, 0, {'shift' + _arm[0]: [float(shift), '']})
     else:
-        floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + int(shift), '']})
+        floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + float(shift), '']})
         floyds.util.updateheader(imgex, 0, {'shift' + _arm[0]: [float(shift), '']})
     return shift
 
@@ -1335,7 +1335,34 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                 print imgl
                                 floyds.floydsspecdef.checkwavestd(imgl, _interactive, 2)
                             else:
-                                print '\n### warning check in wavelength not possible for short exposure in the blu range'
+                                print re.sub('blue','red',imgl)
+                                if os.path.isfile(re.sub('blue','red',imgl)):
+                                    hdrred = floyds.util.readhdr(re.sub('blue','red',imgl))
+                                    shiftred = floyds.readkey3(hdrred,'SHIFTR')
+                                    if shiftred:
+                                        zro = popen(imgl)[0].header.get('CRVAL1')
+                                        if _interactive.upper() in ['YES', 'Y']:
+                                            answ = raw_input('\n### do you want to correct the wavelength calibration'
+                                            ' with this shift: ' + str(shiftred) + ' [[y]/n] ? ')
+                                            if not answ:
+                                                answ = 'y'
+                                            if answ.lower() in ['y', 'yes']:
+                                                num = raw_input(' how much [ ' + str(shiftred) + ' ] ? ')
+                                                if not num:
+                                                    num = shiftred
+                                                floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
+                                                floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(num), '']})
+#                                                floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + int(shiftred), '']})
+#                                                floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
+                                        else:
+                                            print 'no interactive'
+                                            floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(shiftred), '']})
+                                            floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
+                                    else:
+                                        print shiftred
+                                        print 'no shift'
+                                else:
+                                    print '\n### warning check in wavelength not possible for short exposure in the blu range'
                         else:
                             print '\n### check object wave calib'
                             _skyfile = floyds.__path__[0] + '/standard/ident/sky_' + setup[0] + '.fits'
@@ -1965,7 +1992,6 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     _arm = floyds.util.readkey3(hdr, 'GRISM')
     floyds.util.delete('t' + img)
     print img, re.sub('.fits', '', imgrect)
-
     if _arm == 'red':
         iraf.specred.transform(input=img, output='t' + img, minput='', fitnames=re.sub('.fits', '', imgrect),
                                databas='database', x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1,
