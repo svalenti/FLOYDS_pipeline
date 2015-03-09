@@ -545,7 +545,11 @@ def searchsens(img, listsens):
     from numpy import argmin, abs
 
     hdr = readhdr(img)
-    JD = readkey3(hdr, 'JD')
+    if 'MJD' in hdr:
+        JD = readkey3(hdr, 'MJD')
+    elif 'MJD-OBS' in hdr:
+        JD = readkey3(hdr, 'MJD-OBS')
+
     _instrume = readkey3(hdr, 'TELID')
     grism0 = readkey3(hdr, 'grism')
     if not listsens:
@@ -559,7 +563,11 @@ def searchsens(img, listsens):
         goodlist = []
         for sens in listsens:
             hdrs = readhdr(sens)
-            JDsens = readkey3(hdrs, 'JD')
+            if 'MJD' in hdrs:
+                JDsens = readkey3(hdrs, 'MJD')
+            elif 'MJD-OBS' in hdrs:
+                JDsens = readkey3(hdrs, 'MJD-OBS')
+
             grism1 = readkey3(hdrs, 'grism') if readkey3(hdrs, 'grism') else readkey3(hdrs, 'GRISM')
             if grism0 == grism1:
                 goodlist.append(sens)
