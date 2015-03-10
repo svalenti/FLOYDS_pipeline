@@ -250,8 +250,12 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
             iraf.specred.standard(input=standardfile, output=_outputstd, extinct=_extinctdir + _extinction,
                                   caldir=_caldir, observa=_observatory, star_nam=refstar, airmass=_airmass,
                                   exptime=_exptime, interac=_interactive)
+
+            if str(readkey3(hdrs, 'grism')) == 'blu':
+                floyds.floydsspecdef.cutstd(_outputstd, start=5980, end=6012, out=False)
+
             iraf.specred.sensfunc(standard=_outputstd, sensitiv=_outputsens, extinct=_extinctdir + _extinction,
-                                  ignorea='yes', observa=_observatory, functio=_function, order=_order,
+                                  ignorea='yes', observa=_observatory, graphs='sri', functio=_function, order=_order,
                                   interac=_interactive)
         else:
             _outputstd = 'std_' + str(readkey3(hdrs, 'grism')) + '_' + str(readkey3(hdrs, 'filter')) + '.fits'
@@ -260,30 +264,63 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                                   caldir=_caldir, observa=_observatory, star_nam=refstar, airmass=_airmass,
                                   exptime=_exptime, interac=_interactive)
             #     sens full range
-            floyds.floydsspecdef.cutstd(_outputstd, start=3600, end=3900, out=False)
-            floyds.floydsspecdef.cutstd(_outputstd, start=4300, end=4600, out=False)
-            floyds.util.delete('sens0.fits')
-            iraf.specred.sensfunc(standard=_outputstd, sensitiv='sens0.fits', extinct=_extinctdir + _extinction,
-                                  ignorea='yes', observa=_observatory, functio=_function, order=_order,
+            if str(readkey3(hdrs, 'grism')) == 'blu':
+                floyds.floydsspecdef.cutstd(_outputstd, start=3600, end=3900, out=False)
+                floyds.floydsspecdef.cutstd(_outputstd, start=4300, end=4600, out=False)
+                floyds.floydsspecdef.cutstd(_outputstd, start=5990, end=6012, out=False)
+
+                floyds.util.delete('sens0.fits')
+                iraf.specred.sensfunc(standard=_outputstd, sensitiv='sens0.fits', extinct=_extinctdir + _extinction,
+                                  ignorea='yes', observa=_observatory, graphs='sri', functio=_function, order=_order,
                                   interac=_interactive)
-            sss = 'sens0.fits'
-            for jj in range(0, len(string.split(sample, ','))):
-                aa, bb = string.split(string.split(sample, ',')[jj], ':')
-                std0 = '_stdcut' + str(jj) + '.fits'
-                std1 = '_stdcut' + str(jj)
-                sens1 = '_senscut' + str(jj) + '.fits'
-                floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
-                iraf.scopy(standardfile, std0, w1=aa, w2=bb)
-                iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
+                sss = 'sens0.fits'
+                for jj in range(0, len(string.split(sample, ','))):
+                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                    std0 = '_stdcut' + str(jj) + '.fits'
+                    std1 = '_stdcut' + str(jj)
+                    sens1 = '_senscut' + str(jj) + '.fits'
+                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
+                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
+                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
                                       observa=_observatory, star_nam=refstar, airmass=_airmass,
                                       exptime=_exptime, interac=_interactive)
-                iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
-                                      observa=_observatory, functio=_function, order=30, interac=_interactive)
-                sss = sss + ',' + sens1
-                floyds.util.delete(std1 + ',' + std0)
-            _outputsens = combineblusens(sss, _outputsens)
-            for i in string.split(sss, ','):
-                floyds.util.delete(i)
+                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
+                                      observa=_observatory, graphs='sri', functio=_function, order=30, interac=_interactive)
+                    sss = sss + ',' + sens1
+                    floyds.util.delete(std1 + ',' + std0)
+                _outputsens = combineblusens(sss, _outputsens)
+                print sss
+                print _outputsens
+                raw_input('go on')
+#                for i in string.split(sss, ','):
+#                    floyds.util.delete(i)
+            else:
+                print 'split red sens'
+                sss=''
+                for jj in range(0, len(string.split(sample, ','))):
+                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                    std0 = '_stdcut' + str(jj) + '.fits'
+                    std1 = '_stdcut' + str(jj)
+                    sens1 = '_senscut' + str(jj) + '.fits'
+                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
+                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
+                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
+                                      observa=_observatory, star_nam=refstar, airmass=_airmass,
+                                      exptime=_exptime, interac=_interactive)
+                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
+                                      observa=_observatory, graphs='sri', functio=_function, order=30, interac=_interactive)
+                    if sss:
+                        sss = sss + ',' + sens1
+                    else:
+                        sss = sens1
+
+                    floyds.util.delete(std1 + ',' + std0)
+                print sss
+#                _outputsens = combineblusens(sss, _outputsens)
+                _outputsens = combineredsens(sss, _outputsens)
+                for i in string.split(sss, ','):
+                    floyds.util.delete(i)
+
         data, hdr = pyfits.getdata(standardfile, 0, header=True)  # added later
         data1, hdr1 = pyfits.getdata(_outputsens, 0, header=True)  # added later
         floyds.util.delete(_outputsens)  # added later
@@ -1404,23 +1441,39 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     floyds.util.delete(stdusedclean)
                     _function = 'spline3'
                     iraf.specred.sarith(input1=imgl, op='/', input2=atmofile, output=stdusedclean, format='multispec')
-                    _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8,
-                                                                     _interactive)
+                    if _tel in ['fts','coj']:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8,
+                                                                         _interactive,'4600:6730,6720:10000')
+                    else:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8,
+                                                                         _interactive)
+
                     if setup not in atmo:
                         atmo[setup] = [atmofile]
                     else:
                         atmo[setup].append(atmofile)
                 else:
                     _function = 'spline3'
-                    _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive,
-                                                                     '3400:4700')  #,3600:4300')
+                    if _tel in ['fts','coj']:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8,
+                                                                         _interactive)
+                    else:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive,
+                                                                         '3400:4700')  #,3600:4300')
 
                 if _outputsens2 not in sens:
+                    print _outputsens2
                     sens.append(_outputsens2)
-#                if setup not in sens:
-#                    sens[setup] = [_outputsens2]
-#                else:
-#                    sens[setup].append(_outputsens2)
+                    if _verbose:
+                        #    calibrate the standard using the sensitivity just obtained  
+                        _airmass = readkey3(hdrs, 'airmass')
+                        _exptime = readkey3(hdrs, 'exptime')
+                        imgf = re.sub('_l.fits', '_f.fits', imgl)
+                        floyds.util.delete(imgf)
+                        qqq = iraf.specred.calibrate(input=imgl, output=imgf, sensiti=_outputsens2, extinct='yes', flux='yes',
+                                                     extinction=_extinctdir + _extinction, observatory=_observatory,
+                                                     airmass=_airmass, ignorea='yes', exptime=_exptime, fnu='no')
+
 
     if _verbose:
         print wavecalib
@@ -1937,6 +1990,42 @@ def combineblusens(imglist, imgout='pippo.fits'):
     pyfits.writeto(imgout, float32(data1), hdr)
     return imgout
     ##################################################
+
+def combineredsens(imglist, imgout='pippo.fits'):
+    import pyfits
+    import string
+    from pyfits import open as popen
+    from numpy import compress, where, array, arange, float32
+    from numpy import interp as ninterp
+    from pyraf import iraf
+    import floyds
+
+    floyds.util.delete(imgout)
+    sss = iraf.specred.scombine(imglist, output=imgout, combine='average', reject='none',
+                                scale='none', weight='none', Stdout=1)
+    return imgout
+
+#    img1, img2 = string.split(imglist, ',')
+#    xx1, yy1 = floyds.util.readspectrum(img1)
+#    xx2, yy2 = floyds.util.readspectrum(img2)
+#    yy22 = ninterp(xx2, xx1, yy1)
+#    if len(where(yy22 - yy1 > 0)) > 0:
+#        xfix1 = xx1[where(yy22 - yy1 > 0)][0]
+#        xfix2 = xx1[where(yy22 - yy1 > 0)][-1]
+#    else:
+#        xfix1 = xx1[argmin(abs(yy22 - yy1))]
+#        xfix2 = xx1[argmin(abs(yy22 - yy1))]
+#    print xfix1,xfix2    
+
+#    xx11 = compress(xx1 <= xfix1, xx2)
+#    yy11 = compress(xx1 <= xfix1, yy22)
+#    yyfin3 = array(list(yy1) + list(yy22) 
+#    data1, hdr = pyfits.getdata(img1, 0, header=True)
+#    floyds.util.delete(imgout)
+#    data1 = array(yyfin3)
+#    pyfits.writeto(imgout, float32(data1), hdr)
+    ##################################################
+
 
 
 def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, _cosmic=True):
