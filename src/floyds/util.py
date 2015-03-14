@@ -1165,3 +1165,10 @@ def peakdet(v, delta, x=None):
     return array(maxtab), array(mintab)
 
 ######################################################################
+
+def mjdtoday():
+  from datetime import datetime
+  today = datetime.utcnow()
+  mjd0  = datetime(1858,11,17)
+  mjd = (today - mjd0).days
+  return mjd
