@@ -195,7 +195,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
     import floyds
     import datetime
     # import matplotlib
-    MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 01, 01)).days
+    MJDtoday = floyds.util.mjdtoday()
     from floyds.util import delete, readhdr, readkey3, updateheader, name_duplicate
     from pyfits import open as popen
     from numpy import float32
@@ -264,7 +264,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                                   caldir=_caldir, observa=_observatory, star_nam=refstar, airmass=_airmass,
                                   exptime=_exptime, interac=_interactive)
             #     sens full range
-            if str(readkey3(hdrs, 'grism')) == 'blu':
+            if str(readkey3(hdrs, 'grism')) == 'blu' and _tel not in ['fts', 'coj']:
                 floyds.floydsspecdef.cutstd(_outputstd, start=3600, end=3900, out=False)
                 floyds.floydsspecdef.cutstd(_outputstd, start=4300, end=4600, out=False)
                 floyds.floydsspecdef.cutstd(_outputstd, start=5990, end=6012, out=False)
@@ -291,9 +291,34 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                 _outputsens = combineblusens(sss, _outputsens)
                 print sss
                 print _outputsens
-                raw_input('go on')
-#                for i in string.split(sss, ','):
-#                    floyds.util.delete(i)
+#                raw_input('go on')
+                for i in string.split(sss, ','):
+                    floyds.util.delete(i)
+            elif str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj']:
+                print 'split blue sens'
+                sss=''
+                for jj in range(0, len(string.split(sample, ','))):
+                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                    std0 = '_stdcut' + str(jj) + '.fits'
+                    std1 = '_stdcut' + str(jj)
+                    sens1 = '_senscut' + str(jj) + '.fits'
+                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
+                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
+                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
+                                      observa=_observatory, star_nam=refstar, airmass=_airmass,
+                                      exptime=_exptime, interac=_interactive)
+                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
+                                      observa=_observatory, graphs='sri', functio=_function, order=100, interac=_interactive)
+                    if sss:
+                        sss = sss + ',' + sens1
+                    else:
+                        sss = sens1
+
+                    floyds.util.delete(std1 + ',' + std0)
+                print sss
+                _outputsens = combineredsens(sss, _outputsens)
+                for i in string.split(sss, ','):
+                    floyds.util.delete(i)
             else:
                 print 'split red sens'
                 sss=''
@@ -316,13 +341,16 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
 
                     floyds.util.delete(std1 + ',' + std0)
                 print sss
-#                _outputsens = combineblusens(sss, _outputsens)
                 _outputsens = combineredsens(sss, _outputsens)
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
 
-        data, hdr = pyfits.getdata(standardfile, 0, header=True)  # added later
+        hdr = pyfits.getheader(standardfile)  # added later
         data1, hdr1 = pyfits.getdata(_outputsens, 0, header=True)  # added later
+
+        for key in ['ctype1', 'crval1', 'crpix1', 'cdelt1', 'cd1_1']:
+            hdr.update(key, hdr1[key], savecomment=True) # keep wavelength calibration from sensfuncs
+
         floyds.util.delete(_outputsens)  # added later
         floyds.util.delete(_outputstd)
         pyfits.writeto(_outputsens, float32(data1), hdr)  # added later
@@ -457,17 +485,18 @@ def checkwavestd(imgex, _interactive, _type=1):
         floyds.util.delete('atmo2_' + _tel + '_' + imgex)
     else:
         shift = 0
-    zro = popen(imgex)[0].header.get('CRVAL1')
-    if _interactive.upper() in ['YES', 'Y']:
-        answ = raw_input('\n### do you want to correct the wavelength calibration with this shift: ' +
-                         str(shift) + ' [[y]/n] ? ')
-        if not answ: answ = 'y'
-        if answ.lower() in ['y', 'yes']:
-            floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + float(shift), '']})
-            floyds.util.updateheader(imgex, 0, {'shift' + _arm[0]: [float(shift), '']})
-    else:
-        floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + float(shift), '']})
-        floyds.util.updateheader(imgex, 0, {'shift' + _arm[0]: [float(shift), '']})
+##### this is now done in floydsspecreduction to match the blue part #####
+#    zro = popen(imgex)[0].header.get('CRVAL1')
+#    if _interactive.upper() in ['YES', 'Y']:
+#        answ = raw_input('\n### do you want to correct the wavelength calibration with this shift: ' +
+#                         str(shift) + ' [[y]/n] ? ')
+#        if not answ: answ = 'y'
+#        if answ.lower() in ['y', 'yes']:
+#            floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + float(shift), '']})
+#            floyds.util.updateheader(imgex, 0, {'shift' + _arm[0]: [float(shift), '']})
+#    else:
+#        floyds.util.updateheader(imgex, 0, {'CRVAL1': [zro + float(shift), '']})
+#        floyds.util.updateheader(imgex, 0, {'shift' + _arm[0]: [float(shift), '']})
     return shift
 
 
@@ -617,7 +646,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
     import datetime
     from numpy import arange, float32
 
-    MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 01, 01)).days
+    MJDtoday = floyds.util.mjdtoday()
     from pyraf import iraf
 
     iraf.noao(_doprint=0)
@@ -636,9 +665,9 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
     iraf.specred.dispaxi = 1
     imgex = re.sub('.fits', '_ex.fits', img)
     imgfast = re.sub(str(MJDtoday) + '_', '', img)
-    if not os.path.isfile(imgex) and not os.path.isfile(
-                    'database/ap' + re.sub('.fits', '', img)) and not os.path.isfile(
-                    'database/ap' + re.sub('.fits', '', imgfast)):
+    if _type=='agn' or (not os.path.isfile(imgex)
+        and not os.path.isfile('database/ap' + re.sub('.fits', '', img))
+        and not os.path.isfile('database/ap' + re.sub('.fits', '', imgfast))):
         _new = 'yes'
         _extract = 'yes'
     else:
@@ -646,8 +675,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             if _interactive.upper() in ['YES', 'Y']:
                 answ = 'x'
                 while answ not in ['o', 'n', 's']:
-                    answ = raw_input(
-                        '\n### New extraction [n], extraction with old parameters [o], skip extraction [s] ? [o]')
+                    answ = raw_input('\n### New extraction [n], extraction with old parameters [o], skip extraction [s] ? [o] ')
                     if not answ: answ = 'o'
                 if answ == 'o':
                     _new, _extract = 'no', 'yes'
@@ -723,8 +751,8 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             _edit = 'yes'
             _review = 'yes'
             _resize = dv[_type]['_resize']
-        #   extraction for agn or std, we always reset the parameters 
-        if _type in ['agn', 'std']:
+        #   extraction for agn, we always reset the parameters 
+        if _type=='agn':
             if os.path.isfile('database/ap' + re.sub('.fits', '', img)):
                 os.system('rm database/ap' + re.sub('.fits', '', img))
 
@@ -903,7 +931,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         iraf.ccdred.verbose = 'no'
     now = datetime.datetime.now()
     datenow = now.strftime('20%y%m%d%H%M')
-    MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 01, 01)).days
+    MJDtoday = floyds.util.mjdtoday()
     outputlist = []
     hdr0 = floyds.util.readhdr(re.sub('\n', '', files[0]))
     _gain = readkey3(hdr0, 'gain')
@@ -1380,7 +1408,20 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             if setup[0] == 'red':
                                 print '\n### check standard wave calib'
                                 print imgl
-                                floyds.floydsspecdef.checkwavestd(imgl, _interactive, 2)
+                                shiftred = floyds.floydsspecdef.checkwavestd(imgl, _interactive, 2)
+                                zro = popen(imgl)[0].header.get('CRVAL1')
+                                if _interactive.upper() in ['YES', 'Y']:
+                                    print 'Figure out the shift of H-alpha (should be near 6563).'
+                                    iraf.onedspec.splot(imgl + '[*,1,1]')
+                                    num = raw_input('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
+                                    if not num:
+                                        num = shiftred
+                                    floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
+                                    floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(num), '']})
+                                else:
+                                    print 'shifting wavelength calibration by', shiftred
+                                    floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(shiftred), '']})
+                                    floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
                             else:
                                 print re.sub('blue','red',imgl)
                                 if os.path.isfile(re.sub('blue','red',imgl)):
@@ -1389,20 +1430,15 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                     if shiftred:
                                         zro = popen(imgl)[0].header.get('CRVAL1')
                                         if _interactive.upper() in ['YES', 'Y']:
-                                            answ = raw_input('\n### do you want to correct the wavelength calibration'
-                                            ' with this shift: ' + str(shiftred) + ' [[y]/n] ? ')
-                                            if not answ:
-                                                answ = 'y'
-                                            if answ.lower() in ['y', 'yes']:
-                                                num = raw_input(' how much [ ' + str(shiftred) + ' ] ? ')
-                                                if not num:
-                                                    num = shiftred
-                                                floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
-                                                floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(num), '']})
-#                                                floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + int(shiftred), '']})
-#                                                floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
+                                            print 'Figure out the shift of H-beta (should be near 4861).'
+                                            iraf.onedspec.splot(imgl + '[*,1,1]')
+                                            num = raw_input('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
+                                            if not num:
+                                                num = shiftred
+                                            floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
+                                            floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(num), '']})
                                         else:
-                                            print 'no interactive'
+                                            print 'shifting wavelength calibration by', shiftred
                                             floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(shiftred), '']})
                                             floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
                                     else:
@@ -1452,24 +1488,20 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     _function = 'spline3'
                     iraf.specred.sarith(input1=imgl, op='/', input2=atmofile, output=stdusedclean, format='multispec')
                     if _tel in ['fts','coj']:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8,
-                                                                         _interactive,'4600:6730,6720:10000')
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive,'4600:6730,6720:10000')
                     else:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8,
-                                                                         _interactive)
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive)
 
                     if setup not in atmo:
                         atmo[setup] = [atmofile]
                     else:
                         atmo[setup].append(atmofile)
-                else:
+                else: # blue arm
                     _function = 'spline3'
                     if _tel in ['fts','coj']:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8,
-                                                                         _interactive)
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900')
                     else:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive,
-                                                                         '3400:4700')  #,3600:4300')
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive, '3400:4700')  #,3600:4300')
 
                 if _outputsens2 not in sens:
                     print _outputsens2
@@ -2001,12 +2033,12 @@ def combineblusens(imglist, imgout='pippo.fits'):
     return imgout
     ##################################################
 
-def combineredsens(imglist, imgout='pippo.fits'):
-    import pyfits
-    import string
-    from pyfits import open as popen
-    from numpy import compress, where, array, arange, float32
-    from numpy import interp as ninterp
+def combineredsens(imglist, imgout='pippo.fits'): # used for both arms of FTS
+#    import pyfits
+#    import string
+#    from pyfits import open as popen
+#    from numpy import compress, where, array, arange, float32
+#    from numpy import interp as ninterp
     from pyraf import iraf
     import floyds
 
