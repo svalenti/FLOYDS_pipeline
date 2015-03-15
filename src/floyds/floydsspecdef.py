@@ -728,6 +728,16 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             if os.path.isfile('database/ap' + re.sub('.fits', '', img)):
                 os.system('rm database/ap' + re.sub('.fits', '', img))
 
+        print _gain,_rdnoise
+        print dv[_type]['_b_sample']
+        print dv[_type]['_t_nlost']
+        print dv[_type]['_t_order']
+        print dv[_type]['_radius']
+        print dv[_type]['_weights']
+        print dv[_type]['_nsum']
+        print dv[_type]['_t_step']
+        print dv[_type]['_t_step']
+        print dv[_type]['_b_naver']
         iraf.specred.apall(img, output=imgex, referen=_reference, trace=_trace, fittrac=_fittrac, find=_find,
                            recenter=_recenter, edit=_edit,
                            nfind=1, extract='yes', backgro='fit', gain=_gain, readnoi=_rdnoise, lsigma=4, usigma=4,
