@@ -3,3 +3,9 @@ v1.0, 20130301 -- Initial release.
 - Floyds pipeline version 1 works for floyds at FTN and FTS 
 
 - reduction keywords following reduction keywords from photometry, to be added
+
+__________
+V2.2.2     20150315 
+release with new way of computing sensitivity function for FTS
+
+
