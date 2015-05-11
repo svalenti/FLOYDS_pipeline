@@ -961,12 +961,14 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             if 'blu' not in lista: lista['blu'] = []
             if 'red' not in lista: lista['red'] = []
             _object0 = floyds.util.readkey3(hdr0, 'object')
-            _object0 = re.sub(' ', '', _object0)
-            _object0 = re.sub('/', '_', _object0)
-            _object0 = re.sub('\(', '', _object0)
-            _object0 = re.sub('\[', '', _object0)
-            _object0 = re.sub('\)', '', _object0)
-            _object0 = re.sub('\]', '', _object0)
+            # remove all the following characters from the filename:
+            _object0 = re.sub(':', '', _object0) # colon
+            _object0 = re.sub('/', '', _object0) # slash
+            _object0 = re.sub('\s', '', _object0) # any whitespace
+            _object0 = re.sub('\(', '', _object0) # open parenthesis
+            _object0 = re.sub('\[', '', _object0) # open square bracket
+            _object0 = re.sub('\)', '', _object0) # close parenthesis
+            _object0 = re.sub('\]', '', _object0) # close square bracket
             _date0 = readkey3(hdr0, 'date-night')
             _tel = readkey3(hdr0, 'TELID')
             _type = readkey3(hdr0, 'OBSTYPE')
