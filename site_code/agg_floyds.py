@@ -46,8 +46,8 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
     acq_cam, spec_cam = determine_camnames(site)
     if debug: print "Cameras are:", acq_cam, spec_cam
 
-    acq_root = os.path.join('/mnt/data', acq_cam)
-    spec_root = os.path.join('/mnt/data', spec_cam)
+    acq_root = os.path.join('/mnt/data/daydirs', acq_cam+os.sep)
+    spec_root = os.path.join('/mnt/data/daydirs', spec_cam+os.sep)
 
 #aggregate data for each night
     i=0
@@ -64,11 +64,13 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 	    os.makedirs(dir_for_guideimgs)
 
 #        acq_images = glob.glob('/icc2/tmp/[s,r]*'+_night+'*.fits')
-	acq_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits'
+	acq_glob = acq_root+_night+'/flash/*'+acq_cam+'*'+_night+'*01.fits'
+#        print "acq_glob=",acq_glob
 	acq_images = glob.glob(acq_glob)
         acq_images.sort()
 #        spec_images = glob.glob('/icc/tmp/[g,f]*'+_night+'*.fits')
-        spec_glob = spec_root+'/*'+spec_cam+'*'+_night+'*02.fits'
+        spec_glob = spec_root+_night+'/flash/*'+spec_cam+'*'+_night+'*02.fits'
+        if debug >2: print "spec_glob=", spec_glob
 	spec_images  = glob.glob(spec_glob)
         spec_images.sort()
         if (acq_images == []) & (spec_images == []):
@@ -77,7 +79,7 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 #Make a guider log from the XML files
 
 #        gxml_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits.inst.guide.xml'
-        gxml_glob = acq_root+'/*'+acq_cam+'*'+_night+'*01.fits.guide.xml'
+        gxml_glob = acq_root+_night+'/cat/*'+acq_cam+'*'+_night+'*01.fits.guide.xml'
         gxml_images  = glob.glob(gxml_glob)
         gxml_images.sort()
         if len(gxml_images) > 0:
@@ -132,6 +134,7 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
 
 #            guide_xml_file = _acqimage.replace('.fits','.fits.inst.guide.xml')
             guide_xml_file = _acqimage.replace('.fits','.fits.guide.xml')
+            guide_xml_file = guide_xml_file.replace('flash/','cat/')
             guide_dateobs = prihdr['DATE-OBS']
 	    if guide_dateobs != '' and guide_dateobs != 'N/A' and os.path.exists(guide_xml_file):
 	    	for char in ['T','-',':']:
@@ -158,9 +161,9 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
             acqfile_destpath = os.path.join(dir_for_guideimgs, acqfile_dest)
             
             yo = _acqimage #.replace(acq_root,'/lco/floyds/tmp/')
-            jpgfile = yo.replace('.fits','.jpg')
+            jpgfile = yo.replace('.fits','.jpg').replace('flash/', 'flash/jpg/')
             jpgfile_dest = os.path.basename(yo)
-            jpgfile_dest = jpgfile_dest.replace('.fits', '.jpg')
+            jpgfile_dest = jpgfile_dest.replace('.fits', '.jpg').replace('flash/', 'flash/jpg/')
             jpgfile_destpath = os.path.join(dir_for_guideimgs, jpgfile_dest)
             
             yo = _acqimage #.replace(acq_root,'/lco/floyds/tmp/')
@@ -291,8 +294,12 @@ def agg_floyds(nightlist,site='floyds.coj.lco.gtn',tmp_dir="./", debug=False):
             copy_cmd = 'cp ' + _specimage +' '+ dir_for_guideimgs + '/'
             if debug >2: print copy_cmd
             os.system(copy_cmd)
-            _specimage_jpg = _specimage.replace('.fits', '.jpg') 
-            copy_cmd = 'cp ' + _specimage_jpg +' ' + dir_for_guideimgs+'/'
+            _specimage_jpg = _specimage.replace('02.fits', '01.jpg').replace('flash/','flash/jpg/')
+            if debug >2: print "Specjpg  =",_specimage_jpg
+            _specimage_jpg_dest = os.path.basename(_specimage_jpg)
+            _specimage_jpg_dest = _specimage_jpg_dest.replace('01.jpg','02.jpg')
+            if debug >2: print "Specjpgds=",_specimage_jpg_dest
+            copy_cmd = 'cp ' + _specimage_jpg +' ' + dir_for_guideimgs+'/' + _specimage_jpg_dest
             if debug >2: print copy_cmd
             os.system(copy_cmd)
            
@@ -434,7 +441,7 @@ def find_first_guide(night,acqimages,acq_utstart,acq_utstop,acq_mjd,site):
 
 # Determine acquisition camera name and therefore path
     acq_cam, spec_cam = determine_camnames(site)
-    imgdir = os.path.join('/mnt/data/', acq_cam + os.sep)
+    imgdir = os.path.join('/mnt/data/daydirs/', acq_cam,night,'flash' + os.sep)
 #    print acq_cam, imgdir
 
 
@@ -573,7 +580,7 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
     if guideimage != 'Null':
     	link_cmd = 'ln -s '+guideimage+' '+new_dir+'/'
     else:
-        link_cmd = 'ln -s /var/www/html/images/no_guide.png '+new_dir+'/'
+        link_cmd = 'ln -sf /var/www/html/images/no_guide.png '+new_dir+'/'
     os.system(link_cmd)
     print "link_cmd3=", link_cmd
     
@@ -810,11 +817,19 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
 
 
     for _specs in specslist:
+        if debug >2: print "specs before=", _specs
         _specs = _specs.replace(spec_root,data_dir+'/')
-        _specsjpg = _specs.replace('.fits','.jpg')
+        if '/var/www/html' not in _specs:
+            _specsjpg = _specs.replace('02.fits','01.jpg').replace('flash/', 'flash/jpg/')
+        else:
+            _specsjpg = _specs.replace('.fits', '.jpg')
+        
+        if debug >2: print "specs  after=", _specs
+        if debug >2: print "specsjpg=", _specsjpg
         specindex = _specs.rfind('/')
         spec_in_curr = _specs[specindex+1:]
         specjpg_in_curr = spec_in_curr.replace('.fits','.jpg')
+        if debug >2: print "specjpg_in_curr=", specjpg_in_curr
         try:
             os.remove(new_dir+'/'+spec_in_curr)
         except:
@@ -827,7 +842,7 @@ def mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_di
         link_spec = 'ln -s '+_specs+' '+new_dir+'/'
         retval = os.system(link_spec)
         print "Spec link cmd,status=",link_spec, retval
-        link_spec='ln -s '+_specsjpg+' '+new_dir+'/'
+        link_spec='ln -s '+_specsjpg+' '+new_dir+'/'+specjpg_in_curr
         retval = os.system(link_spec)
         print "Spec link cmd,status=",link_spec, retval
 
