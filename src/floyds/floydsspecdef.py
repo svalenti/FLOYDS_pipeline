@@ -955,6 +955,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     flatlist = {}
     flatlistd = {}
     arclist = {}
+    max_length = 14
     for img in files:
         hdr0 = readhdr(img)
         if readkey3(hdr0, 'naxis2') >= 500:
@@ -962,6 +963,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             if 'red' not in lista: lista['red'] = []
             _object0 = floyds.util.readkey3(hdr0, 'object')
             # remove all the following characters from the filename:
+            _object0=floyds.util.readkey3(hdr0,'object')
             _object0 = re.sub(':', '', _object0) # colon
             _object0 = re.sub('/', '', _object0) # slash
             _object0 = re.sub('\s', '', _object0) # any whitespace
@@ -969,6 +971,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             _object0 = re.sub('\[', '', _object0) # open square bracket
             _object0 = re.sub('\)', '', _object0) # close parenthesis
             _object0 = re.sub('\]', '', _object0) # close square bracket
+            if len(_object0) > max_length:
+                _object0 = _object0[:max_length]
             _date0 = readkey3(hdr0, 'date-night')
             _tel = readkey3(hdr0, 'TELID')
             _type = readkey3(hdr0, 'OBSTYPE')
@@ -2291,9 +2295,9 @@ def fringing_classicmethod(flatfile, img, _inter, _sample, _order, arm):
     xdim = hdrx['NAXIS1']
     ydim = hdrx['NAXIS2']
     if arm == 'red':
-        floyds.util.delete(re.sub('.fits', 'cut.fits', flatfile))
-        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'cut.fits', flatfile), verbose='no')
-        flatfile = re.sub('.fits', 'cut.fits', flatfile)
+        floyds.util.delete(re.sub('.fits', 'c.fits', flatfile))
+        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
+        flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
         print ydim, '[*,1:' + str(int(ydim) - 1) + ']'
         iraf.specred.response(flatfile, normaliz=flatfile + '[*,1:' + str(int(ydim) - 1) + ']',
@@ -2450,10 +2454,10 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
     iraf.specred.aptrace.step = 10
     iraf.specred.aptrace.nlost = 10
     if arm == 'red':
-        floyds.util.delete(re.sub('.fits', 'cut.fits', flatfile))
-        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'cut.fits', flatfile), verbose='no')
+        floyds.util.delete(re.sub('.fits', 'c.fits', flatfile))
+        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
         iraf.imarith(flatfile, '/', flatfile, 'norm.fits', verbose='no')
-        flatfile = re.sub('.fits', 'cut.fits', flatfile)
+        flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
         iraf.unlearn(iraf.specred.apflatten)
         print flatfile, _inter, _order, _sample
