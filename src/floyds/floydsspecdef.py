@@ -187,7 +187,7 @@ def correctfringing(imgex, fringingmask):
     return imgex
 
 
-def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sample='*'):
+def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sample='*', fts_contaminated=False):
     import re
     import os
     import sys
@@ -264,7 +264,32 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                                   caldir=_caldir, observa=_observatory, star_nam=refstar, airmass=_airmass,
                                   exptime=_exptime, interac=_interactive)
             #     sens full range
-            if str(readkey3(hdrs, 'grism')) == 'blu' and _tel not in ['fts', 'coj']:
+            if str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj'] and fts_contaminated:
+                print 'split blue sens'
+                sss=''
+                for jj in range(0, len(string.split(sample, ','))):
+                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                    std0 = '_stdcut' + str(jj) + '.fits'
+                    std1 = '_stdcut' + str(jj)
+                    sens1 = '_senscut' + str(jj) + '.fits'
+                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
+                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
+                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
+                                      observa=_observatory, star_nam=refstar, airmass=_airmass,
+                                      exptime=_exptime, interac=_interactive)
+                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
+                                      observa=_observatory, graphs='sri', functio=_function, order=100, interac=_interactive)
+                    if sss:
+                        sss = sss + ',' + sens1
+                    else:
+                        sss = sens1
+
+                    floyds.util.delete(std1 + ',' + std0)
+                print sss
+                _outputsens = combineredsens(sss, _outputsens)
+                for i in string.split(sss, ','):
+                    floyds.util.delete(i)
+            elif str(readkey3(hdrs, 'grism')) == 'blu':
                 floyds.floydsspecdef.cutstd(_outputstd, start=3600, end=3900, out=False)
                 floyds.floydsspecdef.cutstd(_outputstd, start=4300, end=4600, out=False)
                 floyds.floydsspecdef.cutstd(_outputstd, start=5990, end=6012, out=False)
@@ -291,35 +316,9 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                 _outputsens = combineblusens(sss, _outputsens)
                 print sss
                 print _outputsens
-#                raw_input('go on')
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
-            elif str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj']:
-                print 'split blue sens'
-                sss=''
-                for jj in range(0, len(string.split(sample, ','))):
-                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
-                    std0 = '_stdcut' + str(jj) + '.fits'
-                    std1 = '_stdcut' + str(jj)
-                    sens1 = '_senscut' + str(jj) + '.fits'
-                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
-                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
-                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
-                                      observa=_observatory, star_nam=refstar, airmass=_airmass,
-                                      exptime=_exptime, interac=_interactive)
-                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
-                                      observa=_observatory, graphs='sri', functio=_function, order=100, interac=_interactive)
-                    if sss:
-                        sss = sss + ',' + sens1
-                    else:
-                        sss = sens1
-
-                    floyds.util.delete(std1 + ',' + std0)
-                print sss
-                _outputsens = combineredsens(sss, _outputsens)
-                for i in string.split(sss, ','):
-                    floyds.util.delete(i)
-            else:
+            else: # red arm
                 print 'split red sens'
                 sss=''
                 for jj in range(0, len(string.split(sample, ','))):
@@ -874,7 +873,7 @@ def imreplace_region(img):
 #####################################################
 def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listbias, _listarc, _cosmic, _ext_trace,
                         _dispersionline, liststandard, listatmo, _automaticex, _classify=False, _verbose=False,
-                        smooth=1, fringing=1, _typefromuser='obj'):
+                        smooth=1, fringing=1, _typefromuser='obj', fts_contaminated=False):
     import floyds
     from floyds.util import readhdr, readkey3
     import string, re, os, sys
@@ -1493,8 +1492,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     floyds.util.delete(stdusedclean)
                     _function = 'spline3'
                     iraf.specred.sarith(input1=imgl, op='/', input2=atmofile, output=stdusedclean, format='multispec')
-                    if _tel in ['fts','coj']:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive,'4600:6730,6720:10000')
+                    if _tel in ['fts','coj'] and fts_contaminated:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive,'4600:6730,6720:10000', fts_contaminated)
                     else:
                         _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive)
 
@@ -1504,8 +1503,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         atmo[setup].append(atmofile)
                 else: # blue arm
                     _function = 'spline3'
-                    if _tel in ['fts','coj']:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900')
+                    if _tel in ['fts','coj'] and fts_contaminated:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900', fts_contaminated)
                     else:
                         _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive, '3400:4700')  #,3600:4300')
 
