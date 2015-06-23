@@ -1476,15 +1476,17 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 ######################################################
                 hdrs = readhdr(imgl)
                 _tel = readkey3(hdrs, 'TELID')
+                datenight = readkey3(hdrs, 'date-night')
                 if _tel not in ['fts', 'ftn']:  _tel = readkey3(hdrs, 'SITEID')
                 try:
-                    _outputsens2 = 'sens_' + _tel + '_' + str(readkey3(hdrs, 'date-night')) + '_' + str(
-                        readkey3(hdrs, 'grism')) + \
+                    _outputsens2 = 'sens_' + _tel + '_' + datenight + '_' + str(readkey3(hdrs, 'grism')) + \
                                    '_' + re.sub('.dat', '', readkey3(hdrs, 'stdname')) + '_' + str(MJDtoday)
                 except:
                     sys.exit('Error: missing header -stdname- in standard ' + str(standardfile) + '  ')
 
                 print '\n### compute sensitivity function and atmofile'
+                if fts_contaminated is not None: fts_contam = fts_contaminated         # if an option is given on the command line, use that
+                else: fts_contam = (datenight > '20140915' and datenight < '20150616') # by default, use the period that FTS FLOYDS had glycol on the mirrors
                 if setup[0] == 'red':
                     atmofile = floyds.floydsspecdef.telluric_atmo(imgl)
                     print atmofile
@@ -1492,8 +1494,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     floyds.util.delete(stdusedclean)
                     _function = 'spline3'
                     iraf.specred.sarith(input1=imgl, op='/', input2=atmofile, output=stdusedclean, format='multispec')
-                    if _tel in ['fts','coj'] and fts_contaminated:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive,'4600:6730,6720:10000', fts_contaminated)
+                    if _tel in ['fts','coj'] and fts_contam:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive, '4600:6730,6720:10000', fts_contam)
                     else:
                         _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive)
 
@@ -1503,8 +1505,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         atmo[setup].append(atmofile)
                 else: # blue arm
                     _function = 'spline3'
-                    if _tel in ['fts','coj'] and fts_contaminated:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900', fts_contaminated)
+                    if _tel in ['fts','coj'] and fts_contam:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900', fts_contam)
                     else:
                         _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive, '3400:4700')  #,3600:4300')
 

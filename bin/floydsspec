@@ -43,8 +43,10 @@ if __name__ == "__main__":
                       help='use for telluric correction the closest telluric file from this list')
     parser.add_option("--typeobject", dest="typeobject", default='obj', type="str",
                       help='choose extraction parameters depending on the type of object [obj,agn]')
-    parser.add_option("--fts-contaminated", dest="fts_contaminated", action="store_true",
-                      help='use a high-order fit for the sensitivity function (use this to rereduce data from 2014-09-15 to 2015-06-16)')
+    parser.add_option("--fts-contaminated", dest="fts_contaminated", default=None, action="store_true",
+                      help='force a high-order fit for the sensitivity function (used by default for FTS data from 2014-09-15 to 2015-06-16)')
+    parser.add_option("--fts-cleaned", dest="fts_contaminated", default=None, action="store_false",
+                      help='prevent a high-order fit for the sensitivity function (used by default for FTS data from 2014-09-15 to 2015-06-16)')
     option, args = parser.parse_args()
     ############################################################
     _typefromuser = option.typeobject
