@@ -954,7 +954,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     flatlist = {}
     flatlistd = {}
     arclist = {}
-    max_length = 14
+    max_length = 22 # max length of FITS header values is 68, and filenames must fit in header
     for img in files:
         hdr0 = readhdr(img)
         if readkey3(hdr0, 'naxis2') >= 500:
@@ -1869,8 +1869,8 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
     from pyraf import iraf
 
     # read in spectra and headers, determine third dimension of images
-    _x0, _y0 = floyds.util.readspectrum(_img0)
-    _x1, _y1 = floyds.util.readspectrum(_img1)
+    _x0, _ = floyds.util.readspectrum(_img0)
+    _x1, _ = floyds.util.readspectrum(_img1)
     hdr0 = pyfits.getheader(_img0)
     hdr1 = pyfits.getheader(_img1)
     if 'NAXIS3' in hdr0 and 'NAXIS3' in hdr1 and hdr0['NAXIS3'] == hdr1['NAXIS3']:
@@ -1878,95 +1878,71 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
     else:
         dimension = 1
 
-    # rename so that 0 = blue and 1 = red
+    # figure out which is blue and which is red
     if min(_x0) < min(_x1):
-        x0, y0 = _x0, _y0
-        x1, y1 = _x1, _y1
-        img0, img1 = _img0, _img1
+        xblue = np.array(_x0)
+        xred  = np.array(_x1)
+        imgblue, imgred = _img0, _img1
     else:
-        x0, y0 = _x1, _y1
-        x1, y1 = _x0, _y0
-        img0, img1 = _img1, _img0
+        xblue = np.array(_x1)
+        xred  = np.array(_x0)
+        imgblue, imgred = _img1, _img0
 
-    # extract overlapping region
-    limmin = max(min(x0), min(x1))  # lower limit of overlap
-    limmax = min(max(x0), max(x1))  # upper limit of overlap
-    x01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limmax), x0)  # x of overlap
-    y01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limmax), y0)  # y of overlap from blue side
-    x11 = x01  # use x of blue part in overlap
-    y11 = np.interp(x01, x1, y1)  # resample red spectrum over x of blue
-    if not num:
-        num = len(x01) / 10  # divide overlapping region into tenths
+    # num is the index in xred corresponding to 1st decile of the overlap
+    if not num: num = np.searchsorted(xred, max(xblue)) / 10
 
     # rescale red & blue to match
-    if scale:
-        integral0 = np.trapz(y01, x01)  # flux in blue
-        integral1 = np.trapz(y11, x11)  # flux in red
-        if integral0 < integral1:  # scale to side with higher flux
-            A0, A1 = integral1 / integral0, 1
-        else:
-            A0, A1 = 1, integral0 / integral1
-    else:
-        A0, A1 = 1, 1
+    if scale: scomb_scale = 'median'
+    else:     scomb_scale = 'none'
 
-    floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
+    floyds.util.delete('s1.fits,s2.fits')
     floyds.util.delete(_output)
-
     if dimension == 1:
-        iraf.scopy(img0, 's1.fits', w1='INDEF', w2=x01[2 * num],
-                   rebin='no')  # take blue part up to 20% of overlapping region
-        iraf.scopy(img1, 's2.fits', w1=x01[num], w2='INDEF',
-                   rebin='no')  # take red part starting from 10% of overlapping region
-        iraf.sarith(input1='s1.fits', op='*', input2=A0, output='s11.fits')  # rescale
-        iraf.sarith(input1='s2.fits', op='*', input2=A1, output='s22.fits')
-        iraf.specred.scombine(input='s11.fits,s22.fits', w1='INDEF', w2='INDEF',
-                              output=_output)  # combine by averaging 2nd tenth of overlap
+        iraf.scopy(imgblue, 's1.fits', w1='INDEF', w2=xred[2*num], rebin='no') # take 1st-2nd deciles of blue part in overlap
+        iraf.scopy(imgred, 's2.fits', w1=xred[num], w2='INDEF', rebin='no')    # take all but 1st decile of red part in overlap
+        iraf.specred.scombine(input='s1.fits,s2.fits', w1='INDEF', w2='INDEF', output=_output,
+                              scale=scomb_scale, sample=str(xred[num])+':'+str(xred[2*num])) # combine by averaging 2nd decile of overlap
     else:
         print 'more than one dimension'
-        datavecs = np.empty(0, dtype='float32')
+        datavecs = []
         hdrvec = []
-        for layer in range(dimension):
-            outputn = re.sub('.fits', '', _output) + '_' + str(layer + 1) + '.fits'
+        for layer in np.arange(dimension)+1: # IRAF is 1-indexed
+            outputn = re.sub('.fits', '', _output) + '_' + str(layer) + '.fits'
             floyds.util.delete(outputn)
-            floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-            iraf.scopy(img0 + '[*,1,' + str(layer + 1) + ']', 's1.fits', w1='INDEF', w2=x01[2 * num], rebin='no')
-            iraf.scopy(img1 + '[*,1,' + str(layer + 1) + ']', 's2.fits', w1=x01[num], w2='INDEF', rebin='no')
-            iraf.sarith(input1='s1.fits', op='*', input2=A0, output='s11.fits')
-            iraf.sarith(input1='s2.fits', op='*', input2=A1, output='s22.fits')
-            iraf.specred.scombine(input='s11.fits,s22.fits', w1='INDEF', w2='INDEF', output=outputn)
-            datavec, head = pyfits.getdata(outputn, 0, header=True)
-            datavecs = np.append(datavecs, datavec)
+            floyds.util.delete('s1.fits,s2.fits')
+            iraf.scopy(imgblue + '[*,1,' + str(layer) + ']', 's1.fits', w1='INDEF', w2=xred[2*num], rebin='no')
+            iraf.scopy(imgred + '[*,1,' + str(layer) + ']', 's2.fits', w1=xred[num], w2='INDEF', rebin='no')
+            iraf.specred.scombine(input='s1.fits,s2.fits', w1='INDEF', w2='INDEF', output=outputn,
+                                  scale=scomb_scale, sample=str(xred[num])+':'+str(xred[2*num]))
+            datavec, head = pyfits.getdata(outputn, header=True) # these have shape (4440,)
+            datavecs.append(datavec)
             hdrvec.append(head)
+            floyds.util.delete(outputn)
         floyds.util.delete(_output)
         try:
-            hdr0.update('NAXIS1', hdrvec[1]['NAXIS1'], hdrvec[1].comments['NAXIS1'])
-            hdr0.update('CRVAL1', hdrvec[1]['CRVAL1'], hdrvec[1].comments['CRVAL1'])
-            hdr0.update('CD1_1', hdrvec[1]['CD1_1'], hdrvec[1].comments['CD1_1'])
-            hdr0.update('CRPIX1', hdrvec[1]['CRPIX1'], hdrvec[1].comments['CRPIX1'])
+            hdr0.update('NAXIS1', hdrvec[0]['NAXIS1'], hdrvec[0].comments['NAXIS1'])
+            hdr0.update('CRVAL1', hdrvec[0]['CRVAL1'], hdrvec[0].comments['CRVAL1'])
+            hdr0.update('CD1_1', hdrvec[0]['CD1_1'], hdrvec[0].comments['CD1_1'])
+            hdr0.update('CRPIX1', hdrvec[0]['CRPIX1'], hdrvec[0].comments['CRPIX1'])
         except:
-            hdr0.update('NAXIS1', hdrvec[1]['NAXIS1'], 'Width of image data')
-            hdr0.update('CRVAL1', hdrvec[1]['CRVAL1'], 'wavelength ref.')
-            hdr0.update('CD1_1', hdrvec[1]['CD1_1'], '')
-            hdr0.update('CRPIX1', hdrvec[1]['CRPIX1'], 'Pixel ref.')
-        data3d = np.reshape(datavecs, [dimension, 1, -1])
-        pyfits.writeto(_output, data3d, hdr0)
+            hdr0.update('NAXIS1', hdrvec[0]['NAXIS1'], 'Width of image data')
+            hdr0.update('CRVAL1', hdrvec[0]['CRVAL1'], 'wavelength ref.')
+            hdr0.update('CD1_1', hdrvec[0]['CD1_1'], '')
+            hdr0.update('CRPIX1', hdrvec[0]['CRPIX1'], 'Pixel ref.')
+        data3d = np.rollaxis(np.dstack(datavecs), 2)
+        pyfits.writeto(_output, data3d, hdr0) # this must have shape (4, 1, 4440)
+    floyds.util.delete('s1.fits,s2.fits')
 
-    floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-    for layer in range(dimension):
-        outputn = re.sub('.fits', '', _output) + '_' + str(layer + 1) + '.fits'
-        floyds.util.delete(outputn)
-        header = {}
-        keywords = ['ATMOR', 'ATMOB', 'SENSFUNB', 'SENSFUNR', 'ARCBLU', 'ARCRED', 'FLATRED', 'FLATBLUE', \
-                    'SHIFTR', 'SHIFTB', 'LAMRMS_R', 'LAMNLINR', 'SPE_ER_R', 'LAMRMS_B', 'LAMNLINB', 'SPE_ER_B', \
-                    'SPERES_R', 'SPERES_B']
-
+    header = {}
+    keywords = ['ATMOR', 'ATMOB', 'SENSFUNB', 'SENSFUNR', 'ARCBLU', 'ARCRED', 'FLATRED', 'FLATBLUE',
+                'SHIFTR', 'SHIFTB', 'LAMRMS_R', 'LAMNLINR', 'SPE_ER_R', 'LAMRMS_B', 'LAMNLINB', 'SPE_ER_B',
+                'SPERES_R', 'SPERES_B']
     for key in keywords:
         for hdr in [hdr0, hdr1]:
             if key in hdr:
-                try:
-                    header[key] = [hdr[key], hdr.comments[key]]
-                except:
-                    header[key] = [hdr[key], '']
+                try: comment = hdr.comments[key]
+                except: comment = ''
+                header[key] = (hdr[key], comment)
 
     if 'XMIN' in hdr0 and 'XMIN' in hdr1: _xmin = min(hdr0['XMIN'], hdr1['XMIN'])
     if 'XMAX' in hdr0 and 'XMAX' in hdr1: _xmax = max(hdr0['XMAX'], hdr1['XMAX'])
