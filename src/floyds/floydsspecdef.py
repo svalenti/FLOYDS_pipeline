@@ -1513,15 +1513,15 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 if _outputsens2 not in sens:
                     print _outputsens2
                     sens.append(_outputsens2)
-                    if _verbose:
-                        #    calibrate the standard using the sensitivity just obtained  
-                        _airmass = readkey3(hdrs, 'airmass')
-                        _exptime = readkey3(hdrs, 'exptime')
-                        imgf = re.sub('_l.fits', '_f.fits', imgl)
-                        floyds.util.delete(imgf)
-                        qqq = iraf.specred.calibrate(input=imgl, output=imgf, sensiti=_outputsens2, extinct='yes', flux='yes',
-                                                     extinction=_extinctdir + _extinction, observatory=_observatory,
-                                                     airmass=_airmass, ignorea='yes', exptime=_exptime, fnu='no')
+#                    if _verbose:
+                    #    calibrate the standard using the sensitivity just obtained  
+#                    _airmass = readkey3(hdrs, 'airmass')
+#                    _exptime = readkey3(hdrs, 'exptime')
+#                    imgf = re.sub('_l.fits', '_f.fits', imgl)
+#                    floyds.util.delete(imgf)
+#                    qqq = iraf.specred.calibrate(input=imgl, output=imgf, sensiti=_outputsens2, extinct='yes', flux='yes',
+#                                                 extinction=_extinctdir + _extinction, observatory=_observatory,
+#                                                 airmass=_airmass, ignorea='yes', exptime=_exptime, fnu='no')
 
 
     if _verbose:
@@ -1529,7 +1529,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         print sens
         print atmo
 
-    for tpe in ['obj', 'agn']:
+    for tpe in ['std', 'obj', 'agn']:
         if tpe in wavecalib.keys():
             for setup in wavecalib[tpe].keys():
                 for img in wavecalib[tpe][setup]:
@@ -1544,7 +1544,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         except:
                             print setup
                             print 'no standard'
-                            _sens = floyds.util.searchsens(img, '')[0]  # search in tha archive
+                            _sens = floyds.util.searchsens(img, '')[0]  # search in the archive
 
                     _atmo = ''
                     if listatmo:  _atmo = floyds.util.searchatmo(img, listatmo)[
@@ -1650,8 +1650,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             _output_f = combspec2(lista[0], lista[1], _output_f, scale=True, num=None)
         #            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #            except:         print 'Warning: problem combining the red and blu spectra'
-        if '_e.fits' and _classify:
-            aa, bb, cc = floyds.util.classifyfast(_output, program='snid')
+            if _classify: aa, bb, cc = floyds.util.classifyfast(_output, program='snid')
         if _i: _trim = raw_input('Do you want to trim the edges of the spectrum? [[y]/n] ')
         if not _i or _trim != 'n':  # if not interactive, spectrum is trimmed at default boundaries (3200,10000)
             trimmed = 'trim_' + _output
