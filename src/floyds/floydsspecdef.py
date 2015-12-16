@@ -1164,7 +1164,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     flatfile = ''
                 ##########################   find arcfile            #######################
                 arcfile = ''
-                if _listarc:       arcfile = [floyds.util.searcharc(img, _listarc)[0]][0]  # take arc from list 
+                if _listarc:
+                    arcfile = [floyds.util.searcharc(img, _listarc)[0]][0]  # take arc from list
                 if not arcfile and setup in arclist.keys():
                     if _grpid in arclist[setup]:
                         print '\n###ARC WITH SAME GRPID'
