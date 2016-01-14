@@ -876,7 +876,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         smooth=1, fringing=1, _typefromuser='obj', fts_contaminated=False):
     import floyds
     from floyds.util import readhdr, readkey3
-    import string, re, os, sys
+    import string, re, os, sys, glob
     from numpy import arange, pi, arccos, sin, cos, argmin, sqrt
     from pyfits import open as popen
     from pyraf import iraf
@@ -1291,17 +1291,59 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     print '\n### warning no arcfile \n exit '
                     imgl = ''
                 else:
-                    imgl = re.sub('_ex.fits', '_l.fits', imgex)
-                    if _interactive.upper() in ['YES', 'Y']:
-                        if os.path.isfile(imgl):
-                            answ = raw_input('\n### wavelength calibrated file already there, '
-                                             'do you want to calibrate again [[y]/n] ? ')
-                            if not answ: answ = 'y'
-                        else:
-                            answ = 'y'
+                    imgl = imgex.replace('_ex.fits', '_l.fits')
+                    oldfiletoday = os.path.isfile(imgl)
+                    if not oldfiletoday:
+                        oldfiles = [f.replace('_l', '_ex') for f in glob.glob(re.sub(str(floyds.util.mjdtoday()), '*', imgl))]
+                    if _automaticex:
+                        default = 'o'
                     else:
-                        answ = 'y'
-                    if answ in ['y', 'Y', 'YES', 'yes', 'Yes']:
+                        default = 'n'
+                    ans3 = ''
+                    if _interactive.lower() in ['yes', 'y']:
+                        if oldfiletoday:
+                            while ans3 not in ['n', 'o', 's']:
+                                ans3 = raw_input('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, '
+                                                 '[s]kip calibration (use previous file) [' + default + '] ')
+                                if not ans3:
+                                    ans3 = default
+                        elif oldfiles:
+                            while ans3 not in ['n', 'o']:
+                                ans3 = raw_input('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, [' + default + '] ')
+                                if not ans3:
+                                    ans3 = default
+                        else:
+                            ans3 = 'n'
+                    else:
+                        ans3 = default
+
+#                    if _interactive.upper() in ['YES', 'Y']:
+#                        if os.path.isfile(imgl):
+#                            answ = raw_input('\n### wavelength calibrated file already there, '
+#                                             'do you want to calibrate again [[y]/n] ? ')
+#                            if not answ: answ = 'y'
+#                        else:
+#                            answ = 'y'
+#                    else:
+#                        answ = 'y'
+
+                    if ans3 == 'n':
+                        arcref = floyds.util.searcharc(imgex, '')[0]
+                        wlident = True
+                        wlcal = True
+                    elif ans3 == 'o' and not oldfiletoday:
+                        arcref = 'arc_' + max(oldfiles)
+                        wlident = True
+                        wlcal = True
+                    elif ans3 == 'o':
+                        wlident = False
+                        wlcal = True
+                    else:
+                        wlident = False
+                        wlcal = False
+
+#                    if answ in ['y', 'Y', 'YES', 'yes', 'Yes']:
+                    if wlident:
                         print imgex, setup
                         if setup[0] == 'blu':
                             _order = 3
@@ -1316,7 +1358,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             _specres = 25
                             _cradius = 10
 
-                        arcref = floyds.util.searcharc(imgex, '')[0]
+#                        arcref = floyds.util.searcharc(imgex, '')[0]
                         os.system('cp ' + floyds.__path__[0] + '/standard/ident/FLOYDS_lines.txt .')
 
                         if not arcref:
@@ -1333,7 +1375,6 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                                                                                             arcref)):
                                 os.system('cp ' + floyds.util.searcharc(imgex, '')[1] +
                                           '/database/id' + re.sub('.fits', '', arcref) + ' database/')
-
                             identific = iraf.specred.reidentify(referenc=arcref, images=arcfile, interac=_interactive,
                                                                 section='middle line', coordli='FLOYDS_lines.txt',
                                                                 overrid='yes', cradius=_cradius, step=0, newaps='no',
@@ -1404,6 +1445,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                         floyds.util.updateheader(imgex, 0, hedvec)
 
+                    if wlcal:
                         floyds.util.delete(imgl)
 
                         iraf.specred.dispcor(imgex, output=imgl, flux='yes')
