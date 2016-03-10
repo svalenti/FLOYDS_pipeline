@@ -187,7 +187,7 @@ def correctfringing(imgex, fringingmask):
     return imgex
 
 
-def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sample='*'):
+def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sample='*', fts_contaminated=False):
     import re
     import os
     import sys
@@ -264,7 +264,32 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                                   caldir=_caldir, observa=_observatory, star_nam=refstar, airmass=_airmass,
                                   exptime=_exptime, interac=_interactive)
             #     sens full range
-            if str(readkey3(hdrs, 'grism')) == 'blu' and _tel not in ['fts', 'coj']:
+            if str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj'] and fts_contaminated:
+                print 'split blue sens'
+                sss=''
+                for jj in range(0, len(string.split(sample, ','))):
+                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                    std0 = '_stdcut' + str(jj) + '.fits'
+                    std1 = '_stdcut' + str(jj)
+                    sens1 = '_senscut' + str(jj) + '.fits'
+                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
+                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
+                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
+                                      observa=_observatory, star_nam=refstar, airmass=_airmass,
+                                      exptime=_exptime, interac=_interactive)
+                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
+                                      observa=_observatory, graphs='sri', functio=_function, order=100, interac=_interactive)
+                    if sss:
+                        sss = sss + ',' + sens1
+                    else:
+                        sss = sens1
+
+                    floyds.util.delete(std1 + ',' + std0)
+                print sss
+                _outputsens = combineredsens(sss, _outputsens)
+                for i in string.split(sss, ','):
+                    floyds.util.delete(i)
+            elif str(readkey3(hdrs, 'grism')) == 'blu':
                 floyds.floydsspecdef.cutstd(_outputstd, start=3600, end=3900, out=False)
                 floyds.floydsspecdef.cutstd(_outputstd, start=4300, end=4600, out=False)
                 floyds.floydsspecdef.cutstd(_outputstd, start=5990, end=6012, out=False)
@@ -291,35 +316,9 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                 _outputsens = combineblusens(sss, _outputsens)
                 print sss
                 print _outputsens
-#                raw_input('go on')
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
-            elif str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj']:
-                print 'split blue sens'
-                sss=''
-                for jj in range(0, len(string.split(sample, ','))):
-                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
-                    std0 = '_stdcut' + str(jj) + '.fits'
-                    std1 = '_stdcut' + str(jj)
-                    sens1 = '_senscut' + str(jj) + '.fits'
-                    floyds.util.delete(std1 + ',' + sens1 + ',' + std0)
-                    iraf.scopy(standardfile, std0, w1=aa, w2=bb)
-                    iraf.specred.standard(input=std0, output=std1, extinct=_extinctdir + _extinction, caldir=_caldir,
-                                      observa=_observatory, star_nam=refstar, airmass=_airmass,
-                                      exptime=_exptime, interac=_interactive)
-                    iraf.specred.sensfunc(standard=std1, sensitiv=sens1, extinct=_extinctdir + _extinction, ignorea='yes',
-                                      observa=_observatory, graphs='sri', functio=_function, order=100, interac=_interactive)
-                    if sss:
-                        sss = sss + ',' + sens1
-                    else:
-                        sss = sens1
-
-                    floyds.util.delete(std1 + ',' + std0)
-                print sss
-                _outputsens = combineredsens(sss, _outputsens)
-                for i in string.split(sss, ','):
-                    floyds.util.delete(i)
-            else:
+            else: # red arm
                 print 'split red sens'
                 sss=''
                 for jj in range(0, len(string.split(sample, ','))):
@@ -874,10 +873,10 @@ def imreplace_region(img):
 #####################################################
 def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listbias, _listarc, _cosmic, _ext_trace,
                         _dispersionline, liststandard, listatmo, _automaticex, _classify=False, _verbose=False,
-                        smooth=1, fringing=1, _typefromuser='obj'):
+                        smooth=1, fringing=1, _typefromuser='obj', fts_contaminated=False):
     import floyds
     from floyds.util import readhdr, readkey3
-    import string, re, os, sys
+    import string, re, os, sys, glob
     from numpy import arange, pi, arccos, sin, cos, argmin, sqrt
     from pyfits import open as popen
     from pyraf import iraf
@@ -955,18 +954,24 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     flatlist = {}
     flatlistd = {}
     arclist = {}
+    max_length = 22 # max length of FITS header values is 68, and filenames must fit in header
     for img in files:
         hdr0 = readhdr(img)
         if readkey3(hdr0, 'naxis2') >= 500:
             if 'blu' not in lista: lista['blu'] = []
             if 'red' not in lista: lista['red'] = []
             _object0 = floyds.util.readkey3(hdr0, 'object')
-            _object0 = re.sub(' ', '', _object0)
-            _object0 = re.sub('/', '_', _object0)
-            _object0 = re.sub('\(', '', _object0)
-            _object0 = re.sub('\[', '', _object0)
-            _object0 = re.sub('\)', '', _object0)
-            _object0 = re.sub('\]', '', _object0)
+            # remove all the following characters from the filename:
+            _object0=floyds.util.readkey3(hdr0,'object')
+            _object0 = re.sub(':', '', _object0) # colon
+            _object0 = re.sub('/', '', _object0) # slash
+            _object0 = re.sub('\s', '', _object0) # any whitespace
+            _object0 = re.sub('\(', '', _object0) # open parenthesis
+            _object0 = re.sub('\[', '', _object0) # open square bracket
+            _object0 = re.sub('\)', '', _object0) # close parenthesis
+            _object0 = re.sub('\]', '', _object0) # close square bracket
+            if len(_object0) > max_length:
+                _object0 = _object0[:max_length]
             _date0 = readkey3(hdr0, 'date-night')
             _tel = readkey3(hdr0, 'TELID')
             _type = readkey3(hdr0, 'OBSTYPE')
@@ -1159,7 +1164,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     flatfile = ''
                 ##########################   find arcfile            #######################
                 arcfile = ''
-                if _listarc:       arcfile = [floyds.util.searcharc(img, _listarc)[0]][0]  # take arc from list 
+                if _listarc:
+                    arcfile = [floyds.util.searcharc(img, _listarc)[0]][0]  # take arc from list
                 if not arcfile and setup in arclist.keys():
                     if _grpid in arclist[setup]:
                         print '\n###ARC WITH SAME GRPID'
@@ -1285,17 +1291,59 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     print '\n### warning no arcfile \n exit '
                     imgl = ''
                 else:
-                    imgl = re.sub('_ex.fits', '_l.fits', imgex)
-                    if _interactive.upper() in ['YES', 'Y']:
-                        if os.path.isfile(imgl):
-                            answ = raw_input('\n### wavelength calibrated file already there, '
-                                             'do you want to calibrate again [[y]/n] ? ')
-                            if not answ: answ = 'y'
-                        else:
-                            answ = 'y'
+                    imgl = imgex.replace('_ex.fits', '_l.fits')
+                    oldfiletoday = os.path.isfile(imgl)
+                    if not oldfiletoday:
+                        oldfiles = [f.replace('_l', '_ex') for f in glob.glob(re.sub(str(floyds.util.mjdtoday()), '*', imgl))]
+                    if _automaticex:
+                        default = 'o'
                     else:
-                        answ = 'y'
-                    if answ in ['y', 'Y', 'YES', 'yes', 'Yes']:
+                        default = 'n'
+                    ans3 = ''
+                    if _interactive.lower() in ['yes', 'y']:
+                        if oldfiletoday:
+                            while ans3 not in ['n', 'o', 's']:
+                                ans3 = raw_input('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, '
+                                                 '[s]kip calibration (use previous file) [' + default + '] ')
+                                if not ans3:
+                                    ans3 = default
+                        elif oldfiles:
+                            while ans3 not in ['n', 'o']:
+                                ans3 = raw_input('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, [' + default + '] ')
+                                if not ans3:
+                                    ans3 = default
+                        else:
+                            ans3 = 'n'
+                    else:
+                        ans3 = default
+
+#                    if _interactive.upper() in ['YES', 'Y']:
+#                        if os.path.isfile(imgl):
+#                            answ = raw_input('\n### wavelength calibrated file already there, '
+#                                             'do you want to calibrate again [[y]/n] ? ')
+#                            if not answ: answ = 'y'
+#                        else:
+#                            answ = 'y'
+#                    else:
+#                        answ = 'y'
+
+                    if ans3 == 'n':
+                        arcref = floyds.util.searcharc(imgex, '')[0]
+                        wlident = True
+                        wlcal = True
+                    elif ans3 == 'o' and not oldfiletoday:
+                        arcref = 'arc_' + max(oldfiles)
+                        wlident = True
+                        wlcal = True
+                    elif ans3 == 'o':
+                        wlident = False
+                        wlcal = True
+                    else:
+                        wlident = False
+                        wlcal = False
+
+#                    if answ in ['y', 'Y', 'YES', 'yes', 'Yes']:
+                    if wlident:
                         print imgex, setup
                         if setup[0] == 'blu':
                             _order = 3
@@ -1310,7 +1358,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             _specres = 25
                             _cradius = 10
 
-                        arcref = floyds.util.searcharc(imgex, '')[0]
+#                        arcref = floyds.util.searcharc(imgex, '')[0]
                         os.system('cp ' + floyds.__path__[0] + '/standard/ident/FLOYDS_lines.txt .')
 
                         if not arcref:
@@ -1327,7 +1375,6 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                                                                                             arcref)):
                                 os.system('cp ' + floyds.util.searcharc(imgex, '')[1] +
                                           '/database/id' + re.sub('.fits', '', arcref) + ' database/')
-
                             identific = iraf.specred.reidentify(referenc=arcref, images=arcfile, interac=_interactive,
                                                                 section='middle line', coordli='FLOYDS_lines.txt',
                                                                 overrid='yes', cradius=_cradius, step=0, newaps='no',
@@ -1398,6 +1445,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                         floyds.util.updateheader(imgex, 0, hedvec)
 
+                    if wlcal:
                         floyds.util.delete(imgl)
 
                         iraf.specred.dispcor(imgex, output=imgl, flux='yes')
@@ -1471,15 +1519,17 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 ######################################################
                 hdrs = readhdr(imgl)
                 _tel = readkey3(hdrs, 'TELID')
+                datenight = readkey3(hdrs, 'date-night')
                 if _tel not in ['fts', 'ftn']:  _tel = readkey3(hdrs, 'SITEID')
                 try:
-                    _outputsens2 = 'sens_' + _tel + '_' + str(readkey3(hdrs, 'date-night')) + '_' + str(
-                        readkey3(hdrs, 'grism')) + \
+                    _outputsens2 = 'sens_' + _tel + '_' + datenight + '_' + str(readkey3(hdrs, 'grism')) + \
                                    '_' + re.sub('.dat', '', readkey3(hdrs, 'stdname')) + '_' + str(MJDtoday)
                 except:
                     sys.exit('Error: missing header -stdname- in standard ' + str(standardfile) + '  ')
 
                 print '\n### compute sensitivity function and atmofile'
+                if fts_contaminated is not None: fts_contam = fts_contaminated         # if an option is given on the command line, use that
+                else: fts_contam = (datenight > '20140915' and datenight < '20150616') # by default, use the period that FTS FLOYDS had glycol on the mirrors
                 if setup[0] == 'red':
                     atmofile = floyds.floydsspecdef.telluric_atmo(imgl)
                     print atmofile
@@ -1487,8 +1537,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     floyds.util.delete(stdusedclean)
                     _function = 'spline3'
                     iraf.specred.sarith(input1=imgl, op='/', input2=atmofile, output=stdusedclean, format='multispec')
-                    if _tel in ['fts','coj']:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive,'4600:6730,6720:10000')
+                    if _tel in ['fts','coj'] and fts_contam:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive, '4600:6730,6720:10000', fts_contam)
                     else:
                         _outputsens2 = floyds.floydsspecdef.sensfunction(stdusedclean, _outputsens2, _function, 8, _interactive)
 
@@ -1498,23 +1548,23 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         atmo[setup].append(atmofile)
                 else: # blue arm
                     _function = 'spline3'
-                    if _tel in ['fts','coj']:
-                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900')
+                    if _tel in ['fts','coj'] and fts_contam:
+                        _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 8, _interactive, '3200:4700,4600:5900', fts_contam)
                     else:
                         _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive, '3400:4700')  #,3600:4300')
 
                 if _outputsens2 not in sens:
                     print _outputsens2
                     sens.append(_outputsens2)
-                    if _verbose:
-                        #    calibrate the standard using the sensitivity just obtained  
-                        _airmass = readkey3(hdrs, 'airmass')
-                        _exptime = readkey3(hdrs, 'exptime')
-                        imgf = re.sub('_l.fits', '_f.fits', imgl)
-                        floyds.util.delete(imgf)
-                        qqq = iraf.specred.calibrate(input=imgl, output=imgf, sensiti=_outputsens2, extinct='yes', flux='yes',
-                                                     extinction=_extinctdir + _extinction, observatory=_observatory,
-                                                     airmass=_airmass, ignorea='yes', exptime=_exptime, fnu='no')
+#                    if _verbose:
+                    #    calibrate the standard using the sensitivity just obtained  
+#                    _airmass = readkey3(hdrs, 'airmass')
+#                    _exptime = readkey3(hdrs, 'exptime')
+#                    imgf = re.sub('_l.fits', '_f.fits', imgl)
+#                    floyds.util.delete(imgf)
+#                    qqq = iraf.specred.calibrate(input=imgl, output=imgf, sensiti=_outputsens2, extinct='yes', flux='yes',
+#                                                 extinction=_extinctdir + _extinction, observatory=_observatory,
+#                                                 airmass=_airmass, ignorea='yes', exptime=_exptime, fnu='no')
 
 
     if _verbose:
@@ -1522,7 +1572,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         print sens
         print atmo
 
-    for tpe in ['obj', 'agn']:
+    for tpe in ['std', 'obj', 'agn']:
         if tpe in wavecalib.keys():
             for setup in wavecalib[tpe].keys():
                 for img in wavecalib[tpe][setup]:
@@ -1537,7 +1587,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         except:
                             print setup
                             print 'no standard'
-                            _sens = floyds.util.searchsens(img, '')[0]  # search in tha archive
+                            _sens = floyds.util.searchsens(img, '')[0]  # search in the archive
 
                     _atmo = ''
                     if listatmo:  _atmo = floyds.util.searchatmo(img, listatmo)[
@@ -1643,8 +1693,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             _output_f = combspec2(lista[0], lista[1], _output_f, scale=True, num=None)
         #            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
         #            except:         print 'Warning: problem combining the red and blu spectra'
-        if '_e.fits' and _classify:
-            aa, bb, cc = floyds.util.classifyfast(_output, program='snid')
+            if _classify: aa, bb, cc = floyds.util.classifyfast(_output, program='snid')
         if _i: _trim = raw_input('Do you want to trim the edges of the spectrum? [[y]/n] ')
         if not _i or _trim != 'n':  # if not interactive, spectrum is trimmed at default boundaries (3200,10000)
             trimmed = 'trim_' + _output
@@ -1862,8 +1911,8 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
     from pyraf import iraf
 
     # read in spectra and headers, determine third dimension of images
-    _x0, _y0 = floyds.util.readspectrum(_img0)
-    _x1, _y1 = floyds.util.readspectrum(_img1)
+    _x0, _ = floyds.util.readspectrum(_img0)
+    _x1, _ = floyds.util.readspectrum(_img1)
     hdr0 = pyfits.getheader(_img0)
     hdr1 = pyfits.getheader(_img1)
     if 'NAXIS3' in hdr0 and 'NAXIS3' in hdr1 and hdr0['NAXIS3'] == hdr1['NAXIS3']:
@@ -1871,95 +1920,71 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
     else:
         dimension = 1
 
-    # rename so that 0 = blue and 1 = red
+    # figure out which is blue and which is red
     if min(_x0) < min(_x1):
-        x0, y0 = _x0, _y0
-        x1, y1 = _x1, _y1
-        img0, img1 = _img0, _img1
+        xblue = np.array(_x0)
+        xred  = np.array(_x1)
+        imgblue, imgred = _img0, _img1
     else:
-        x0, y0 = _x1, _y1
-        x1, y1 = _x0, _y0
-        img0, img1 = _img1, _img0
+        xblue = np.array(_x1)
+        xred  = np.array(_x0)
+        imgblue, imgred = _img1, _img0
 
-    # extract overlapping region
-    limmin = max(min(x0), min(x1))  # lower limit of overlap
-    limmax = min(max(x0), max(x1))  # upper limit of overlap
-    x01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limmax), x0)  # x of overlap
-    y01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limmax), y0)  # y of overlap from blue side
-    x11 = x01  # use x of blue part in overlap
-    y11 = np.interp(x01, x1, y1)  # resample red spectrum over x of blue
-    if not num:
-        num = len(x01) / 10  # divide overlapping region into tenths
+    # num is the index in xred corresponding to 1st decile of the overlap
+    if not num: num = np.searchsorted(xred, max(xblue)) / 10
 
     # rescale red & blue to match
-    if scale:
-        integral0 = np.trapz(y01, x01)  # flux in blue
-        integral1 = np.trapz(y11, x11)  # flux in red
-        if integral0 < integral1:  # scale to side with higher flux
-            A0, A1 = integral1 / integral0, 1
-        else:
-            A0, A1 = 1, integral0 / integral1
-    else:
-        A0, A1 = 1, 1
+    if scale: scomb_scale = 'median'
+    else:     scomb_scale = 'none'
 
-    floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
+    floyds.util.delete('s1.fits,s2.fits')
     floyds.util.delete(_output)
-
     if dimension == 1:
-        iraf.scopy(img0, 's1.fits', w1='INDEF', w2=x01[2 * num],
-                   rebin='no')  # take blue part up to 20% of overlapping region
-        iraf.scopy(img1, 's2.fits', w1=x01[num], w2='INDEF',
-                   rebin='no')  # take red part starting from 10% of overlapping region
-        iraf.sarith(input1='s1.fits', op='*', input2=A0, output='s11.fits')  # rescale
-        iraf.sarith(input1='s2.fits', op='*', input2=A1, output='s22.fits')
-        iraf.specred.scombine(input='s11.fits,s22.fits', w1='INDEF', w2='INDEF',
-                              output=_output)  # combine by averaging 2nd tenth of overlap
+        iraf.scopy(imgblue, 's1.fits', w1='INDEF', w2=xred[2*num], rebin='no') # take 1st-2nd deciles of blue part in overlap
+        iraf.scopy(imgred, 's2.fits', w1=xred[num], w2='INDEF', rebin='no')    # take all but 1st decile of red part in overlap
+        iraf.specred.scombine(input='s1.fits,s2.fits', w1='INDEF', w2='INDEF', output=_output,
+                              scale=scomb_scale, sample=str(xred[num])+':'+str(xred[2*num])) # combine by averaging 2nd decile of overlap
     else:
         print 'more than one dimension'
-        datavecs = np.empty(0, dtype='float32')
+        datavecs = []
         hdrvec = []
-        for layer in range(dimension):
-            outputn = re.sub('.fits', '', _output) + '_' + str(layer + 1) + '.fits'
+        for layer in np.arange(dimension)+1: # IRAF is 1-indexed
+            outputn = re.sub('.fits', '', _output) + '_' + str(layer) + '.fits'
             floyds.util.delete(outputn)
-            floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-            iraf.scopy(img0 + '[*,1,' + str(layer + 1) + ']', 's1.fits', w1='INDEF', w2=x01[2 * num], rebin='no')
-            iraf.scopy(img1 + '[*,1,' + str(layer + 1) + ']', 's2.fits', w1=x01[num], w2='INDEF', rebin='no')
-            iraf.sarith(input1='s1.fits', op='*', input2=A0, output='s11.fits')
-            iraf.sarith(input1='s2.fits', op='*', input2=A1, output='s22.fits')
-            iraf.specred.scombine(input='s11.fits,s22.fits', w1='INDEF', w2='INDEF', output=outputn)
-            datavec, head = pyfits.getdata(outputn, 0, header=True)
-            datavecs = np.append(datavecs, datavec)
+            floyds.util.delete('s1.fits,s2.fits')
+            iraf.scopy(imgblue + '[*,1,' + str(layer) + ']', 's1.fits', w1='INDEF', w2=xred[2*num], rebin='no')
+            iraf.scopy(imgred + '[*,1,' + str(layer) + ']', 's2.fits', w1=xred[num], w2='INDEF', rebin='no')
+            iraf.specred.scombine(input='s1.fits,s2.fits', w1='INDEF', w2='INDEF', output=outputn,
+                                  scale=scomb_scale, sample=str(xred[num])+':'+str(xred[2*num]))
+            datavec, head = pyfits.getdata(outputn, header=True) # these have shape (4440,)
+            datavecs.append(datavec)
             hdrvec.append(head)
+            floyds.util.delete(outputn)
         floyds.util.delete(_output)
         try:
-            hdr0.update('NAXIS1', hdrvec[1]['NAXIS1'], hdrvec[1].comments['NAXIS1'])
-            hdr0.update('CRVAL1', hdrvec[1]['CRVAL1'], hdrvec[1].comments['CRVAL1'])
-            hdr0.update('CD1_1', hdrvec[1]['CD1_1'], hdrvec[1].comments['CD1_1'])
-            hdr0.update('CRPIX1', hdrvec[1]['CRPIX1'], hdrvec[1].comments['CRPIX1'])
+            hdr0.update('NAXIS1', hdrvec[0]['NAXIS1'], hdrvec[0].comments['NAXIS1'])
+            hdr0.update('CRVAL1', hdrvec[0]['CRVAL1'], hdrvec[0].comments['CRVAL1'])
+            hdr0.update('CD1_1', hdrvec[0]['CD1_1'], hdrvec[0].comments['CD1_1'])
+            hdr0.update('CRPIX1', hdrvec[0]['CRPIX1'], hdrvec[0].comments['CRPIX1'])
         except:
-            hdr0.update('NAXIS1', hdrvec[1]['NAXIS1'], 'Width of image data')
-            hdr0.update('CRVAL1', hdrvec[1]['CRVAL1'], 'wavelength ref.')
-            hdr0.update('CD1_1', hdrvec[1]['CD1_1'], '')
-            hdr0.update('CRPIX1', hdrvec[1]['CRPIX1'], 'Pixel ref.')
-        data3d = np.reshape(datavecs, [dimension, 1, -1])
-        pyfits.writeto(_output, data3d, hdr0)
+            hdr0.update('NAXIS1', hdrvec[0]['NAXIS1'], 'Width of image data')
+            hdr0.update('CRVAL1', hdrvec[0]['CRVAL1'], 'wavelength ref.')
+            hdr0.update('CD1_1', hdrvec[0]['CD1_1'], '')
+            hdr0.update('CRPIX1', hdrvec[0]['CRPIX1'], 'Pixel ref.')
+        data3d = np.rollaxis(np.dstack(datavecs), 2)
+        pyfits.writeto(_output, data3d, hdr0) # this must have shape (4, 1, 4440)
+    floyds.util.delete('s1.fits,s2.fits')
 
-    floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-    for layer in range(dimension):
-        outputn = re.sub('.fits', '', _output) + '_' + str(layer + 1) + '.fits'
-        floyds.util.delete(outputn)
-        header = {}
-        keywords = ['ATMOR', 'ATMOB', 'SENSFUNB', 'SENSFUNR', 'ARCBLU', 'ARCRED', 'FLATRED', 'FLATBLUE', \
-                    'SHIFTR', 'SHIFTB', 'LAMRMS_R', 'LAMNLINR', 'SPE_ER_R', 'LAMRMS_B', 'LAMNLINB', 'SPE_ER_B', \
-                    'SPERES_R', 'SPERES_B']
-
+    header = {}
+    keywords = ['ATMOR', 'ATMOB', 'SENSFUNB', 'SENSFUNR', 'ARCBLU', 'ARCRED', 'FLATRED', 'FLATBLUE',
+                'SHIFTR', 'SHIFTB', 'LAMRMS_R', 'LAMNLINR', 'SPE_ER_R', 'LAMRMS_B', 'LAMNLINB', 'SPE_ER_B',
+                'SPERES_R', 'SPERES_B']
     for key in keywords:
         for hdr in [hdr0, hdr1]:
             if key in hdr:
-                try:
-                    header[key] = [hdr[key], hdr.comments[key]]
-                except:
-                    header[key] = [hdr[key], '']
+                try: comment = hdr.comments[key]
+                except: comment = ''
+                header[key] = (hdr[key], comment)
 
     if 'XMIN' in hdr0 and 'XMIN' in hdr1: _xmin = min(hdr0['XMIN'], hdr1['XMIN'])
     if 'XMAX' in hdr0 and 'XMAX' in hdr1: _xmax = max(hdr0['XMAX'], hdr1['XMAX'])
@@ -2289,9 +2314,9 @@ def fringing_classicmethod(flatfile, img, _inter, _sample, _order, arm):
     xdim = hdrx['NAXIS1']
     ydim = hdrx['NAXIS2']
     if arm == 'red':
-        floyds.util.delete(re.sub('.fits', 'cut.fits', flatfile))
-        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'cut.fits', flatfile), verbose='no')
-        flatfile = re.sub('.fits', 'cut.fits', flatfile)
+        floyds.util.delete(re.sub('.fits', 'c.fits', flatfile))
+        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
+        flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
         print ydim, '[*,1:' + str(int(ydim) - 1) + ']'
         iraf.specred.response(flatfile, normaliz=flatfile + '[*,1:' + str(int(ydim) - 1) + ']',
@@ -2448,10 +2473,10 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
     iraf.specred.aptrace.step = 10
     iraf.specred.aptrace.nlost = 10
     if arm == 'red':
-        floyds.util.delete(re.sub('.fits', 'cut.fits', flatfile))
-        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'cut.fits', flatfile), verbose='no')
+        floyds.util.delete(re.sub('.fits', 'c.fits', flatfile))
+        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
         iraf.imarith(flatfile, '/', flatfile, 'norm.fits', verbose='no')
-        flatfile = re.sub('.fits', 'cut.fits', flatfile)
+        flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
         iraf.unlearn(iraf.specred.apflatten)
         print flatfile, _inter, _order, _sample

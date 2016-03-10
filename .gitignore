@@ -3,3 +3,7 @@
 
 build/
 *.xml
+
+.idea/
+
+*~

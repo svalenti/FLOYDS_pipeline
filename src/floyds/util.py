@@ -284,7 +284,7 @@ def readkey3(hdr, keyword):
                 if value == 'UNKNOWN': value = '1.6'
             elif keyword == 'object':
                 value = re.sub('\}', '', value)
-                value = re.sub('\+', '', value)
+                #value = re.sub('\+', '', value)
                 value = re.sub('\{', '', value)
                 value = re.sub('\[', '', value)
                 value = re.sub('\]', '', value)

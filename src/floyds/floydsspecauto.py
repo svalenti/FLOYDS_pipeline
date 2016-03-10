@@ -205,18 +205,22 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
     flatlist={}
     flatlistd={}
     arclist={}
+    max_length=14
     for img in files:
         hdr0=floyds.util.readhdr(img)
         if  floyds.util.readkey3(hdr0,'naxis2')>=500:
             if 'blu' not in lista: lista['blu']=[]
             if 'red' not in lista: lista['red']=[]
             _object0=floyds.util.readkey3(hdr0,'object')
-            _object0=re.sub(' ' ,'',_object0)
-            _object0=re.sub('/' ,'_',_object0)
-            _object0=re.sub('\(' ,'',_object0)
-            _object0=re.sub('\[' ,'',_object0)
-            _object0=re.sub('\)' ,'',_object0)
-            _object0=re.sub('\]' ,'',_object0)
+            _object0 = re.sub(':', '', _object0) # colon
+            _object0 = re.sub('/', '', _object0) # slash
+            _object0 = re.sub('\s', '', _object0) # any whitespace
+            _object0 = re.sub('\(', '', _object0) # open parenthesis
+            _object0 = re.sub('\[', '', _object0) # open square bracket
+            _object0 = re.sub('\)', '', _object0) # close parenthesis
+            _object0 = re.sub('\]', '', _object0) # close square bracket
+            if len(_object0) > max_length:
+                _object0 = _object0[:max_length]
             _date0=floyds.util.readkey3(hdr0,'date-night')
             _tel=floyds.util.readkey3(hdr0,'TELID')
             _type=floyds.util.readkey3(hdr0,'OBSTYPE')
@@ -496,10 +500,10 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           floyds.util.delete('n'+flatfile)
                           floyds.util.delete('norm.fits')
                           floyds.util.delete('n'+img)
-                          floyds.util.delete(re.sub('.fits','cut.fits',flatfile))
-                          iraf.imcopy(flatfile+'[500:'+str(xdim)+',*]',re.sub('.fits','cut.fits',flatfile),verbose='no')
+                          floyds.util.delete(re.sub('.fits','c.fits',flatfile))
+                          iraf.imcopy(flatfile+'[500:'+str(xdim)+',*]',re.sub('.fits','c.fits',flatfile),verbose='no')
                           iraf.imarith(flatfile,'/',flatfile,'norm.fits',verbose='no')
-                          flatfile=re.sub('.fits','cut.fits',flatfile)
+                          flatfile=re.sub('.fits','c.fits',flatfile)
                           floyds.util.delete('n'+flatfile)
                           iraf.unlearn(iraf.specred.apflatten)
                           floyds.floydsspecdef.aperture(flatfile)

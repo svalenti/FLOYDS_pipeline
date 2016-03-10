@@ -15,16 +15,16 @@ if __name__ == "__main__":
     parser.add_option("-i", "--interactive", dest="interactive", action="store_true",
                       help='run the script in interactive mode [recommended] ')
     parser.add_option("-c", "--classify", dest="classify", action="store_true",
-                      help=' try to classifyed the reduced spectrum using SNID (if installed) ')
+                      help='try to classifyed the reduced spectrum using SNID (if installed) ')
     parser.add_option("-C", "--cosmic", dest="cosmic", action="store_true",
-                      help=' using this option cosmic rays are removed from the images ')
+                      help='using this option cosmic rays are removed from the images ')
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true")
     parser.add_option("-A", "--Automatic", dest="automatic", action="store_true",
                       help='extract spectrum with previous parameters in the database')
     parser.add_option("-t", "--trace", dest="trace", action="store_true",
                       help='trace extraction with another frame ')
     parser.add_option("-d", "--dispersion", dest="dispersionline", action="store_true",
-                      help='chose interctively the disperasion line\n where aperture and background are selected')
+                      help='choose interctively the disperasion line\n where aperture and background are selected')
     parser.add_option("-r", "--rebin", dest="rebin", default=1, type=int, help='rebin blue part [pixels]')
     parser.add_option("--fringing", dest="fringing", default=3, type=int,
                       help='fringing correction \t [1] response, \t [2] computed' + \
@@ -40,9 +40,13 @@ if __name__ == "__main__":
     parser.add_option("--listarc", dest="listarc", default='', type="str",
                       help='use for the arc the raw frames in the arc list \t [%default]')
     parser.add_option("--listatmo", dest="listatmo", default='', type="str",
-                      help='use for tellurich correction the closest tellurich file from this list')
+                      help='use for telluric correction the closest telluric file from this list')
     parser.add_option("--typeobject", dest="typeobject", default='obj', type="str",
-                      help='chose exstraction parameters depending on the type of object [obj,agn]')
+                      help='choose extraction parameters depending on the type of object [obj,agn]')
+    parser.add_option("--fts-contaminated", dest="fts_contaminated", default=None, action="store_true",
+                      help='force a high-order fit for the sensitivity function (used by default for FTS data from 2014-09-15 to 2015-06-16)')
+    parser.add_option("--fts-cleaned", dest="fts_contaminated", default=None, action="store_false",
+                      help='prevent a high-order fit for the sensitivity function (used by default for FTS data from 2014-09-15 to 2015-06-16)')
     option, args = parser.parse_args()
     ############################################################
     _typefromuser = option.typeobject
@@ -165,7 +169,7 @@ if __name__ == "__main__":
         outputlist = floyds.floydsspecdef.floydsspecreduction(files, _interactive, _dobias, _doflat, listflat,
                                                               listbias, listarc, _cosmic, _trace, _dispersionline,
                                                               listsens, listatmo, _automaticex, _classify, _verbose,
-                                                              _rebin, _fringing, _typefromuser)
+                                                              _rebin, _fringing, _typefromuser, option.fts_contaminated)
     else:
         outputlist = []
     stoptime = time.time()
