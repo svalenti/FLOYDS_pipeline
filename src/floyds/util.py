@@ -196,6 +196,8 @@ def readkey3(hdr, keyword):
                            'obstype': 'OBSTYPE',
                            'RA': 'RA',
                            'DEC': 'DEC',
+                           'CAT-RA': 'CAT-RA',
+                           'CAT-DEC': 'CAT-DEC',
                            'datamin': -100,
                            'datamax': 60000,
                            'grpid': 'BLKUID',
@@ -217,6 +219,8 @@ def readkey3(hdr, keyword):
                            'obstype': 'OBSTYPE',
                            'RA': 'RA',
                            'DEC': 'DEC',
+                           'CAT-RA': 'CAT-RA',
+                           'CAT-DEC': 'CAT-DEC',
                            'datamin': -100,
                            'datamax': 60000,
                            'grpid': 'BLKUID',
@@ -259,7 +263,7 @@ def readkey3(hdr, keyword):
                 value = value.lower()
             elif keyword == 'grism':
                 if not value: value = 'full'
-            elif keyword == 'RA':
+            elif keyword == 'RA' or keyword == 'CAT-RA':
                 import string, re
 
                 value0 = string.split(value, ':')
@@ -267,7 +271,7 @@ def readkey3(hdr, keyword):
                     value = ((float(value0[0]) + ((float(value0[1]) + (float(value0[2]) / 60.)) / 60.)) * 15)
                 except:
                     value = 0
-            elif keyword == 'DEC':
+            elif keyword == 'DEC' or keyword == 'CAT-DEC':
                 import string, re
 
                 value0 = string.split(value, ':')
