@@ -121,8 +121,8 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
         for _acqimage in acq_images:
             # print os.path.getsize(_acqimage)
             if os.path.getsize(_acqimage) < 100000:
-                badname = _acqimage
-                acq_images.remove(badname)
+                # Reject the frame
+                continue
 
             hdulist = pyfits.open(_acqimage)
             # print _acqimage
@@ -496,6 +496,8 @@ def find_first_guide(night, acqimages, acq_utstart, acq_utstop, acq_mjd, site):
 
 # get the UT start time for all of the full frame guide images
     for _guides in full_guides_all:
+        if os.path.getsize(_guides) < 100000:
+            continue
         hdulist = pyfits.open(_guides)
         prihdr = hdulist[0].header
         utstart_guides = prihdr['UTSTART']
