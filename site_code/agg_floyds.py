@@ -59,6 +59,8 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
     spec_root = os.path.join('/mnt/data/daydirs', spec_cam + os.sep)
 
 # aggregate data for each night
+    other_acquisition_images = []
+    other_acquisition_image_blockids = []
     i = 0
     for _night in night_list:
 
@@ -133,10 +135,14 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
 # has the same value as the previous frame (which indicates its a guide frame
 # and not an acquisition image
 #
-            if blkuid_acq == 'N/A' or blkuid_acq == previous_blkuid:
+            if blkuid_acq == 'N/A':
                 if debug:
                     print "Rejecting frame", _acqimage, blkuid_acq, previous_blkuid
-#                acq_images.remove(_acqimage)
+            if blkuid_acq == previous_blkuid:
+                if debug:
+                    print "Rejecting frame", _acqimage, blkuid_acq, previous_blkuid
+                other_acquisition_images.append(_acqimage)
+                other_acquisition_image_blockids.append(int(blkuid_acq))
             else:
                 if debug:
                     print "Keeping   frame", _acqimage, blkuid_acq, previous_blkuid
@@ -405,6 +411,8 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
             utstop_speclist_arr = array(utstop_speclist_nocolon)
             obstype_speclist_arr = array(obstype_speclist)
             exptime_speclist_arr = array(exptime_speclist)
+            other_acquisition_images_array = array(other_acquisition_images)
+            other_acquisition_image_blockid_array = array(other_acquisition_image_blockids)
         except UnboundLocalError:
             grpuid_speclist_arr = numpy.zeros(1)
             spec_images_arr = numpy.zeros(1)
@@ -425,6 +433,8 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
             print _acq, grpuid_curr  # , type(grpuid_curr)
 #	    print grpuid_speclist
 #	    print grpuid_speclist_arr
+            other_acq_images_forthis_acq = other_acquisition_images_array[
+                other_acquisition_image_blockid_array == grpuid_curr]
             specs_forthis_acq = spec_images_arr[
                 where(grpuid_speclist_arr == grpuid_curr)]
             specs_forthis_acqlist = specs_forthis_acq.tolist()
@@ -463,7 +473,7 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
             mk_obs_website(acq_images[i], grpid_acqlist[i], propid_acqlist[i],
                            acq_utstart_nocolon[i], _night, first_guideimage[
                                i], dir_for_guideimgs,
-                           specs_forthis_acqlist, sciencespecs_forthis_acq)
+                           specs_forthis_acqlist, sciencespecs_forthis_acq, other_acq_images_forthis_acq)
             i = i + 1
 
 
@@ -547,7 +557,8 @@ def find_first_guide(night, acqimages, acq_utstart, acq_utstop, acq_mjd, site):
 # mk_obs_website(acqimage,grpid,propid,UTstartnocolon,night,guideimage,data_dir,specslist,guidecountplots):
 
 
-def mk_obs_website(acqimage, grpid, propid, UTstartnocolon, night, guideimage, data_dir, specslist, sciencespecs):
+def mk_obs_website(acqimage, grpid, propid, UTstartnocolon, night, guideimage, data_dir, specslist,
+                   sciencespecs, other_acq_images_forthis_acq):
 
     new_dir = '/var/www/html/night_summary/' + night + '/' + \
         grpid + '_' + str(UTstartnocolon) + '_' + propid
@@ -613,6 +624,10 @@ def mk_obs_website(acqimage, grpid, propid, UTstartnocolon, night, guideimage, d
     except:
         pass
 
+    for img in other_acq_images_forthis_acq:
+        if os.path.exists(os.path.join(new_dir, os.path.basename(img))):
+            os.remove(os.path.join(new_dir, os.path.basename(img)))
+
     link_cmd = 'ln -s ' + acqimage + ' ' + new_dir + '/'
     print "link_cmd1=", link_cmd
     os.system(link_cmd)
@@ -644,6 +659,11 @@ def mk_obs_website(acqimage, grpid, propid, UTstartnocolon, night, guideimage, d
     print "link_cmd7=", link_cmd
     os.system(link_cmd)
 
+    for img in other_acq_images_forthis_acq:
+        link_cmd = 'ln -s ' + img + ' ' + new_dir + '/'
+        print "link_cmd=", link_cmd
+        os.system(link_cmd)
+
     tarname = new_dir + '/' + grpid + '_' + propid + '.tar'
 #    os.system('rm -f *guide*.png')
 #    os.system('cp '+new_dir+'/*guide*.png .')
@@ -654,6 +674,11 @@ def mk_obs_website(acqimage, grpid, propid, UTstartnocolon, night, guideimage, d
         os.system('cp ' + guideimage + ' ./')
         tarfiles = tarfiles + ' ' + guide_in_curr
         print tarfiles
+
+    for img in other_acq_images_forthis_acq:
+        os.system('cp ' + img + ' ./')
+        tarfiles += ' ' + os.path.basename(img)
+
     home = os.path.expanduser('~')
 
     for _sciencespec in sciencespecs:
@@ -716,12 +741,20 @@ def mk_obs_website(acqimage, grpid, propid, UTstartnocolon, night, guideimage, d
             guidestate_tar = os.path.basename(guidestate_curr)
             tarfiles = tarfiles + ' ' + guidestate_tar
 
+    #fpack all of the guider frames
+    os.system('fpack *g01.fits')
+    tarfiles = tarfiles.replace('g01.fits', 'g01.fits.fz')
     os.system('rm -f ' + tarname)
     os.system('tar -cvf ' + tarname + ' ' + tarfiles)
 
     os.system('rm -f ' + acq_in_curr)
+    os.system('rm -f ' + acq_in_curr + '.fz')
     if os.path.exists(guide_in_curr):
         os.system('rm -f ' + guide_in_curr)
+        os.system('rm -f ' + guide_in_curr + '.fz')
+    for img in other_acq_images_forthis_acq:
+        os.system('rm -f ' + os.path.basename(img))
+        os.system('rm -f ' + os.path.basename(img) + '.fz')
 
 # file translations and path additions
 
