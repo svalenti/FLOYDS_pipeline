@@ -112,7 +112,7 @@ if ( ! -r ${UTnight}.processed ) then
       gunzip -f $FLOYDS_DATA_OUT/${camprefix}*.fits.gz
     endif
     if ( `ls -1 $FLOYDS_DATA_OUT/ | grep '.fits.fz' | wc -l | awk '{print $1}'` > 0 ) then
-      funpack $FLOYDS_DATA_OUT/${camprefix}*.fits.gz
+      funpack $FLOYDS_DATA_OUT/${camprefix}*.fits.fz
     endif
     $pipepath/bin/floydsauto -X >>& $LOGDIR/Pipeline_${UTnight}_${camera}.log
     set floydsstatus = $status
