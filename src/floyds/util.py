@@ -83,7 +83,7 @@ def readspectrum(img):
 ###########################################################################
 
 def readlist(listfile):
-    from floyds.util import correctcard
+#    from floyds.util import correctcard
     import string, os, sys, re, glob
     from pyfits import open as opn
 
@@ -111,13 +111,15 @@ def readlist(listfile):
                         try:
                             hdulist = opn(ff)
                             imglist.append(ff)
-                        except:
-                            try:
-                                correctcard(ff)
-                                hdulist = opn(ff)
-                                imglist.append(ff)
-                            except:
-                                pass
+                        except Exception as e:
+                            print 'problem reading header of', ff
+                            print e
+#                            try:
+#                                correctcard(ff)
+#                                hdulist = opn(ff)
+#                                imglist.append(ff)
+#                            except:
+#                                pass
             except:
                 sys.exit('\n##### Error ###\n file ' + str(listfile) + ' do not  exist\n')
     if len(imglist) == 0:
@@ -156,21 +158,29 @@ def delete(listfile):
 
 ###############################################################
 def readhdr(img):
-    from pyfits import open as popen
-
+    from astropy.io.fits import getheader
     try:
-        hdr = popen(img)[0].header
-    except:
-        from floyds.util import correctcard
-
-        try:
-            correctcard(img)
-        except:
-            import sys
-
-            sys.exit('image ' + str(img) + ' is corrupted, delete it and start again')
-        hdr = popen(img)[0].header
+        hdr = getheader(img)
+    except Exception as e:
+        print "Couldn't read header of {}. Try deleting it and starting over.".format(img)
+        raise e
     return hdr
+#def readhdr(img):
+#    from pyfits import open as popen
+
+#    try:
+#        hdr = popen(img)[0].header
+#    except:
+#        from floyds.util import correctcard
+
+#        try:
+#            correctcard(img)
+#        except:
+#            import sys
+
+#            sys.exit('image ' + str(img) + ' is corrupted, delete it and start again')
+#        hdr = popen(img)[0].header
+#    return hdr
 
 
 def readkey3(hdr, keyword):
@@ -328,67 +338,80 @@ def writeinthelog(text, logfile):
 
 
 ################################################
-def correctcard(img):
-    from  pyfits import open as popen
-    from numpy import asarray
-    import re
+# THIS WAY OF UPDATING HEADERS DOES NOT WORK WITH PYFITS 3.4
+#def correctcard(img):
+#    from  pyfits import open as popen
+#    from numpy import asarray
+#    import re
 
-    hdulist = popen(img)
-    a = hdulist[0]._verify('fix')
-    _header = hdulist[0].header
-    for i in range(len(a)):
-        if not a[i]:
-            a[i] = ['']
-    ww = asarray([i for i in range(len(a)) if (re.sub(' ', '', a[i][0]) != '')])
-    if len(ww) > 0:
-        newheader = []
-        headername = []
-        for j in _header.items():
-            headername.append(j[0])
-            newheader.append(j[1])
-        hdulist.close()
-        imm = popen(img, mode='update')
-        _header = imm[0].header
-        for i in ww:
-            if headername[i]:
-                try:
-                    _header.update(headername[i], newheader[i])
-                except:
-                    _header.update(headername[i], 'xxxx')
-        imm.flush()
-        imm.close()
+#    hdulist = popen(img)
+#    a = hdulist[0]._verify('fix')
+#    _header = hdulist[0].header
+#    for i in range(len(a)):
+#        if not a[i]:
+#            a[i] = ['']
+#    ww = asarray([i for i in range(len(a)) if (re.sub(' ', '', a[i][0]) != '')])
+#    if len(ww) > 0:
+#        newheader = []
+#        headername = []
+#        for j in _header.items():
+#            headername.append(j[0])
+#            newheader.append(j[1])
+#        hdulist.close()
+#        imm = popen(img, mode='update')
+#        _header = imm[0].header
+#        for i in ww:
+#            if headername[i]:
+#                try:
+#                    _header.update(headername[i], newheader[i])
+#                except:
+#                    _header.update(headername[i], 'xxxx')
+#        imm.flush()
+#        imm.close()
 
 
 ######################################################################################################
-def updateheader(image, dimension, headerdict):
-    from pyfits import open as opp
+# THIS OLD VERSION DOES NOT WORK WITH PYFITS 3.4
+#def updateheader(image, dimension, headerdict):
+#    from pyfits import open as opp
 
+#    try:
+#        imm = opp(image, mode='update')
+#        _header = imm[dimension].header
+#        for i in headerdict.keys():
+#            _header.update(i, headerdict[i][0], headerdict[i][1])
+#        imm.flush()
+#        imm.close()
+#    except:
+#        from floyds.util import correctcard
+
+#        print '\nwarning: problem to update header, try to correct header format ....'
+#        correctcard(image)
+#        try:
+#            imm = opp(image, mode='update')
+#            _header = imm[dimension].header
+#            for i in headerdict.keys():
+#                _header.update(i, headerdict[i][0], headerdict[i][1])
+#            _header.update(_headername, _value, commento)
+#            imm.flush()
+#            imm.close()
+#        except:
+#            print '\n# still problems to update header'
+##           import sys
+##            sys.exit('error: not possible update header')
+
+def updateheader(filename, dimension, headerdict):
+    from astropy.io import fits
+    tupledict = {key: tuple(value) for key, value in headerdict.items()}
     try:
-        imm = opp(image, mode='update')
-        _header = imm[dimension].header
-        for i in headerdict.keys():
-            _header.update(i, headerdict[i][0], headerdict[i][1])
-        imm.flush()
-        imm.close()
-    except:
-        from floyds.util import correctcard
+        hdulist = fits.open(filename, mode='update')
+        header = hdulist[dimension].header
+        header.update(tupledict)
+        hdulist.close()
+    except Exception as e:
+        print 'header of', image, 'not updated:'
+        print e
 
-        print '\nwarning: problem to update header, try to correct header format ....'
-        correctcard(image)
-        try:
-            imm = opp(image, mode='update')
-            _header = imm[dimension].header
-            for i in headerdict.keys():
-                _header.update(i, headerdict[i][0], headerdict[i][1])
-            _header.update(_headername, _value, commento)
-            imm.flush()
-            imm.close()
-        except:
-            print '\n# still problems to update header'
-
-
-#           import sys
-#            sys.exit('error: not possible update header')
 #################################################################################################
 def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _ysize=1, _erase='yes'):
     goon = 'True'
@@ -840,7 +863,7 @@ def correctobject(img, coordinatefile):
     scal = pi / 180.
     std, rastd, decstd, magstd = readstandard(coordinatefile)
     img = re.sub('\n', '', img)
-    correctcard(img)
+#    correctcard(img)
     hdr = readhdr(img)
     _ra = readkey3(hdr, 'RA')
     _dec = readkey3(hdr, 'DEC')
