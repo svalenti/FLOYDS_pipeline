@@ -5,7 +5,10 @@
 
 import os
 import numpy as np
-import pyfits
+try:
+    from astropy.io import fits as pyfits
+except:
+    import pyfits 
 
 
 # We define the laplacian kernel to be used

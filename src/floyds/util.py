@@ -1,14 +1,18 @@
 def sortbyJD(lista):
-    from pyfits import open as popen
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
+
     from numpy import array
 
     JDlist = []
     for img in lista:
         hdr = popen(img)[0].header
         if 'MJD' in hdr:
-            JDlist.append(popen(img)[0].header.get('MJD'))
+            JDlist.append(pyfits.open(img)[0].header.get('MJD'))
         else:
-            JDlist.append(popen(img)[0].header.get('MJD-OBS'))
+            JDlist.append(pyfits.open(img)[0].header.get('MJD-OBS'))
     lista = array(lista)
     JDlist = array(JDlist)
     inds = JDlist.argsort()
@@ -34,7 +38,11 @@ def ReadAscii2(ascifile):
 #########################################################################
 def readspectrum(img):
     from numpy import array
-    import pyfits
+    try:
+        from astropy.io import fits as pyfits
+    except:
+        import pyfits 
+    
     import string
 
     fl = ''
@@ -85,7 +93,11 @@ def readspectrum(img):
 def readlist(listfile):
 #    from floyds.util import correctcard
     import string, os, sys, re, glob
-    from pyfits import open as opn
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
+
 
     if '*' in listfile:
         imglist = glob.glob(listfile)
@@ -93,7 +105,7 @@ def readlist(listfile):
         imglist = string.split(listfile, sep=',')
     else:
         try:
-            hdulist = opn(listfile)
+            hdulist = pyfits.open(listfile)
         except:
             hdulist = []
         if hdulist:
@@ -165,27 +177,13 @@ def readhdr(img):
         print "Couldn't read header of {}. Try deleting it and starting over.".format(img)
         raise e
     return hdr
-#def readhdr(img):
-#    from pyfits import open as popen
-
-#    try:
-#        hdr = popen(img)[0].header
-#    except:
-#        from floyds.util import correctcard
-
-#        try:
-#            correctcard(img)
-#        except:
-#            import sys
-
-#            sys.exit('image ' + str(img) + ' is corrupted, delete it and start again')
-#        hdr = popen(img)[0].header
-#    return hdr
-
 
 def readkey3(hdr, keyword):
     import re, string, sys
-    import pyfits
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits     
 
     if pyfits.__version__:
         if int(re.sub('\.', '', str(pyfits.__version__))[:2]) <= 30:
@@ -808,9 +806,13 @@ def phase3header(img):
     import string
     from floyds.util import readhdr, readkey3
     from numpy import max, min, isfinite
-    from pyfits import open as popen
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
 
-    img_data = popen(img)[0].data
+
+    img_data = pyfits.open(img)[0].data
     hdr = readhdr(img)
     hedvec0 = {'DATAMIN': [float(min(img_data[isfinite(img_data)])), ''],
                'DATAMAX': [float(max(img_data[isfinite(img_data)])), ''],
@@ -1020,7 +1022,11 @@ def classifyfast(fitsfile, program='snid'):
 ################################################
 
 def spectraresolution2(img0, ww=25):
-    import pyfits
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
+
     import os, string, re, sys
     import floyds
     from numpy import arange, mean, compress, array
@@ -1080,7 +1086,11 @@ def spectraresolution2(img0, ww=25):
 ##################################################
 
 def spectraresolution3(img0, ww=25):
-    import pyfits
+    try:
+        from astropy.io import fits as pyfits
+    except:
+        import pyfits 
+
     import os, string, re, sys
     import floyds
     from numpy import arange, mean, compress, array, median

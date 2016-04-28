@@ -128,7 +128,11 @@ def normflat(img):
 def correctfringing(imgex, fringingmask):
     import floyds
     from pyraf import iraf
-    import pyfits
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
+
     from numpy import float32
 
     iraf.images(_doprint=0)
@@ -197,9 +201,12 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
     # import matplotlib
     MJDtoday = floyds.util.mjdtoday()
     from floyds.util import delete, readhdr, readkey3, updateheader, name_duplicate
-    from pyfits import open as popen
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
+
     from numpy import float32
-    import pyfits  #  added later
     from pyraf import iraf
 
     iraf.noao(_doprint=0)
@@ -242,7 +249,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
         else:
             sys.exit('ERROR: observatory not recognised')
 
-        refstar = 'm' + re.sub('.dat', '', popen(standardfile)[0].header.get('stdname'))
+        refstar = 'm' + re.sub('.dat', '', pyfits.open(standardfile)[0].header.get('stdname'))
         if sample == '*':
             _outputstd = 'std_' + str(readkey3(hdrs, 'grism')) + '_' + str(readkey3(hdrs, 'filter')) + '.fits'
             floyds.util.delete(_outputstd)
@@ -427,7 +434,10 @@ def telluric_atmo(imgstd):
         telluric_features_cut = ninterp(xxstd, llskyo2, telluric_features)
 
         _imgout = 'atmo_' + _tel + '_' + imgstd
-        import pyfits
+        try:
+            from astropy.io import fits as pyfits
+        except:
+            import pyfits 
 
         data1, hdr = pyfits.getdata(imgstd, 0, header=True)
         data1[0] = array(telluric_features_cut)
@@ -447,10 +457,14 @@ def telluric_atmo(imgstd):
 
 def checkwavestd(imgex, _interactive, _type=1):
     import floyds
-    from pyfits import open as popen
+    try:
+        from astropy.io import fits as pyfits
+    except:
+        import pyfits 
+
     from numpy import arange, array
 
-    _arm = popen(imgex)[0].header.get('GRISM')
+    _arm = pyfits.open(imgex)[0].header.get('GRISM')
     print '\n### Warning: check in wavelength with sky lines not performed\n'
     if _interactive.upper() in ['YES', 'Y']:
         answ = raw_input('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
@@ -460,22 +474,22 @@ def checkwavestd(imgex, _interactive, _type=1):
     if answ in ['y', 'yes']:
         print '\n### check wavelength calibration with telluric lines \n'
         _skyfile = floyds.__path__[0] + '/standard/ident/sky_new_0.fits'
-        skyff = 1 - (popen(_skyfile)[0].data)
-        crval1 = popen(_skyfile)[0].header.get('CRVAL1')
-        cd1 = popen(_skyfile)[0].header.get('CD1_1')
+        skyff = 1 - (pyfits.open(_skyfile)[0].data)
+        crval1 = pyfits.open(_skyfile)[0].header.get('CRVAL1')
+        cd1 = pyfits.open(_skyfile)[0].header.get('CD1_1')
         skyxx = arange(len(skyff))
         skyaa = crval1 + skyxx * cd1
-        _tel = popen(imgex)[0].header.get('TELID')
+        _tel = pyfits.open(imgex)[0].header.get('TELID')
         # if _tel not in ['ftn','fts']:         _tel=popen(imgex)[0].header.get('SITEID')
 
         print imgex
         atmofile = floyds.floydsspecdef.atmofile(imgex, 'atmo2_' + _tel + '_' + imgex)
         if _type == 1:
-            atmoff = 1 - (popen(atmofile)[0].data[0][0])
+            atmoff = 1 - (pyfits.open(atmofile)[0].data[0][0])
         else:
-            atmoff = 1 - (popen(atmofile)[0].data)
-        crval1 = popen(atmofile)[0].header.get('CRVAL1')
-        cd1 = popen(atmofile)[0].header.get('CD1_1')
+            atmoff = 1 - (pyfits.open(atmofile)[0].data)
+        crval1 = pyfits.open(atmofile)[0].header.get('CRVAL1')
+        cd1 = pyfits.open(atmofile)[0].header.get('CD1_1')
         atmoxx = arange(len(atmoff))
         atmoaa = crval1 + atmoxx * cd1
         shift = floyds.floydsspecdef.checkwavelength_arc(atmoaa, atmoff, skyaa, skyff, 6800, 7800, _interactive)
@@ -533,71 +547,6 @@ def checkwavelength_obj(fitsfile, skyfile, _interactive='yes', usethirdlayer=Tru
         shift = 0
     return shift
 
-# THIS USES THE OLD WAY OF UPDATING HEADERS
-#def checkwavelength_obj(fitsfile, skyfile, _interactive='yes', _type=1):
-#    import floyds
-#    import pyfits
-#    from pyfits import open as popen
-#    from numpy import arange
-#    from pylab import ion, show, plot
-
-#    _arm = popen(fitsfile)[0].header.get('GRISM')
-#    print '\n### Warning: check in wavelength with sky lines not performed\n'
-#    if _interactive.upper() in ['YES', 'Y']:
-#        answ = raw_input('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
-#        if not answ:
-#            answ = 'y'
-#    else:
-#        answ = 'y'
-#    if answ in ['y', 'yes']:
-#        print '\n### check wavelength calibration with telluric lines \n'
-#        # yy0=popen(fitsfile)[0]
-#        if _type == 1:
-#            yy1 = popen(fitsfile)[0].data[2][0]
-#        else:
-#            yy1 = popen(fitsfile)[0].data
-#        crval2 = popen(fitsfile)[0].header.get('CRVAL1')
-#        cd2 = popen(fitsfile)[0].header.get('CD1_1')
-#        xx1 = arange(len(yy1))
-#        if _interactive.upper() in ['YES', 'Y']:
-#            ion()
-#            plot(xx1, yy1)
-#            show()
-#        floyds.util.delete('new3.fits')
-#        hdu = pyfits.PrimaryHDU(yy1)
-#        hdulist = pyfits.HDUList([hdu])
-#        hdulist[0].header.update('CRVAL1', crval2)
-#        hdulist[0].header.update('CD1_1', cd2)
-#        hdulist.writeto('new3.fits')
-#        hdulist.close()
-#        fitsfile2 = floyds.floydsspecdef.continumsub('new3.fits', 6, 1)
-#        yy1 = popen(fitsfile2)[0].data
-#        xx1 = arange(len(yy1))
-#        aa1 = crval2 + (xx1) * cd2
-#        floyds.util.delete('new3.fits')
-#        skyff = popen(skyfile)[0].data
-#        crval1 = popen(skyfile)[0].header.get('CRVAL1')
-#        cd1 = popen(skyfile)[0].header.get('CD1_1')
-#        skyxx = arange(len(skyff))
-#        skyaa = crval1 + skyxx * cd1
-#        shift = floyds.floydsspecdef.checkwavelength_arc(aa1, yy1, skyaa, skyff, 5500, 6500, _interactive)
-#    else:
-#        shift = 0
-#    zro = popen(fitsfile)[0].header.get('CRVAL1')
-#    if _interactive.upper() in ['YES', 'Y']:
-#        answ = raw_input('\n### do you want to correct the wavelength calibration with this shift: ' +
-#                         str(shift) + ' [[y]/n] ? ')
-#        if not answ:
-#            answ = 'y'
-#        if answ.lower() in ['y', 'yes']:
-#            floyds.util.updateheader(fitsfile, 0, {'CRVAL1': [zro + int(shift), '']})
-#            floyds.util.updateheader(fitsfile, 0, {'shift' + _arm[0]: [float(shift), '']})
-#    else:
-#        floyds.util.updateheader(fitsfile, 0, {'CRVAL1': [zro + int(shift), '']})
-#        floyds.util.updateheader(fitsfile, 0, {'shift' + _arm[0]: [float(shift), '']})
-#    return shift
-
-
 # ###########################################
 
 def checkwavelength_arc(xx1, yy1, xx2, yy2, xmin, xmax, _interactive='yes'):
@@ -639,7 +588,11 @@ def checkwavelength_arc(xx1, yy1, xx2, yy2, xmin, xmax, _interactive='yes'):
 
 
 def atmofile(imgstd, imgout=''):
-    import pyfits, os
+    try:
+        from astropy.io import fits as pyfits
+    except:
+        import pyfits 
+    import os
     import numpy as np
 
     data, hdr = pyfits.getdata(imgstd, 0, header=True)
@@ -688,8 +641,11 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
     iraf.specred(_doprint=0)
     toforget = ['specred.apall', 'specred.transform']
     for t in toforget: iraf.unlearn(t)
-    from pyfits import open as popen
-    import pyfits
+
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
 
     dv = dvex()
     hdr = readhdr(img)
@@ -912,7 +868,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     from floyds.util import readhdr, readkey3
     import string, re, os, sys, glob
     from numpy import arange, pi, arccos, sin, cos, argmin, sqrt
-    from pyfits import open as popen
+
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits
+       
     from pyraf import iraf
     import datetime
 
@@ -1422,9 +1383,9 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                 time.sleep(1)
                                 answ = 'y'
                             if answ in ['n', 'N', 'no', 'NO', 'No']:
-                                yy1 = popen(arcref)[0].data
+                                yy1 = pyfits.open(arcref)[0].data
                                 xx1 = arange(len(yy1))
-                                yy2 = popen(arcfile)[0].data
+                                yy2 = pyfits.open(arcfile)[0].data
                                 xx2 = arange(len(yy2))
                                 _shift = floyds.floydsspecdef.checkwavelength_arc(xx1, yy1, xx2, yy2, '', '',
                                                                                   _interactive)  #*(-1)
@@ -1491,7 +1452,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                 print '\n### check standard wave calib'
                                 print imgl
                                 shiftred = floyds.floydsspecdef.checkwavestd(imgl, _interactive, 2)
-                                zro = popen(imgl)[0].header.get('CRVAL1')
+                                zro = pyfits.open(imgl)[0].header.get('CRVAL1')
                                 if _interactive.upper() in ['YES', 'Y']:
                                     print 'Figure out the shift of H-alpha (should be near 6563).'
                                     iraf.onedspec.splot(imgl + '[*,1,1]')
@@ -1510,7 +1471,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                     hdrred = floyds.util.readhdr(re.sub('blue','red',imgl))
                                     shiftred = floyds.readkey3(hdrred,'SHIFTR')
                                     if shiftred:
-                                        zro = popen(imgl)[0].header.get('CRVAL1')
+                                        zro = pyfits.open(imgl)[0].header.get('CRVAL1')
                                         if _interactive.upper() in ['YES', 'Y']:
                                             print 'Figure out the shift of H-beta (should be near 4861).'
                                             iraf.onedspec.splot(imgl + '[*,1,1]')
@@ -2036,7 +1997,11 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
 def combineblusens(imglist, imgout='pippo.fits'):
     import pyfits
     import string
-    from pyfits import open as popen
+    try:
+        from astropy.io import fits as pyfits
+    except:
+        import pyfits 
+
     from numpy import compress, where, array, arange, float32
     from numpy import interp as ninterp
     import floyds
@@ -2136,8 +2101,11 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     from floyds.util import delete, updateheader, readhdr, readkey3, display_image
     import string, re, os, glob, sys
     from numpy import array, arange, argmin, float32
-    import pyfits
-    #    from pyfits import open as popen
+    try:
+        from astropy.io import fits as pyfits
+    except:
+       import pyfits 
+
     from pyraf import iraf
     import datetime
 
@@ -2542,7 +2510,11 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
 
 ####################################################################
 def aperture(img):
-    import pyfits
+    try:
+        from astropy.io import fits as pyfits
+    except:
+        import pyfits 
+    
     import re
     import time
 
