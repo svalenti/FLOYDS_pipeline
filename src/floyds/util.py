@@ -185,13 +185,6 @@ def readkey3(hdr, keyword):
     except:
        import pyfits     
 
-    if pyfits.__version__:
-        if int(re.sub('\.', '', str(pyfits.__version__))[:2]) <= 30:
-            aa = 'HIERARCH '
-        else:
-            aa = ''
-    else:
-        aa = ''
     try:
         _instrume = hdr.get('INSTRUME').lower()
     except:
