@@ -1,7 +1,6 @@
 def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
-    import pyfits
+    from astropy.io import fits
     import re,string
-    from pyfits import open as popen
     from numpy import arange, array, float32
     from numpy import interp as ninterp
     import floyds
@@ -16,17 +15,17 @@ def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
         _observatory='cfht'
     else: sys.exit('ERROR: observatory not recognised')
 
-    data2d, hdr2d = pyfits.getdata(img2d, 0, header=True)
+    data2d, hdr2d = fits.getdata(img2d, 0, header=True)
     if 'GRISM' in hdr2d:  _arm=hdr2d['GRISM']
     else:                 _arm=''
     xxd=arange(len(data2d[0,:]))
-    crvald=popen(img2d)[0].header.get('CRVAL1')
-    cdd=popen(img2d)[0].header.get('CD1_1')
+    crvald = hdr2d['CRVAL1']
+    cdd = hdr2d['CD1_1']
     _exptime,_airmass=readkey3(readhdr(img2d),'exptime'),readkey3(readhdr(img2d),'airmass')
     #  read sensfunction and interpole pixel of 2D image
-    yys=popen(sensfun)[0].data
-    crvals=popen(sensfun)[0].header.get('CRVAL1')
-    cds=popen(sensfun)[0].header.get('CD1_1')    
+    yys, senshdr = fits.getdata(sensfun, header=True)
+    crvals = senshdr['CRVAL1']
+    cds = senshdr['CD1_1']
     yys=(10**(yys/2.5))*cds                  # from sens iraf in sens flux
     xxs=arange(len(yys))
     aasens=crvals+(xxs)*cds
@@ -41,18 +40,18 @@ def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
     img2df=re.sub('.fits','_2df.fits',img2d)
     for i in range(len(data2d[:,0])):  data2d[i,:]=((array(data2d[i,:]/_exptime)*array(aircorr))/aasens2)*1e20
     floyds.util.delete(img2df)
-    pyfits.writeto(img2df, float32(data2d), hdr2d)
+    fits.writeto(img2df, float32(data2d), hdr2d)
     floyds.util.updateheader(img2df,0,{'SENSFUN'+_arm[0]:[string.split(sensfun,'/')[-1],'']})
     floyds.util.updateheader(img2df,0,{'BUNIT':['erg/cm2/s/A  10^20','Physical unit of array values']})
     return img2df
 
 def gettar(img):
-    import pyfits
+    from astropy.io import fits
     import floyds
     from urllib import urlopen
     import re,string,os
     from datetime import datetime, timedelta
-    data, hdr = pyfits.getdata(img, 0, header=True)
+    data, hdr = fits.getdata(img, 0, header=True)
 
     #
     #
@@ -136,7 +135,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
     import floyds
     import string,re,os,glob,sys,pickle
     from numpy import array, arange, mean,pi,arccos,sin,cos,argmin
-    import pyfits
+    from astropy.io import fits
     from pyraf import iraf
     import datetime
     os.environ["PYRAF_BETA_STATUS"] = "1"
@@ -426,14 +425,14 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                   if setup[0]=='red':
                       print '\n### check standard wave calib'
                       #print img
-                      data, hdr = pyfits.getdata(img, 0, header=True) 
+                      data, hdr = fits.getdata(img, 0, header=True) 
                       y=data.mean(1)
                       import numpy as np
                       if np.argmax(y) < 80 and np.argmax(y) > 15:                      
                           y2=data[np.argmax(y)-3:np.argmax(y)+3].mean(0)
                           yy2=data[np.argmax(y)-9:np.argmax(y)-3].mean(0)
                           floyds.util.delete('_std.fits')
-                          pyfits.writeto('_std.fits', np.float32(y2-yy2), hdr)
+                          fits.writeto('_std.fits', np.float32(y2-yy2), hdr)
                           #print '_std.fits',_interactive
                           shift=floyds.floydsspecdef.checkwavestd('_std.fits',_interactive,2)
                           zro=hdr['CRVAL1']
@@ -447,14 +446,14 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               else:
                     print '\n### check object wave calib'
                     _skyfile=floyds.__path__[0]+'/standard/ident/sky_'+setup[0]+'.fits'
-                    data, hdr = pyfits.getdata(img, 0, header=True) 
+                    data, hdr = fits.getdata(img, 0, header=True) 
                     y=data.mean(1)
                     import numpy as np
                     if np.argmax(y) < 80 and np.argmax(y) > 15:
                         yy1=data[10:np.argmax(y)-9].mean(0)
                         yy2=data[np.argmax(y)+9:-10].mean(0)
                         floyds.util.delete('_sky.fits')
-                        pyfits.writeto('_sky.fits', np.float32(yy1+yy2), hdr)
+                        fits.writeto('_sky.fits', np.float32(yy1+yy2), hdr)
                         shift=floyds.floydsspecdef.checkwavelength_obj('_sky.fits',_skyfile,_interactive,2)
                         floyds.util.delete('_sky.fits')
                         zro=hdr['CRVAL1']
@@ -484,7 +483,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           shift=int(.5+float(shift)/3.5)        # shift from correctfringing_auto in Angstrom
                           print '\n##### flat scaling: ',str(scale),str(shift)
 ########################################################
-                          datax, hdrx = pyfits.getdata(flatfile, 0, header=True)
+                          datax, hdrx = fits.getdata(flatfile, 0, header=True)
                           xdim=hdrx['NAXIS1']
                           ydim=hdrx['NAXIS2']
                           iraf.specred.apedit.nsum=15 
@@ -710,11 +709,11 @@ def writereadme():
 
 #####################################################
 def archivespectrum(img,_force=True):
-    import pyfits
+    from astropy.io import fits
     import datetime
     import floyds
     import string,re,os,glob
-    hdr=pyfits.open(img)[0].header
+    hdr=fits.open(img)[0].header
     _tel=hdr['telescop']
     if 'South' in _tel: _tel='fts'
     if 'North' in _tel: _tel='ftn'
@@ -733,7 +732,7 @@ def archivespectrum(img,_force=True):
         imglist=glob.glob(directory+'/*_'+_tel+'_*2df*fits')
         filethere=0
         for imgold in imglist:
-            hdr1=pyfits.open(imgold)[0].header
+            hdr1=fits.open(imgold)[0].header
             _date1=hdr1['DATE-OBS']
             _grism1=hdr1['grism']
             if _date1==_date and _grism1==_grism:

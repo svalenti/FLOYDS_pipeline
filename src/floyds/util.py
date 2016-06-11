@@ -1,14 +1,14 @@
 def sortbyJD(lista):
-    from pyfits import open as popen
+    from astropy.io import fits
     from numpy import array
 
     JDlist = []
     for img in lista:
-        hdr = popen(img)[0].header
+        hdr = fits.open(img)[0].header
         if 'MJD' in hdr:
-            JDlist.append(popen(img)[0].header.get('MJD'))
+            JDlist.append(hdr['MJD'])
         else:
-            JDlist.append(popen(img)[0].header.get('MJD-OBS'))
+            JDlist.append(hdr['MJD-OBS'])
     lista = array(lista)
     JDlist = array(JDlist)
     inds = JDlist.argsort()
@@ -34,13 +34,13 @@ def ReadAscii2(ascifile):
 #########################################################################
 def readspectrum(img):
     from numpy import array
-    import pyfits
+    from astropy.io import fits
     import string
 
     fl = ''
     lam = ''
     graf = 1
-    spec = pyfits.open(img)
+    spec = fits.open(img)
     head = spec[0].header
     try:
         if spec[0].data.ndim == 1:
@@ -85,7 +85,7 @@ def readspectrum(img):
 def readlist(listfile):
 #    from floyds.util import correctcard
     import string, os, sys, re, glob
-    from pyfits import open as opn
+    from astropy.io import fits
 
     if '*' in listfile:
         imglist = glob.glob(listfile)
@@ -93,7 +93,7 @@ def readlist(listfile):
         imglist = string.split(listfile, sep=',')
     else:
         try:
-            hdulist = opn(listfile)
+            hdulist = fits.open(listfile)
         except:
             hdulist = []
         if hdulist:
@@ -109,17 +109,11 @@ def readlist(listfile):
                     if not ff == '\n' and ff[0] != '#':
                         ff = re.sub('\n', '', ff)
                         try:
-                            hdulist = opn(ff)
+                            hdulist = fits.open(ff)
                             imglist.append(ff)
                         except Exception as e:
                             print 'problem reading header of', ff
                             print e
-#                            try:
-#                                correctcard(ff)
-#                                hdulist = opn(ff)
-#                                imglist.append(ff)
-#                            except:
-#                                pass
             except:
                 sys.exit('\n##### Error ###\n file ' + str(listfile) + ' do not  exist\n')
     if len(imglist) == 0:
@@ -158,42 +152,17 @@ def delete(listfile):
 
 ###############################################################
 def readhdr(img):
-    from astropy.io.fits import getheader
+    from astropy.io import fits
     try:
-        hdr = getheader(img)
+        hdr = fits.getheader(img)
     except Exception as e:
         print "Couldn't read header of {}. Try deleting it and starting over.".format(img)
         raise e
     return hdr
-#def readhdr(img):
-#    from pyfits import open as popen
-
-#    try:
-#        hdr = popen(img)[0].header
-#    except:
-#        from floyds.util import correctcard
-
-#        try:
-#            correctcard(img)
-#        except:
-#            import sys
-
-#            sys.exit('image ' + str(img) + ' is corrupted, delete it and start again')
-#        hdr = popen(img)[0].header
-#    return hdr
-
 
 def readkey3(hdr, keyword):
     import re, string, sys
-    import pyfits
 
-    if pyfits.__version__:
-        if int(re.sub('\.', '', str(pyfits.__version__))[:2]) <= 30:
-            aa = 'HIERARCH '
-        else:
-            aa = ''
-    else:
-        aa = ''
     try:
         _instrume = hdr.get('INSTRUME').lower()
     except:
@@ -335,70 +304,6 @@ def writeinthelog(text, logfile):
     f = open(logfile, 'a')
     f.write(text)
     f.close()
-
-
-################################################
-# THIS WAY OF UPDATING HEADERS DOES NOT WORK WITH PYFITS 3.4
-#def correctcard(img):
-#    from  pyfits import open as popen
-#    from numpy import asarray
-#    import re
-
-#    hdulist = popen(img)
-#    a = hdulist[0]._verify('fix')
-#    _header = hdulist[0].header
-#    for i in range(len(a)):
-#        if not a[i]:
-#            a[i] = ['']
-#    ww = asarray([i for i in range(len(a)) if (re.sub(' ', '', a[i][0]) != '')])
-#    if len(ww) > 0:
-#        newheader = []
-#        headername = []
-#        for j in _header.items():
-#            headername.append(j[0])
-#            newheader.append(j[1])
-#        hdulist.close()
-#        imm = popen(img, mode='update')
-#        _header = imm[0].header
-#        for i in ww:
-#            if headername[i]:
-#                try:
-#                    _header.update(headername[i], newheader[i])
-#                except:
-#                    _header.update(headername[i], 'xxxx')
-#        imm.flush()
-#        imm.close()
-
-
-######################################################################################################
-# THIS OLD VERSION DOES NOT WORK WITH PYFITS 3.4
-#def updateheader(image, dimension, headerdict):
-#    from pyfits import open as opp
-
-#    try:
-#        imm = opp(image, mode='update')
-#        _header = imm[dimension].header
-#        for i in headerdict.keys():
-#            _header.update(i, headerdict[i][0], headerdict[i][1])
-#        imm.flush()
-#        imm.close()
-#    except:
-#        from floyds.util import correctcard
-
-#        print '\nwarning: problem to update header, try to correct header format ....'
-#        correctcard(image)
-#        try:
-#            imm = opp(image, mode='update')
-#            _header = imm[dimension].header
-#            for i in headerdict.keys():
-#                _header.update(i, headerdict[i][0], headerdict[i][1])
-#            _header.update(_headername, _value, commento)
-#            imm.flush()
-#            imm.close()
-#        except:
-#            print '\n# still problems to update header'
-##           import sys
-##            sys.exit('error: not possible update header')
 
 def updateheader(filename, dimension, headerdict):
     from astropy.io import fits
@@ -808,9 +713,9 @@ def phase3header(img):
     import string
     from floyds.util import readhdr, readkey3
     from numpy import max, min, isfinite
-    from pyfits import open as popen
+    from astropy.io import fits
 
-    img_data = popen(img)[0].data
+    img_data = fits.open(img)[0].data
     hdr = readhdr(img)
     hedvec0 = {'DATAMIN': [float(min(img_data[isfinite(img_data)])), ''],
                'DATAMAX': [float(max(img_data[isfinite(img_data)])), ''],
@@ -1020,7 +925,7 @@ def classifyfast(fitsfile, program='snid'):
 ################################################
 
 def spectraresolution2(img0, ww=25):
-    import pyfits
+    from astropy.io import fits
     import os, string, re, sys
     import floyds
     from numpy import arange, mean, compress, array
@@ -1031,7 +936,7 @@ def spectraresolution2(img0, ww=25):
 
     id = 'database/id' + re.sub('.fits', '', img0)
     img = re.sub('arc_', '', img0)
-    data, hdr = pyfits.getdata(img0, 0, header=True)
+    data, hdr = fits.getdata(img0, 0, header=True)
     crvals = floyds.util.readkey3(hdr, 'CRVAL1')
     cds = floyds.util.readkey3(hdr, 'CD1_1')
     xx = arange(len(data))
@@ -1080,7 +985,7 @@ def spectraresolution2(img0, ww=25):
 ##################################################
 
 def spectraresolution3(img0, ww=25):
-    import pyfits
+    from astropy.io import fits
     import os, string, re, sys
     import floyds
     from numpy import arange, mean, compress, array, median
@@ -1090,7 +995,7 @@ def spectraresolution3(img0, ww=25):
     iraf.onedspec(_doprint=0)
 
     img = re.sub('arc_', '', img0)
-    data, hdr = pyfits.getdata(img0, 0, header=True)
+    data, hdr = fits.getdata(img0, 0, header=True)
     crvals = floyds.util.readkey3(hdr, 'CRVAL1')
     cds = floyds.util.readkey3(hdr, 'CD1_1')
     xx = arange(len(data))
