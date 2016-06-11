@@ -7,7 +7,6 @@ import os
 import numpy as np
 from astropy.io import fits
 
-
 # We define the laplacian kernel to be used
 laplkernel = np.array([[0.0, -1.0, 0.0], [-1.0, 4.0, -1.0], [0.0, -1.0, 0.0]])
 # Other kernels :

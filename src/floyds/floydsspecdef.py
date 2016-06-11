@@ -1,3 +1,4 @@
+
 def rebin(y, s):
     from numpy import array
     # s=raw_input('which value for rebining ? [1]')
@@ -610,7 +611,6 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
     iraf.specred(_doprint=0)
     toforget = ['specred.apall', 'specred.transform']
     for t in toforget: iraf.unlearn(t)
-
 
     dv = dvex()
     hdr = readhdr(img)
@@ -1955,7 +1955,7 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
 #############################################################
 def combineblusens(imglist, imgout='pippo.fits'):
     import string
-    from astropoy.io import fits
+    from astropy.io import fits
     from numpy import compress, where, array, arange, float32
     from numpy import interp as ninterp
     import floyds
