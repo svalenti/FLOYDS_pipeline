@@ -465,7 +465,7 @@ def checkwavestd(imgex, _interactive, _type=1):
         cd1 = skyhdr['CD1_1']
         skyxx = arange(len(skyff))
         skyaa = crval1 + skyxx * cd1
-        _tel = skyhdr['TELID']
+        _tel = fits.getheader(imgex)['TELID']
         print imgex
         atmofile = floyds.floydsspecdef.atmofile(imgex, 'atmo2_' + _tel + '_' + imgex)
         atmodata, atmohdr = fits.getdata(atmofile, header=True)
