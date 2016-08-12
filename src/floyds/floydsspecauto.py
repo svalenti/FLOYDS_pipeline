@@ -218,6 +218,9 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             _object0 = re.sub('\[', '', _object0) # open square bracket
             _object0 = re.sub('\)', '', _object0) # close parenthesis
             _object0 = re.sub('\]', '', _object0) # close square bracket
+            _object0 = _object0.replace(r'\t', '') # Any tab characters
+            _object0 = _object0.replace('*', '') # Any asterisks
+
             if len(_object0) > max_length:
                 _object0 = _object0[:max_length]
             _date0=floyds.util.readkey3(hdr0,'date-night')
