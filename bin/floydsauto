@@ -221,10 +221,12 @@ if __name__ == "__main__":
             nametar = str(prop) + '_' + str(grpid) + '_' + str(_instrume) + '_' + str(date) + '_' + str(
                 MJDtoday) + '.tar.gz'
 
-            for img0 in outputlist['grpid'][oblock]:
-                outfile = img0.replace('00.fits', '90.fits')
-                os.system('cp ' + img0 + ' ' + outfile)
-                floyds.util.updateheader(outfile, 0, {'TARFILE': [nametar, '']})
+            # 2016-08-12 We no longer want to produce the e90.fits files as they are basically the
+            # same file as the raw data, but only one updated keyword.
+            #for img0 in outputlist['grpid'][oblock]:
+            #    outfile = img0.replace('00.fits', '90.fits')
+            #    os.system('cp ' + img0 + ' ' + outfile)
+            #    floyds.util.updateheader(outfile, 0, {'TARFILE': [nametar, '']})
 
             imglist = [readme]
             for img0 in outputlist['grpid'][oblock].keys():
