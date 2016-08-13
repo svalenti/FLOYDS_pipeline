@@ -801,7 +801,7 @@ def continumsub(imagefile, _order1, _order2):
     output = 'subtracted.fits'
     iraf.specred.continuum(imagefile, output='tsky.fits', type='difference', interact='no', function='legendre',
                            niterat=300, low_rej=3, high_re=2, sample='*', order=_order1, ask='YES')
-    iraf.continuum('tsky.fits', output=output, type='difference', interact='no', function='spline1',
+    iraf.specred.continuum('tsky.fits', output=output, type='difference', interact='no', function='spline1',
                    overrid='yes', niterat=10, low_rej=3, high_re=1, sample='*', order=_order2, ask='YES')
     delete('tsky.fits')
     return output

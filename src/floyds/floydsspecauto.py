@@ -457,7 +457,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                         yy2=data[np.argmax(y)+9:-10].mean(0)
                         floyds.util.delete('_sky.fits')
                         fits.writeto('_sky.fits', np.float32(yy1+yy2), hdr)
-                        shift=floyds.floydsspecdef.checkwavelength_obj('_sky.fits',_skyfile,_interactive,2)
+                        shift=floyds.floydsspecdef.checkwavelength_obj('_sky.fits',_skyfile,_interactive,usethirdlayer=False)
                         floyds.util.delete('_sky.fits')
                         zro=hdr['CRVAL1']
                         floyds.util.updateheader(img,0,{'CRVAL1':[zro+int(shift),'']})
