@@ -147,7 +147,7 @@ if ( ! -r ${UTnight}.processed ) then
         if ( ! -rd $FINAL_DATA_OUT/$propid/$UTnight ) then
           mkdir -p $FINAL_DATA_OUT/$propid/$UTnight
         endif
-        cp -v $donefile $FINAL_DATA_OUT/$propid/$UTnight/
+        #cp -v $donefile $FINAL_DATA_OUT/$propid/$UTnight/
         set tarfile = `fits_get_keyword_value_static $donefile TARFILE STRING`
         mv -v $tarfile $FINAL_DATA_OUT/$propid/$UTnight/
         \rm -f $donefile
