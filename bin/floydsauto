@@ -190,7 +190,6 @@ if __name__ == "__main__":
                                                                   _rebin, _fringing)
     else:
         outputlist = ''
-    print outputlist
     #############   group the files by groupid, not science frame
     if outputlist:
         now = datetime.datetime.now()
@@ -243,7 +242,9 @@ if __name__ == "__main__":
 
             try:
                 bb, kk = floyds.gettar(img0)
-            except:
+            except Exception as e:
+                print 'failed to download guiding images for', img0
+                print e
                 bb, kk = '', ''
             if bb:
                 imglist.append(bb)
@@ -259,32 +260,24 @@ if __name__ == "__main__":
             for img in imglist:
                 ff.write('%80s' % (img))
                 if 'tt' in img[0:2]:
-                    ff.write('\t  rectified spectrum ')
+                    ff.write('\trectified spectrum')
                 if 'ntt' in img[0:3] or 'Ntt' in img[0:3]:
-                    ff.write('\t rectified spectrum \t  flat corrected')
+                    ff.write('\trectified spectrum\tflat corrected')
                 if '_2df' in img:
-                    ff.write('\t  2D  wave & flux calib ')
+                    ff.write('\t2D wave & flux calib')
                 if '_ex.fits' in img:
-                    ff.write('\t  fast extraction ')
+                    ff.write('\tfast extraction')
                 if 'sens' in img[0:4]:
-                    ff.write('\t sensitivity function')
+                    ff.write('\tsensitivity function')
                 if 'atmo' in img[0:4]:
-                    ff.write('\t atmosferic extinction ')
+                    ff.write('\tatmospheric extinction')
                 ff.write('\n')
             ff.close()
             floyds.archivingtar(imglist, nametar)
-            deletefile = deletefile + list(imglist)
-            for img in deletefile:
-                if img not in listfile:
-                    floyds.util.delete(img)
-            listadel = glob.glob('*flat*fits')
-            listadel1 = glob.glob('*_ex.fits')
-            listadel2 = glob.glob('*clean.fits')
-            for img in listadel:
-                floyds.util.delete(img)
-            for img in listadel1:
-                floyds.util.delete(img)
-            for img in listadel2:
+            deletefile += imglist
+
+        for img in deletefile + glob.glob('*flat*.fits') + glob.glob('arc_*.fits') + glob.glob('*_clean.fits') + glob.glob('*_ex.fits'):
+            if img not in listfile:
                 floyds.util.delete(img)
 
     stoptime = time.time()

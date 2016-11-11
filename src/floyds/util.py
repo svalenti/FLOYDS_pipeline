@@ -788,15 +788,11 @@ def archivingtar(outputlist, nametar):
     import os, string, re
     from floyds.util import delete
 
-    print '\n### making a tar with pre-reduced frames ........ please wait'
-    stringa = ''
-    for img in outputlist:   stringa = stringa + img + ' '
-    #   stringa=stringa+
-    #   delete(re.sub('raw.list','tar.gz',rawfile))
+    print '### making a tar with pre-reduced frames ........ please wait'
+    stringa = ' '.join(outputlist)
     delete(nametar)
-    print stringa
-    os.system('tar -zcf ' + nametar + ' ' + stringa)
-    print '\n### tar file: ' + nametar
+    os.system('tar -zcvf ' + nametar + ' ' + stringa)
+    print '### tar file: ' + nametar + '\n'
 
 
 #################################################################

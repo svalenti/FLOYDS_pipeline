@@ -278,7 +278,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       if not _type: _type='EXPOSE'
 
             if _type=='EXPOSE':  
-                print 'warning obstype still EXSPOSE, are this old data ?  run manually floydsfixheader'
+                print 'warning obstype still EXPOSE, are this old data ?  run manually floydsfixheader'
 
             _slit=floyds.util.readkey3(hdr,'slit')
             _grpid=floyds.util.readkey3(hdr,'grpid')
@@ -413,21 +413,18 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                   print fcfile
               print img,arcfile,flatfile
               img0=img
-              if img      and not img in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
+              if img      and img not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
 
               img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,'no',_cosmic)
-              print outputfile
-              if img      and not img in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
+              if img      and img not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
-              print outputfile
 ###################################################################         check wavecalib  
               if tpe=='std' or floyds.util.readkey3(floyds.util.readhdr(img),'exptime') < 300:
                   if setup[0]=='red':
                       print '\n### check standard wave calib'
-                      #print img
                       data, hdr = fits.getdata(img, 0, header=True) 
                       y=data.mean(1)
                       import numpy as np
@@ -436,7 +433,6 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           yy2=data[np.argmax(y)-9:np.argmax(y)-3].mean(0)
                           floyds.util.delete('_std.fits')
                           fits.writeto('_std.fits', np.float32(y2-yy2), hdr)
-                          #print '_std.fits',_interactive
                           shift=floyds.floydsspecdef.checkwavestd('_std.fits',_interactive,2)
                           zro=hdr['CRVAL1']
                           floyds.util.updateheader(img,0,{'CRVAL1':[zro+int(shift),'']})
@@ -519,10 +515,9 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           imgn=floyds.floydsspecdef.applyflat(img,'n'+flatfile,'n'+img,scale,shift)
               else:                  imgn=''
 
-              if imgn    and not imgn in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgn)
+              if imgn and imgn not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgn)
 
 ###################################################      2D flux calib
-              print '####### '+imgn
               hdr=floyds.util.readhdr(img)
               _sens=''
               if liststandard:  _sens=floyds.util.searchsens(img,liststandard)[0]   # search in the list from reducer
@@ -546,31 +541,39 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if imgdn:
                   try:
                       imgdnex=floyds.floydsspecdef.extractspectrum(imgdn,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)
-                  except:
+                  except Exception as e:
+                      print 'failed to extract', imgdn
+                      print e
                       imgdnex=''
               else:       
                   imgdnex=''
               if imgd:
                   try:
                       imgdex=floyds.floydsspecdef.extractspectrum(imgd,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)  
-                  except:
+                  except Exception as e:
+                      print 'failed to extract', imgd
+                      print e
                       imgdex=''
               else:
                   imgdex=''
-              if imgd    and not imgd in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgd)
-              if imgdn   and not imgdn in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgdn)
-              if imgdnex and imgdnex not in outputfile[tpe][archfile]:   outputfile[tpe][archfile].append(imgdnex)
-              if imgdex  and imgdex not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(imgdex)
+              if imgd    and imgd    not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgd)
+              if imgdn   and imgdn   not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgdn)
+              if imgdnex and imgdnex not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgdnex)
+              if imgdex  and imgdex  not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(imgdex)
               if tpe=='std':
                   if imgn:
                       try:
                           imgnex=floyds.floydsspecdef.extractspectrum(imgn,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)  
-                      except:
+                      except Exception as e:
+                          print 'failed to extract', imgn
+                          print e
                           imgnex=''
                   elif img:
                       try:
                           imgnex=floyds.floydsspecdef.extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)  
-                      except:
+                      except Exception as e:
+                          print 'failed to extract', img
+                          print e
                           imgnex=''
                   if imgnex:
                     hdrs=floyds.util.readhdr(imgnex)
@@ -582,8 +585,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                     print '\n### compute sensitivity function and atmofile'
                     if setup[0]=='red':
                           atmofile=floyds.floydsspecdef.telluric_atmo(imgnex)
-                          #print atmofile
-                          if atmofile  and atmofile not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(atmofile)
+                          if atmofile and atmofile not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(atmofile)
                           stdusedclean=re.sub('_ex.fits','_clean.fits',imgnex)
                           floyds.util.delete(stdusedclean)
                           _function='spline3'
@@ -604,58 +606,34 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                               _outputsens2=''
                     if _outputsens2  and _outputsens2 not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(_outputsens2)
     ###################################################
-    print outputfile
     if 'obj' in outputfile:
       for imm in outputfile['obj']:
-        lista= outputfile['obj'][imm]
-        lista1=[]
-        for i in lista: 
-            if '_ex.fits' in i:  
-                lista1.append(i)
-                lista.pop(lista.index(i))
-        done=[]
-        for img in lista1:
-            _output=''
-            if img not in done:
-                if '_red_' in img:
-                    redfile=img
-                    if re.sub('_red_','_blue_',redfile)[1:] in lista1:
-                        bluefile=lista1[lista1.index(re.sub('_red_','_blue_',redfile)[1:])]
-                        _output=re.sub('_red_','_merge_',redfile)
-                        try:
-                            _output=floyds.floydsspecdef.combspec(bluefile,redfile,_output,scale=True,num=None)
-                            lista.append(_output)
-                            done.append(redfile)
-                            done.append(bluefile)
-                            floyds.util.delete(bluefile)
-                            floyds.util.delete(redfile)
-                            floyds.util.delete(redfile[1:])
-                        except:
-                            done.append(redfile)
-                            lista.append(redfile)
-                    else:
-                        done.append(redfile)
-                        lista.append(redfile)
-                elif '_blue_' in img:
-                    bluefile=img
-                    if 'n'+re.sub('_blue_','_red_',bluefile) in lista1:
-                        redfile=lista1[lista1.index('n'+re.sub('_blue_','_red_',bluefile))]
-                        _output=re.sub('_red_','_merge_',redfile)
-                        try:
-                            _output=floyds.floydsspecdef.combspec(bluefile,redfile,_output,scale=True,num=None)
-                            lista.append(_output)
-                            done.append(redfile)
-                            done.append(bluefile)
-                            floyds.util.delete(bluefile)
-                            floyds.util.delete(redfile)
-                            floyds.util.delete(redfile[1:])
-                        except:
-                            done.append(bluefile)
-                            lista.append(bluefile)
-                    else:
-                        done.append(bluefile)
-                        lista.append(bluefile)
-        outputfile['obj'][imm]= lista
+        lista = []
+        tt_red = ''
+        ntt_red = ''
+        tt_blue = ''
+        for f in outputfile['obj'][imm]:
+            if '_ex.fits' in f and '_blue_' in f:
+                tt_blue = f
+            elif '_ex.fits' in f and f[:3] == 'ntt':
+                ntt_red = f
+            elif '_ex.fits' in f and f[:2] == 'tt':
+                tt_red = f
+            else:
+                lista.append(f)
+        merged = ntt_red.replace('_red_', '_merge_')
+        if tt_blue and ntt_red:
+            floyds.floydsspecdef.combspec2(tt_blue, ntt_red, merged, scale=True, num=None)
+        if os.path.isfile(merged):
+            lista.append(merged)
+            floyds.util.delete(tt_blue)
+            floyds.util.delete(tt_red)
+            floyds.util.delete(ntt_red)
+        else:
+            if tt_blue: lista.append(tt_blue)
+            if tt_red:  lista.append(tt_red)
+            if ntt_red: lista.append(ntt_red)
+        outputfile['obj'][imm] = lista
     readme=floyds.floydsspecauto.writereadme()
     return outputfile,readme
 

@@ -51,7 +51,6 @@ def correctfringing_auto(img0, imgN):
     xx2, yy2 = floyds.util.readspectrum('sky2.fits')  #  fringing form flat
     # shift fringing on std and fringing from flat
     shift = floyds.floydsspecdef.checkwavelength_arc(xx1, yy1 - min(yy1), xx2, yy2, '', '', False) * (-1)
-    print shift
     if abs(shift) > 15:
         shift = 0
     xx3 = array(xx2, float)[:]
@@ -87,7 +86,6 @@ def correctfringing_auto(img0, imgN):
     floyds.util.updateheader(img0, 0, {'FRSCALE': [so2, 'fringing scale factor ']})
     floyds.util.updateheader(img0, 0, {'FRSHIFT': [shift, 'fringing shift factor ']})
     floyds.util.updateheader(img0, 0, {'FLAT' + arm: [string.split(imgN, '/')[-1], 'flat field file ']})
-    print so2, shift
     return img0, so2, shift
 
 
@@ -232,7 +230,6 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
         _tel = readkey3(hdrs, 'TELID')
         if _tel not in ['ftn', 'fts']:
             _tel = readkey3(hdrs, 'SITEID')
-        print _tel
         if _tel in ['fts', 'coj']:  # to be checked
             _extinction = 'ssoextinct.dat'
             _observatory = 'sso'
@@ -285,7 +282,6 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                         sss = sens1
 
                     floyds.util.delete(std1 + ',' + std0)
-                print sss
                 _outputsens = combineredsens(sss, _outputsens)
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
@@ -314,7 +310,6 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                     sss = sss + ',' + sens1
                     floyds.util.delete(std1 + ',' + std0)
                 _outputsens = combineblusens(sss, _outputsens)
-                print sss
                 print _outputsens
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
@@ -339,7 +334,6 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                         sss = sens1
 
                     floyds.util.delete(std1 + ',' + std0)
-                print sss
                 _outputsens = combineredsens(sss, _outputsens)
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
@@ -383,7 +377,6 @@ def telluric_atmo(imgstd):
     imgout = floyds.floydsspecdef.atmofile(imgstd, imgout)
     xxstd, ffstd = readspectrum(imgout)
     if _grism in ['red']:
-        print _grism
         llo2 = compress((array(xxstd) >= 7550) & (array(xxstd) <= 7750), array(xxstd))
         llh2o = compress((array(xxstd) >= 7100) & (array(xxstd) <= 7500), array(xxstd))
         ffo2 = compress((array(xxstd) >= 7550) & (array(xxstd) <= 7750), array(ffstd))
@@ -466,7 +459,6 @@ def checkwavestd(imgex, _interactive, _type=1):
         skyxx = arange(len(skyff))
         skyaa = crval1 + skyxx * cd1
         _tel = fits.getheader(imgex)['TELID']
-        print imgex
         atmofile = floyds.floydsspecdef.atmofile(imgex, 'atmo2_' + _tel + '_' + imgex)
         atmodata, atmohdr = fits.getdata(atmofile, header=True)
         if _type == 1:
@@ -566,7 +558,6 @@ def atmofile(imgstd, imgout=''):
     import numpy as np
 
     data, hdr = fits.getdata(imgstd, 0, header=True)
-    print '#####', imgstd
     if len(data) < 10:
         yy = data[0][0]
     else:
@@ -711,16 +702,6 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             if os.path.isfile('database/ap' + re.sub('.fits', '', img)):
                 os.system('rm database/ap' + re.sub('.fits', '', img))
 
-        print _gain,_rdnoise
-        print dv[_type]['_b_sample']
-        print dv[_type]['_t_nlost']
-        print dv[_type]['_t_order']
-        print dv[_type]['_radius']
-        print dv[_type]['_weights']
-        print dv[_type]['_nsum']
-        print dv[_type]['_t_step']
-        print dv[_type]['_t_step']
-        print dv[_type]['_b_naver']
         iraf.specred.apall(img, output=imgex, referen=_reference, trace=_trace, fittrac=_fittrac, find=_find,
                            recenter=_recenter, edit=_edit,
                            nfind=1, extract='yes', backgro='fit', gain=_gain, readnoi=_rdnoise, lsigma=4, usigma=4,
@@ -841,7 +822,6 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     iraf.set(direc=floyds.__path__[0] + '/')
     _extinctdir = 'direc$standard/extinction/'
     _tel = readkey3(readhdr(re.sub('\n', '', files[0])), 'TELID')
-    print _tel
     if _tel in ['fts', 'coj']:
         _extinction = 'ssoextinct.dat'
         _observatory = 'sso'
@@ -1086,7 +1066,6 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 _rdnoise = floyds.readkey3(hdr, 'ron')
                 _grism = floyds.readkey3(hdr, 'grism')
                 _grpid = floyds.readkey3(hdr, 'grpid')
-                print _grpid
                 #####################      flat   ###############
                 if _listflat:
                     flatgood = _listflat  # flat list from reducer
@@ -1634,19 +1613,13 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         lista = coppie[mjd]
         _output = re.sub('_red_', '_merge_', lista[0])
         _output = re.sub('_blue_', '_merge_', _output)
-#        _output = combspec(lista[0], lista[1], _output, scale=True, num=None)
         _output = combspec2(lista[0], lista[1], _output, scale=True, num=None)
-        #try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
-        #except:         print 'Warning: problem combining the red and blu spectra'
         print _output
         if '_e.fits' in _output:
             _output_f = re.sub('_e.fits', '_f.fits', _output)
             if '_e.fits' in lista[0]: lista[0] = re.sub('_e.fits', '_f.fits', lista[0])
             if '_e.fits' in lista[1]: lista[1] = re.sub('_e.fits', '_f.fits', lista[1])
-#            _output_f = combspec(lista[0], lista[1], _output, scale=True, num=None)
             _output_f = combspec2(lista[0], lista[1], _output_f, scale=True, num=None)
-        #            try:            _output=combspec2(lista[0],lista[1],_output,scale=True,num=None)
-        #            except:         print 'Warning: problem combining the red and blu spectra'
             if _classify: aa, bb, cc = floyds.util.classifyfast(_output, program='snid')
         if _i: _trim = raw_input('Do you want to trim the edges of the spectrum? [[y]/n] ')
         if not _i or _trim != 'n':  # if not interactive, spectrum is trimmed at default boundaries (3200,10000)
@@ -2066,7 +2039,6 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     imgrect = string.split(fcfile, '/fc')[-1] + '.fits'
     imgrect1 = string.split(fcfile1, '/fc')[-1] + '.fits'
 
-    print imgrect, imgrect1
     if not os.path.isdir('database/'):   os.mkdir('database/')
     os.system('cp ' + fcfile + ' database/')
     os.system('cp ' + fcfile1 + ' database/')
@@ -2075,7 +2047,6 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     data, hdr = fits.getdata(img, 0, header=True)
     _arm = floyds.util.readkey3(hdr, 'GRISM')
     floyds.util.delete('t' + img)
-    print img, re.sub('.fits', '', imgrect)
     if _arm == 'red':
         iraf.specred.transform(input=img, output='t' + img, minput='', fitnames=re.sub('.fits', '', imgrect),
                                databas='database', x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1,
@@ -2089,11 +2060,9 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     _slit = floyds.util.readkey3(hdr, 'slit')
     _arm = floyds.util.readkey3(hdr, 'GRISM')
     _tel = floyds.util.readkey3(hdr, 'TELID')
-    print _slit, _arm, _tel
     if _tel not in ['ftn', 'fts']:     _tel = floyds.util.readkey3(hdr, 'SITEID')
     setup = [_arm, _slit]
     floyds.util.delete('t' + img)
-    #iraf.delete('t'+img)
     if _arm == 'red':
         if _tel in ['ftn', 'ogg']:
             xa, xb = 0, 1800
@@ -2117,8 +2086,6 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
             xdim = xb - xa
             ydim = yb - ya
 
-    print xa, xb, ya, yb
-
     if not hdr.get('HDRVER'):
         fits.writeto('t' + img, float32(data[0][ya:yb, xa:xb]), hdr)
     else:
@@ -2140,19 +2107,15 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
         floyds.util.updateheader('t' + img, 0, {'LACOSMIC': [False, 'Laplacian cosmic ray rejection']})
 
     floyds.util.delete('tt' + img)
-    #iraf.delete('tt'+img)
     iraf.specred.transform(input='t' + img, output='tt' + img, minput='', fitnames=re.sub('.fits', '', imgrect1),
                            databas='database',
                            x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
                            logfile='logfile')  #, mode='h')
     floyds.util.updateheader('tt' + img, 0, {'DISPAXIS': [1, 'dispersion axis']})
-    #raw_input('qui2')
-    #iraf.delete('t'+img)
     floyds.util.delete('t' + img)
 
     if arcfile:
         floyds.util.delete('t' + arcfile)
-        #iraf.delete('t'+arcfile)
         if _arm == 'red':
             iraf.specred.transform(input=arcfile, output='t' + arcfile, minput='',
                                    fitnames=re.sub('.fits', '', imgrect), databas='database',
@@ -2163,8 +2126,6 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
                                    fitnames=re.sub('.fits', '', imgrect), databas='database',
                                    x1='INDEF', x2='INDEF', y1='INDEF', y2='600', dy=1, flux='yes', blank=0,
                                    logfile='logfile')
-        #            iraf.specred.transform(input=arcfile, output='t'+arcfile, minput='', fitnames=re.sub('.fits','',imgrect), databas='database',\
-        #                                   x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes',  blank=0, logfile='logfile')
         data, hdr = fits.getdata('t' + arcfile, 0, header=True)
         floyds.util.delete('t' + arcfile)
         if not hdr.get('HDRVER'):
@@ -2175,7 +2136,6 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
         floyds.util.updateheader('t' + arcfile, 0, {'NAXIS': [2, 'number of array dimensions']})
         floyds.util.updateheader('t' + arcfile, 0, {'NAXIS1': [xdim, ' x axis']})
         floyds.util.updateheader('t' + arcfile, 0, {'NAXIS2': [ydim, ' y axis']})
-        #        floyds.util.updateheader('t'+arcfile,0,{'CCDSEC':[str("["+str(xa)+":"+str(xb)+":"+str(ya)+":"+str(yb)+"]"),' y axis']})
         aaa = iraf.hedit('t' + arcfile, 'CCDSEC', delete='yes', update='yes', verify='no', Stdout=1)
         aaa = iraf.hedit('t' + arcfile, 'TRIM', delete='yes', update='yes', verify='no', Stdout=1)
 
@@ -2246,7 +2206,6 @@ def fringing_classicmethod(flatfile, img, _inter, _sample, _order, arm):
         iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
         flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
-        print ydim, '[*,1:' + str(int(ydim) - 1) + ']'
         iraf.specred.response(flatfile, normaliz=flatfile + '[*,1:' + str(int(ydim) - 1) + ']',
                               response='n' + flatfile, interac=_inter, thresho='INDEF', sample=_sample, naverage=2,
                               function='spline3', low_rej=3, high_rej=3, order=_order, niterat=20, grow=0,
@@ -2369,7 +2328,6 @@ def applyflat(img, flatimg, output='', scale='', shift=''):
     floyds.delete('sky2.fits')
     floyds.delete('tsky1.fits')
     floyds.delete('tsky11.fits')
-    print img, scale, shift
     return output
 
 
@@ -2407,9 +2365,7 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
         flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
         iraf.unlearn(iraf.specred.apflatten)
-        print flatfile, _inter, _order, _sample
         floyds.floydsspecdef.aperture(flatfile)
-        print '###', flatfile, _inter, _order
         iraf.specred.apflatten(flatfile, output='n' + flatfile, interac=_inter, find='no', recenter='no', resize='no',
                                edit='no', trace='no',
                                fittrac='no', fitspec='no', flatten='yes', aperture='',
