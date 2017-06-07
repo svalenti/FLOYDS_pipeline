@@ -29,12 +29,12 @@ extract the files from the tarball
 > python setup.py install  (--record files.txt)  (--prefix=<install location>)
 
 ##########################################################################
-To uninstall a previus version 
+To uninstall a previous version 
 
 - delete the floyds directory in your site-package path
 - delete the floyds****.egg-info from the same directory
 - delete the floyd executable: floydsspec 
 
 or if during installation  you used the option: --record files.txt
-you can run the following command in theterminal:
+you can run the following command in the terminal:
 > cat files.txt | xargs sudo rm -rf
