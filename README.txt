@@ -5,15 +5,26 @@
 #                              INSTALLATION
 ###########################################################################
 
+FURTHER INFORMATION
 
-FLOYDS is written in python and requires the following package:
+Go to this document for more instructions on how to run the pipeline:
+
+https://www.authorea.com/users/598/articles/6566/_show_article
+
+And this website gives an overview of the pipeline steps:
+
+https://lco.global/documentation/floyds-pipeline/
+
+##########################################################################
+
+FLOYDS is written in python and requires the following packages:
 
 - Python 2.5 or Python 2.6 or Python 2.7
    these modules have to be installed:
             - numpy
 	    - pyraf
 	    - matplotlib
-	    - pyfits
+	    - astropy
 
 - Iraf
 - xhtml2pdf 
@@ -21,20 +32,36 @@ FLOYDS is written in python and requires the following package:
 	xhtml2pdf was needed to make it install with recent pip versions; your
 	mileage may vary)
 	    
-##############################################################################
-extract the files from the tarball
-> tar -xvf floyds-version.tar
 
-> cd floyds-version
-> python setup.py install  (--record files.txt)  (--prefix=<install location>)
+############################################################################
 
-##########################################################################
-To uninstall a previus version 
+We recommend a installation in something like anaconda python, in a
+'clean' conda environment. Note that several commands in the sample
+below are for the bash environment.  If you have all of the
+dependencies mentioned above, you can begin from the 'git clone'
+command below.
 
-- delete the floyds directory in your site-package path
-- delete the floyds****.egg-info from the same directory
-- delete the floyd executable: floydsspec 
 
-or if during installation  you used the option: --record files.txt
-you can run the following command in theterminal:
-> cat files.txt | xargs sudo rm -rf
+> conda create -n floyds python=2 numpy astropy ipython matplotlib
+> source activate floyds
+> conda install -c pkgw pyraf iraf
+> mkiraf
+> export IRAFARCH=linux64
+> export iraf=/home/dsand/.conda/envs/floyds/lib/iraf/
+> git clone https://github.com/svalenti/FLOYDS_pipeline.git
+> cd FLOYDS_pipeline
+> python setup.py install
+
+The FLOYDS pipeline should now be setup.  Anytime you want to run it,
+you must activate the floyds conda environment, and run the two export
+lines above (if you are using bash).
+
+> source activate floyds
+> export IRAFARCH=linux64
+> export iraf=/home/dsand/.conda/envs/floyds/lib/iraf/
+
+If you want to update your version, 
+
+> git pull origin master
+> python setup.py install
+
