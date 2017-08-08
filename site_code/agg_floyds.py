@@ -138,7 +138,7 @@ def agg_floyds(nightlist, site='floyds.coj.lco.gtn', tmp_dir="./", debug=False):
             if blkuid_acq == 'N/A':
                 if debug:
                     print "Rejecting frame", _acqimage, blkuid_acq, previous_blkuid
-            if blkuid_acq == previous_blkuid:
+            elif blkuid_acq == previous_blkuid:
                 if debug:
                     print "Rejecting frame", _acqimage, blkuid_acq, previous_blkuid
                 other_acquisition_images.append(_acqimage)

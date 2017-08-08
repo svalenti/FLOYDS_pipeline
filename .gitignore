@@ -7,3 +7,6 @@ build/
 .idea/
 
 *~
+.DS_Store
+.project
+.pydevproject
