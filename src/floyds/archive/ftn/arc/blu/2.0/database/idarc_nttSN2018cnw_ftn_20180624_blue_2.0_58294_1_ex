@@ -1,0 +1,34 @@
+# Mon 17:23:35 25-Jun-2018
+begin	identify arc_nttSN2018cnw_ftn_20180624_blue_2.0_58294_1_ex - Ap 1
+	id	arc_nttSN2018cnw_ftn_20180624_blue_2.0_58294_1_ex
+	task	identify
+	image	arc_nttSN2018cnw_ftn_20180624_blue_2.0_58294_1_ex - Ap 1
+	aperture	1
+	aplow	49.8
+	aphigh	59.8
+	units	Angstroms
+	features	7
+	        292.42 3650.10116   3650.153   7.0 1 1 Hg
+	        520.13 4046.72421   4046.563   7.0 1 1 Hg
+	        538.00 4077.84654  4077.8314   7.0 1 1 Hg
+	        698.96 4358.18133   4358.328   7.0 1 1 Hg
+	       1332.14 5460.76889  5460.7348   7.0 1 1 Hg
+	       1509.59 5769.72999  5769.5982   7.0 1 1 Hg
+	       1521.53 5790.51927   5790.663   7.0 1 1 Hg
+	function legendre
+	order 3
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	7
+		2.
+		3.
+		292.4164733886719
+		1521.530517578125
+		4720.39321961109
+		1070.209055978803
+		-0.08300077664119271
+
