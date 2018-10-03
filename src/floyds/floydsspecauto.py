@@ -65,7 +65,7 @@ def gettar(img):
         img1=re.sub(string.split(imgg,'_')[4],re.sub('0','',string.split(imgg,'_')[4]),imgg)
     else:
         imgg = ''
-        img1 = img.replace('e00', 'e02')
+        img1 = img.replace('-e00.fits', '')
     # print "DEBUG: imgg,img1=", imgg,img1
 
     # FTN filenames will be the day prior
