@@ -10,13 +10,11 @@ for scheme in INSTALL_SCHEMES.values():
 from imp import find_module
 try: find_module('numpy')
 except: sys.exit('### Error: python module numpy not found')
-    
-try: find_module('pyfits')
+
+try:
+    find_module('astropy')
 except:
-    try:
-        find_module('astropy')
-    except:
-        sys.exit('### Error: python module pyfits not found')
+    sys.exit('### Error: python module astropy not found')
 
 try:
     find_module('pyraf')
@@ -54,7 +52,7 @@ setup(
     license='LICENSE.txt', 
     description='floyds is a package to reduce floyds spectra',
     long_description=open('README.txt').read(),
-    requires=['numpy','pyfits','pyraf','matplotlib'],
+    requires=['numpy','astropy','pyraf','matplotlib'],
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\
