@@ -26,25 +26,9 @@ try:
 except:
     sys.exit('### Error: python module matplotlib not found')
 
-
-verstr = "unknown"
-try:
-    parentdir=os.getcwd()+'/'
-    verstrline = open(parentdir+'/src/floyds/_version.py', "rt").read()
-except EnvironmentError:
-    pass #  Okay, there is no version file.
-else:
-    VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
-    mo = re.search(VSRE, verstrline, re.M)
-    if mo:
-        verstr = mo.group(1)
-    else:
-        raise RuntimeError("unable to find version in "+parentdir+"+src/floyds/_version.py")
-
-
 setup(
     name='floyds',
-    version=verstr,#'0.1.3',
+    version='2.3.0',
     author='S. Valenti',
     author_email='svalenti@lcogt.net',
     scripts=['bin/floydsspec','bin/floydsfixheaders','bin/floydsauto'],
@@ -52,7 +36,7 @@ setup(
     license='LICENSE.txt', 
     description='floyds is a package to reduce floyds spectra',
     long_description=open('README.txt').read(),
-    requires=['numpy','astropy','pyraf','matplotlib'],
+    requires=['numpy','astropy','pyraf','matplotlib', 'xhtml2pdf'],
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\
