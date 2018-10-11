@@ -4,7 +4,7 @@ ENV iraf /iraf/iraf/
 ENV IRAFARCH linux64
 ENV TERM xterm
 RUN  apt-get update \
-        && apt-get -y --no-install-recommends install tcsh curl build-essential git libx11-dev \
+        && apt-get -y --no-install-recommends install tcsh curl build-essential git libx11-dev libcfitsio-bin wget \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p "$iraf" \
