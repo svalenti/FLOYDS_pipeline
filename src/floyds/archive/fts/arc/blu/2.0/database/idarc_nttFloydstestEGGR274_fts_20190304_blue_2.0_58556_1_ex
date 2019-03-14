@@ -1,0 +1,32 @@
+# Thu 17:20:28 14-Mar-2019
+begin	identify arc_nttFloydstestEGGR274_fts_20190304_blue_2.0_58556_1_ex - Ap 1
+	id	arc_nttFloydstestEGGR274_fts_20190304_blue_2.0_58556_1_ex
+	task	identify
+	image	arc_nttFloydstestEGGR274_fts_20190304_blue_2.0_58556_1_ex - Ap 1
+	aperture	1
+	aplow	42.11
+	aphigh	62.11
+	units	Angstroms
+	features	6
+	        366.54 3650.03223   3650.153   7.0 1 1 Hg
+	        594.45  4046.5976   4046.563   7.0 1 1 Hg
+	        773.67 4358.44254   4358.328   7.0 1 1 Hg
+	       1407.23  5460.8441  5460.7348   7.0 1 1 Hg
+	       1584.62 5769.50724  5769.5982   7.0 1 1 Hg
+	       1596.75 5790.61629   5790.663   7.0 1 1 Hg
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		366.5386047363281
+		1596.7548828125
+		4720.324259186098
+		1070.292025950665
+

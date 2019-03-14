@@ -167,7 +167,7 @@ def readkey3(hdr, keyword):
         _instrume = hdr.get('INSTRUME').lower()
     except:
         _instrume = 'none'
-    if _instrume in ['en05', 'en06']:
+    if _instrume in ['en05', 'en06', 'en12']:
         if not hdr.get('HDRVER'):
             useful_keys = {'object': 'OBJECT',
                            'date-obs': 'DATE-OBS',

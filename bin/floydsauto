@@ -14,7 +14,7 @@ import tempfile
 import shutil
 
 GUIDER_CAMERAS = {'ogg': 'kb42', 'coj': 'kb38'}
-FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en05'}
+FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en12'}
 
 description = "> Automatic Specroscopic pre-reduction of floyds data "
 usage = "%prog  \t [listfile -B bias (use this bias) -F flatlist (use these flats) .....]"
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 _imagetype = readkey3(hdr0, 'imagetyp')
             if _naxis1 != 2079 or (_naxis2 != 511 and _naxis2 != 512):
                 _type = 'not standard dimension 2079x511'
-            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06']:
+            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06', 'en12']:
                 _type = 'not efosc intrument'
             if _imagetype and not _type:
                 if _imagetype.lower() in ['lamp-flat', 'flat', 'f', 'lampflat']:

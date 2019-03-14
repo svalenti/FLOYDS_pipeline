@@ -1,0 +1,61 @@
+# Thu 18:43:18 14-Mar-2019
+begin	identify arc_fts_20190304_blue_1.2_58556_1_ex - Ap 1
+	id	arc_fts_20190304_blue_1.2_58556_1_ex
+	task	identify
+	image	arc_fts_20190304_blue_1.2_58556_1_ex - Ap 1
+	aperture	1
+	aplow	42.11
+	aphigh	62.11
+	units	Angstroms
+	features	3
+	        669.43 3650.08203   3650.153   4.0 1 1 Hg
+	       1066.81 4046.72433   4046.563   4.0 1 1 Hg
+	       1378.89 4358.23764   4358.328   4.0 1 1 Hg
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		669.4321899414061
+		1378.89453125
+		4004.159835631825
+		354.077803153961
+
+# Thu 19:08:50 14-Mar-2019
+begin	identify arc_fts_20190304_blue_1.2_58556_1_ex - Ap 1
+	id	arc_fts_20190304_blue_1.2_58556_1_ex
+	task	identify
+	image	arc_fts_20190304_blue_1.2_58556_1_ex - Ap 1
+	aperture	1
+	aplow	42.11
+	aphigh	62.11
+	units	Angstroms
+	features	6
+	        377.32 3649.75873   3650.153   4.0 1 1 Hg
+	        605.47 4046.68483   4046.563   4.0 1 1 Hg
+	        784.84 4358.74514   4358.328   4.0 1 1 Hg
+	       1418.31 5460.81044  5460.7348   4.0 1 1 Hg
+	       1596.08 5770.07701  5769.5982   4.0 1 1 Hg
+	       1607.51 5789.96385   5790.663   4.0 1 1 Hg
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		377.3210144042969
+		1607.506225585938
+		4719.861288124683
+		1070.102558371686
+
