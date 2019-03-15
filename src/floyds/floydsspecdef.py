@@ -2114,10 +2114,15 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
 
     if arcfile:
         rectify_single_image(arcfile, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=_cosmic)
-
+        output_arcfile = 'tt' + arcfile
+    else:
+        output_arcfile = ''
     if flatfile:
         rectify_single_image(flatfile, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=False)
-    return 'tt' + img, 'tt' + arcfile, 'tt' + flatfile
+        output_flatfile = 'tt' + flatfile
+    else:
+        output_flatfile = ''
+    return 'tt' + img, output_arcfile, output_flatfile
 
 
 #############################################################33333
