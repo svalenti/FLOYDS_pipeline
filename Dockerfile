@@ -13,7 +13,6 @@ RUN  mkdir -p $iraf \
         && cd /iraf \
         && git clone https://github.com/iraf-community/iraf.git \
         && cd $iraf \
-        # Fix the version of IRAF
         && git checkout 567961f \
         && ./install < /dev/null \
         && make linux64 \

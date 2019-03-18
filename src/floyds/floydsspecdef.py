@@ -821,7 +821,9 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     os.environ["PYRAF_BETA_STATUS"] = "1"
     iraf.set(direc=floyds.__path__[0] + '/')
     _extinctdir = 'direc$standard/extinction/'
-    _tel = readkey3(readhdr(re.sub('\n', '', files[0])), 'TELID')
+    header = readhdr(re.sub('\n', '', files[0]))
+    _tel = readkey3(header, 'TELID')
+    camera = readkey3(header, 'INSTRUME')
     if _tel in ['fts', 'coj']:
         _extinction = 'ssoextinct.dat'
         _observatory = 'sso'
@@ -1127,12 +1129,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                 ###################################################################
                 if setup[0] == 'red':
-                    fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_red'
-                    fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_red'
+                    fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_red'
+                    fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_red'
                     print fcfile
                 else:
-                    fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_blue'
-                    fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_blue'
+                    fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_blue'
+                    fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_blue'
                     print fcfile
 
                 if not img:  # or not arcfile:
@@ -2097,18 +2099,36 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     if _tel not in ['ftn', 'fts']:     _tel = floyds.util.readkey3(hdr, 'SITEID')
     if _arm == 'red':
         if _tel in ['ftn', 'ogg']:
-            xa, xb = 0, 1800
-            ya, yb = 211, 308
+            if camera == 'en06':
+                xa, xb = 0, 1800
+                ya, yb = 211, 308
+            else:
+                raise ValueError('Camera not supported by pipeline')
         else:
-            xa, xb = 0, 1800
-            ya, yb = 224, 325
+            if camera == 'en05':
+                xa, xb = 0, 1800
+                ya, yb = 186, 285
+            elif camera == 'en12':
+                xa, xb = 0, 1800
+                ya, yb = 224, 325
+            else:
+                raise ValueError('Camera not supported by pipeline')
     else:
         if _tel in ['ftn', 'ogg']:
-            xa, xb = 0, 1800
-            ya, yb = 127, 227
+            if camera == 'en06':
+                xa, xb = 0, 1800
+                ya, yb = 127, 227
+            else:
+                raise ValueError('Camera not supported by pipeline')
         else:
-            xa, xb = 0, 1669
-            ya, yb = 178, 281
+            if camera == 'en05':
+                xa, xb = 0, 1669
+                ya, yb = 125, 226
+            elif camera == 'en12':
+                xa, xb = 0, 1669
+                ya, yb = 178, 281
+            else:
+                raise ValueError('Camera not supported by pipeline')
 
     rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=_cosmic)
 
