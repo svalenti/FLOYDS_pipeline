@@ -2095,6 +2095,7 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     _slit = floyds.util.readkey3(hdr, 'slit')
     _arm = floyds.util.readkey3(hdr, 'GRISM')
     _tel = floyds.util.readkey3(hdr, 'TELID')
+    camera = floyds.util.readkey3(hdr, 'INSTRUME')
 
     if _tel not in ['ftn', 'fts']:     _tel = floyds.util.readkey3(hdr, 'SITEID')
     if _arm == 'red':

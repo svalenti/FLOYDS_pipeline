@@ -1,0 +1,30 @@
+# Tue 00:24:14 19-Mar-2019
+begin	identify arc_HD44594_fts_20181219_blue_6.0_58560_1_ex - Ap 1
+	id	arc_HD44594_fts_20181219_blue_6.0_58560_1_ex
+	task	identify
+	image	arc_HD44594_fts_20181219_blue_6.0_58560_1_ex - Ap 1
+	aperture	1
+	aplow	41.45
+	aphigh	53.86
+	units	Angstroms
+	features	3
+	        285.29   3650.153   3650.153   4.0 1 1 Hg
+	        691.15   4358.328   4358.328   4.0 1 1 Hg
+	       1325.83  5460.7348  5460.7348   4.0 1 1 Hg
+	function legendre
+	order 3
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	7
+		2.
+		3.
+		285.29150390625
+		1325.830078125
+		4556.813782520464
+		905.290900000001
+		-1.369882520462724
+
