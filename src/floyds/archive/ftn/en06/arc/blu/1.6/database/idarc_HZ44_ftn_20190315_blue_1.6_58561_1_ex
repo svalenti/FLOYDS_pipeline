@@ -1,0 +1,33 @@
+# Tue 23:36:20 19-Mar-2019
+begin	identify arc_HZ44_ftn_20190315_blue_1.6_58561_1_ex - Ap 1
+	id	arc_HZ44_ftn_20190315_blue_1.6_58561_1_ex
+	task	identify
+	image	arc_HZ44_ftn_20190315_blue_1.6_58561_1_ex - Ap 1
+	aperture	1
+	aplow	44.32
+	aphigh	57.01
+	units	Angstroms
+	features	6
+	        292.75 3650.12731   3650.153   4.0 1 1 Hg
+	        520.51 4046.71731   4046.563   4.0 1 1 Hg
+	        699.36 4358.15017   4358.328   4.0 1 1 Hg
+	       1332.62  5460.8571  5460.7348   4.0 1 1 Hg
+	       1509.94 5769.61211  5769.5982   4.0 1 1 Hg
+	       1521.97   5790.576   5790.663   4.0 1 1 Hg
+	function legendre
+	order 3
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	7
+		2.
+		3.
+		292.7500305175781
+		1521.974487304688
+		4720.347107115407
+		1070.224343369399
+		0.004547695396565182
+
