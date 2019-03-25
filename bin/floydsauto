@@ -64,18 +64,22 @@ if __name__ == "__main__":
     parser.add_option('--input-root-directory', default='/archive/engineering',
                       dest='input_directory', help='Top level directory that contains the raw data to reduce')
     parser.add_option('--site', choices=['ogg', 'coj'],
-                      dest='site', help='Site to reduce', required=True)
+                      dest='site', help='Site to reduce', default=None)
     parser.add_option('--day-obs', default=None,
                       dest='day_obs', help='DAY-OBS of the data to reduce.')
     parser.add_option('--output-root-directory', default='/archive/engineering',
                       dest='output_directory', help='Top level directory that contains the processed data')
     parser.add_option('--camera', default=None, choices=['en05', 'en06', 'en12', None], dest='camera',
-                      help='Camera to run the automatic reduction on.', required=False)
+                      help='Camera to run the automatic reduction on.')
 
     option, args = parser.parse_args()
     # ###########################################################
     starttime = time.time()
     temp_directory = tempfile.mkdtemp()
+
+    if option.site not in ['coj', 'ogg']:
+        print('You much choose either coj or ogg for site')
+        sys.exit(1)
     if option.day_obs is None:
         option.day_obs = get_default_dayobs(option.site)
 
