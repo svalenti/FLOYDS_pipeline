@@ -821,7 +821,9 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
     os.environ["PYRAF_BETA_STATUS"] = "1"
     iraf.set(direc=floyds.__path__[0] + '/')
     _extinctdir = 'direc$standard/extinction/'
-    _tel = readkey3(readhdr(re.sub('\n', '', files[0])), 'TELID')
+    header = readhdr(re.sub('\n', '', files[0]))
+    _tel = readkey3(header, 'TELID')
+    camera = readkey3(header, 'INSTRUME')
     if _tel in ['fts', 'coj']:
         _extinction = 'ssoextinct.dat'
         _observatory = 'sso'
@@ -968,7 +970,6 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 iraf.ccdproc(rimg, output='', overscan="yes", trim="yes", zerocor='no', flatcor='no', zero='',
                              ccdtype='',
                              fixpix='no', trimsec=_biassecred, biassec=_overscan, readaxi='line', Stdout=1)
-
                 floyds.util.updateheader(bimg, 0, {'GRISM': ['blu', ' blue order']})
                 floyds.util.updateheader(rimg, 0, {'GRISM': ['red', ' blue order']})
                 floyds.util.updateheader(bimg, 0, {'arcfile': [img, 'file name in the archive']})
@@ -1128,12 +1129,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                 ###################################################################
                 if setup[0] == 'red':
-                    fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_red'
-                    fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_red'
+                    fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_red'
+                    fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_red'
                     print fcfile
                 else:
-                    fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_blue'
-                    fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_blue'
+                    fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_blue'
+                    fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_blue'
                     print fcfile
 
                 if not img:  # or not arcfile:
@@ -1143,6 +1144,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum(img, arcfile, flatfile, fcfile,
                                                                                   fcfile1, 'no', _cosmic)
                 import time
+
                 if setup[0] == 'red':
                     cut='[10:1750,*]'
                 else:
@@ -1997,6 +1999,50 @@ def combineredsens(imglist, imgout='pippo.fits'): # used for both arms of FTS
 
     ##################################################
 
+
+def rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=False):
+    import floyds
+    from numpy import float32
+    from astropy.io import fits
+    from pyraf import iraf
+    import re
+
+    first_rectified_image = 't' + img
+    floyds.util.delete(first_rectified_image)
+    iraf.specred.transform(input=img, output=first_rectified_image, minput='', fitnames=re.sub('.fits', '', imgrect),
+                           databas='database', x1='INDEF', x2='INDEF', dx=1, y1='INDEF', y2='600', dy=1,
+                           flux='yes', blank=0, logfile='logfile')
+
+    data, hdr = fits.getdata(first_rectified_image, 0, header=True)
+
+    if not hdr.get('HDRVER'):
+        fits.writeto(first_rectified_image, float32(data[0][ya:yb, xa:xb]), hdr, overwrite=True)
+    else:
+        fits.writeto(first_rectified_image, float32(data[ya:yb, xa:xb]), hdr, overwrite=True)
+
+    iraf.hedit(first_rectified_image, 'CCDSEC', delete='yes', update='yes', verify='no', Stdout=1)
+    iraf.hedit(first_rectified_image, 'TRIM', delete='yes', update='yes', verify='no', Stdout=1)
+
+    if _cosmic:
+        _gain = floyds.util.readkey3(hdr, 'gain')
+        _rdnoise = floyds.util.readkey3(hdr, 'ron')
+        floyds.cosmics.lacos(first_rectified_image, output='', gain=_gain, readn=_rdnoise, xorder=9, yorder=9,
+                             sigclip=4.5, sigfrac=0.5, objlim=1, verbose=True, interactive=True)
+        floyds.util.updateheader(first_rectified_image, 0, {'LACOSMIC': [True, 'Laplacian cosmic ray rejection']})
+        print '\n### cosmic rays rejections ........ done '
+    else:
+        floyds.util.updateheader(first_rectified_image, 0, {'LACOSMIC': [False, 'Laplacian cosmic ray rejection']})
+
+    wavelength_rectified_image = 'tt' + img
+    floyds.util.delete(wavelength_rectified_image)
+    iraf.specred.transform(input=first_rectified_image, output=wavelength_rectified_image, minput='',
+                           fitnames=re.sub('.fits', '', imgrect1),
+                           databas='database', x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
+                           logfile='logfile')  #, mode='h')
+    floyds.util.updateheader(wavelength_rectified_image, 0, {'DISPAXIS': [1, 'dispersion axis']})
+    floyds.util.delete(first_rectified_image)
+
+
 def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, _cosmic=True):
     import floyds
     from floyds.util import delete, updateheader, readhdr, readkey3, display_image
@@ -2046,145 +2092,58 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
     ###################################    transform img, arc, flat
     data, hdr = fits.getdata(img, 0, header=True)
     _arm = floyds.util.readkey3(hdr, 'GRISM')
-    floyds.util.delete('t' + img)
-    if _arm == 'red':
-        iraf.specred.transform(input=img, output='t' + img, minput='', fitnames=re.sub('.fits', '', imgrect),
-                               databas='database', x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1,
-                               flux='yes', blank=0, logfile='logfile')
-    else:
-        iraf.specred.transform(input=img, output='t' + img, minput='', fitnames=re.sub('.fits', '', imgrect),
-                               databas='database', x1='INDEF', x2='INDEF', y1='INDEF', y2='600', dy=1,
-                               flux='yes', blank=0, logfile='logfile')
-
-    data, hdr = fits.getdata('t' + img, 0, header=True)
     _slit = floyds.util.readkey3(hdr, 'slit')
     _arm = floyds.util.readkey3(hdr, 'GRISM')
     _tel = floyds.util.readkey3(hdr, 'TELID')
+    camera = floyds.util.readkey3(hdr, 'INSTRUME')
+
     if _tel not in ['ftn', 'fts']:     _tel = floyds.util.readkey3(hdr, 'SITEID')
-    setup = [_arm, _slit]
-    floyds.util.delete('t' + img)
     if _arm == 'red':
         if _tel in ['ftn', 'ogg']:
-            xa, xb = 0, 1800
-            ya, yb = 211, 308
-            xdim = xb - xa
-            ydim = yb - ya
+            if camera == 'en06':
+                xa, xb = 0, 1800
+                ya, yb = 211, 308
+            else:
+                raise ValueError('Camera not supported by pipeline')
         else:
-            xa, xb = 0, 1800
-            ya, yb = 186, 285
-            xdim = xb - xa
-            ydim = yb - ya
+            if camera == 'en05':
+                xa, xb = 0, 1800
+                ya, yb = 186, 285
+            elif camera == 'en12':
+                xa, xb = 0, 1800
+                ya, yb = 224, 325
+            else:
+                raise ValueError('Camera not supported by pipeline')
     else:
         if _tel in ['ftn', 'ogg']:
-            xa, xb = 0, 1800
-            ya, yb = 127, 227
-            xdim = xb - xa
-            ydim = yb - ya
+            if camera == 'en06':
+                xa, xb = 0, 1800
+                ya, yb = 127, 227
+            else:
+                raise ValueError('Camera not supported by pipeline')
         else:
-            xa, xb = 0, 1669
-            ya, yb = 125, 226
-            xdim = xb - xa
-            ydim = yb - ya
+            if camera == 'en05':
+                xa, xb = 0, 1669
+                ya, yb = 125, 226
+            elif camera == 'en12':
+                xa, xb = 0, 1669
+                ya, yb = 178, 281
+            else:
+                raise ValueError('Camera not supported by pipeline')
 
-    if not hdr.get('HDRVER'):
-        fits.writeto('t' + img, float32(data[0][ya:yb, xa:xb]), hdr)
-    else:
-        fits.writeto('t' + img, float32(data[ya:yb, xa:xb]), hdr)
-
-    floyds.util.updateheader('t' + img, 0, {'NAXIS': [2, 'number of array dimensions']})
-    floyds.util.updateheader('t' + img, 0, {'NAXIS1': [xdim, ' x axis']})
-    floyds.util.updateheader('t' + img, 0, {'NAXIS2': [ydim, ' y axis']})
-    aaa = iraf.hedit('t' + img, 'CCDSEC', delete='yes', update='yes', verify='no', Stdout=1)
-    aaa = iraf.hedit('t' + img, 'TRIM', delete='yes', update='yes', verify='no', Stdout=1)
-    _gain = floyds.util.readkey3(hdr, 'gain')
-    _rdnoise = floyds.util.readkey3(hdr, 'ron')
-    if _cosmic:
-        floyds.cosmics.lacos('t' + img, output='', gain=_gain, readn=_rdnoise, xorder=9, yorder=9, sigclip=4.5,
-                             sigfrac=0.5, objlim=1, verbose=True, interactive=True)
-        floyds.util.updateheader('t' + img, 0, {'LACOSMIC': [True, 'Laplacian cosmic ray rejection']})
-        print '\n### cosmic rays rejections ........ done '
-    else:
-        floyds.util.updateheader('t' + img, 0, {'LACOSMIC': [False, 'Laplacian cosmic ray rejection']})
-
-    floyds.util.delete('tt' + img)
-    iraf.specred.transform(input='t' + img, output='tt' + img, minput='', fitnames=re.sub('.fits', '', imgrect1),
-                           databas='database',
-                           x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
-                           logfile='logfile')  #, mode='h')
-    floyds.util.updateheader('tt' + img, 0, {'DISPAXIS': [1, 'dispersion axis']})
-    floyds.util.delete('t' + img)
+    rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=_cosmic)
 
     if arcfile:
-        floyds.util.delete('t' + arcfile)
-        if _arm == 'red':
-            iraf.specred.transform(input=arcfile, output='t' + arcfile, minput='',
-                                   fitnames=re.sub('.fits', '', imgrect), databas='database',
-                                   x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
-                                   logfile='logfile')
-        else:
-            iraf.specred.transform(input=arcfile, output='t' + arcfile, minput='',
-                                   fitnames=re.sub('.fits', '', imgrect), databas='database',
-                                   x1='INDEF', x2='INDEF', y1='INDEF', y2='600', dy=1, flux='yes', blank=0,
-                                   logfile='logfile')
-        data, hdr = fits.getdata('t' + arcfile, 0, header=True)
-        floyds.util.delete('t' + arcfile)
-        if not hdr.get('HDRVER'):
-            fits.writeto('t' + arcfile, float32(data[0][ya:yb, xa:xb]), hdr)
-        else:
-            fits.writeto('t' + arcfile, float32(data[ya:yb, xa:xb]), hdr)
-
-        floyds.util.updateheader('t' + arcfile, 0, {'NAXIS': [2, 'number of array dimensions']})
-        floyds.util.updateheader('t' + arcfile, 0, {'NAXIS1': [xdim, ' x axis']})
-        floyds.util.updateheader('t' + arcfile, 0, {'NAXIS2': [ydim, ' y axis']})
-        aaa = iraf.hedit('t' + arcfile, 'CCDSEC', delete='yes', update='yes', verify='no', Stdout=1)
-        aaa = iraf.hedit('t' + arcfile, 'TRIM', delete='yes', update='yes', verify='no', Stdout=1)
-
-        floyds.util.delete('tt' + arcfile)
-        iraf.specred.transform(input='t' + arcfile, output='tt' + arcfile, minput='',
-                               fitnames=re.sub('.fits', '', imgrect1), databas='database',
-                               x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes', blank=0,
-                               logfile='logfile')  #, mode='h')
-        floyds.util.updateheader('tt' + arcfile, 0, {'DISPAXIS': [1, 'dispersion axis']})
-        floyds.util.delete('t' + arcfile)
-        arcfile = 'tt' + arcfile
-
+        rectify_single_image(arcfile, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=_cosmic)
+        output_arcfile = 'tt' + arcfile
+    else:
+        output_arcfile = ''
     if flatfile:
-        floyds.util.delete('t' + flatfile)
-        if _arm == 'red':
-            iraf.specred.transform(input=flatfile, output='t' + flatfile, minput='',
-                                   fitnames=re.sub('.fits', '', imgrect), databas='database',
-                                   x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
-                                   logfile='logfile')
-        else:
-            iraf.specred.transform(input=flatfile, output='t' + flatfile, minput='',
-                                   fitnames=re.sub('.fits', '', imgrect), databas='database',
-                                   x1='INDEF', x2='INDEF', y1='INDEF', y2='600', dy=1, flux='yes', blank=0,
-                                   logfile='logfile')
-        #        iraf.specred.transform(input=flatfile, output='t'+flatfile, minput='', fitnames=re.sub('.fits','',imgrect), databas='database',\
-        #                               x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes',  blank=0, logfile='logfile')#, mode='h')
-        data, hdr = fits.getdata('t' + flatfile, 0, header=True)
-        floyds.util.delete('t' + flatfile)
-        if not hdr.get('HDRVER'):
-            fits.writeto('t' + flatfile, float32(data[0][ya:yb, xa:xb]), hdr)
-        else:
-            fits.writeto('t' + flatfile, float32(data[ya:yb, xa:xb]), hdr)
-
-        floyds.util.updateheader('t' + flatfile, 0, {'NAXIS': [2, 'number of array dimensions']})
-        floyds.util.updateheader('t' + flatfile, 0, {'NAXIS1': [xdim, ' x axis']})
-        floyds.util.updateheader('t' + flatfile, 0, {'NAXIS2': [ydim, ' y axis']})
-        #        floyds.util.updateheader('t'+flatfile,0,{'CCDSEC':[str("["+str(xa)+":"+str(xb)+":"+str(ya)+":"+str(yb)+"]"),' y axis']})
-        aaa = iraf.hedit('t' + flatfile, 'TRIM', delete='yes', update='yes', verify='no', Stdout=1)
-        aaa = iraf.hedit('t' + flatfile, 'CCDSEC', delete='yes', update='yes', verify='no', Stdout=1)
-
-        floyds.util.delete('tt' + flatfile)
-        iraf.specred.transform(input='t' + flatfile, output='tt' + flatfile, minput='',
-                               fitnames=re.sub('.fits', '', imgrect1), databas='database',
-                               x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes', blank=0,
-                               logfile='logfile')  #, mode='h')
-        floyds.util.updateheader('tt' + flatfile, 0, {'DISPAXIS': [1, 'dispersion axis']})
-        floyds.util.delete('t' + flatfile)
-        flatfile = 'tt' + flatfile
-    return 'tt' + img, arcfile, flatfile
+        rectify_single_image(flatfile, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=False)
+        output_flatfile = 'tt' + flatfile
+    else:
+        output_flatfile = ''
+    return 'tt' + img, output_arcfile, output_flatfile
 
 
 #############################################################33333

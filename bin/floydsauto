@@ -14,7 +14,7 @@ import tempfile
 import shutil
 
 GUIDER_CAMERAS = {'ogg': 'kb42', 'coj': 'kb38'}
-FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en05'}
+FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en12'}
 
 description = "> Automatic Specroscopic pre-reduction of floyds data "
 usage = "%prog  \t [listfile -B bias (use this bias) -F flatlist (use these flats) .....]"
@@ -64,19 +64,30 @@ if __name__ == "__main__":
     parser.add_option('--input-root-directory', default='/archive/engineering',
                       dest='input_directory', help='Top level directory that contains the raw data to reduce')
     parser.add_option('--site', choices=['ogg', 'coj'],
-                      dest='site', help='Site to reduce')
+                      dest='site', help='Site to reduce', default=None)
     parser.add_option('--day-obs', default=None,
                       dest='day_obs', help='DAY-OBS of the data to reduce.')
     parser.add_option('--output-root-directory', default='/archive/engineering',
                       dest='output_directory', help='Top level directory that contains the processed data')
+    parser.add_option('--camera', default=None, choices=['en05', 'en06', 'en12', None], dest='camera',
+                      help='Camera to run the automatic reduction on.')
 
     option, args = parser.parse_args()
     # ###########################################################
     starttime = time.time()
     temp_directory = tempfile.mkdtemp()
+
+    if option.site not in ['coj', 'ogg']:
+        print('You much choose either coj or ogg for site')
+        sys.exit(1)
     if option.day_obs is None:
         option.day_obs = get_default_dayobs(option.site)
-    fpacked_files = glob.glob(os.path.join(option.input_directory, option.site, FLOYDS_CAMERAS[option.site],
+
+    if option.camera is None:
+        camera = FLOYDS_CAMERAS[option.site]
+    else:
+        camera = option.camera
+    fpacked_files = glob.glob(os.path.join(option.input_directory, option.site, camera,
                                            option.day_obs, 'raw', '*.fits.fz'))
     for fpacked_file in fpacked_files:
         fpack_output_file = os.path.join(temp_directory, os.path.splitext(os.path.basename(fpacked_file))[0])
@@ -106,7 +117,7 @@ if __name__ == "__main__":
                 _imagetype = readkey3(hdr0, 'imagetyp')
             if _naxis1 != 2079 or (_naxis2 != 511 and _naxis2 != 512):
                 _type = 'not standard dimension 2079x511'
-            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06']:
+            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06', 'en12']:
                 _type = 'not efosc intrument'
             if _imagetype and not _type:
                 if _imagetype.lower() in ['lamp-flat', 'flat', 'f', 'lampflat']:
@@ -310,7 +321,7 @@ if __name__ == "__main__":
                 floyds.util.delete(img)
 
     output_files = glob.glob('*.tar.gz')
-    output_directory = os.path.join(option.output_directory, option.site, FLOYDS_CAMERAS[option.site], option.day_obs,
+    output_directory = os.path.join(option.output_directory, option.site, camera, option.day_obs,
                                     'specproc')
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)

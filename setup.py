@@ -40,13 +40,14 @@ setup(
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\
-                             "standard/fits/*","standard/sex/*","standard/stdlist/*","standard/flux/*",\
-                                 "archive/ftn/arc/blu/*/*fits","archive/ftn/arc/blu/*/*/id*",\
-                                 "archive/ftn/arc/red/*/*fits","archive/ftn/arc/red/*/*/id*",\
-                                 "archive/ftn/atmo/red/*fits","archive/fts/atmo/red/*fits",\
-                                 "archive/ftn/flat/*/*fits","archive/ftn/sens/*/*fits","archive/ftn/arc/*/*fits",\
-                                 "archive/fts/arc/blu/*/*fits","archive/fts/arc/blu/*/*/id*",\
-                                 "archive/fts/arc/red/*/*fits","archive/fts/arc/red/*/*/id*",\
-                                 "doc/*pdf",\
-                                 "archive/fts/flat/*/*fits","archive/fts/sens/*/*fits","archive/fts/arc/*/*fits"]}
+                                "standard/ident/en*/*",
+                                "standard/fits/*","standard/sex/*","standard/stdlist/*","standard/flux/*",\
+                                "archive/ftn/*/arc/blu/*/*fits","archive/ftn/*/arc/blu/*/*/id*",\
+                                "archive/ftn/*/arc/red/*/*fits","archive/ftn/*/arc/red/*/*/id*",\
+                                "archive/ftn/*/atmo/red/*fits","archive/fts/*/atmo/red/*fits",\
+                                "archive/ftn/flat/*/*fits","archive/ftn/*/sens/*/*fits","archive/ftn/*/arc/*/*fits",\
+                                "archive/fts/*/arc/blu/*/*fits","archive/fts/*/arc/blu/*/*/id*",\
+                                "archive/fts/*/arc/red/*/*fits","archive/fts/*/arc/red/*/*/id*",\
+                                "doc/*pdf",\
+                                "archive/fts/flat/*/*fits","archive/fts/*/sens/*/*fits","archive/fts/*/arc/*/*fits"]}
 )

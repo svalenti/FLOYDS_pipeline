@@ -69,7 +69,7 @@ if __name__ == "__main__":
         print 'making the list with raw data in the current directory ...... please wait'
         for img in listfile:
             hdr0 = readhdr(img)
-            if readkey3(hdr0, 'instrume') in ['en05', 'en06']:
+            if readkey3(hdr0, 'instrume') in ['en05', 'en06', 'en12']:
                 _type = ''
                 _naxis1 = readkey3(hdr0, 'NAXIS1')
                 _naxis2 = readkey3(hdr0, 'NAXIS2')

@@ -1,0 +1,31 @@
+# Tue 23:37:42 19-Mar-2019
+begin	identify arc_Mrk142_ftn_20190317_blue_6.0_58561_1_ex - Ap 1
+	id	arc_Mrk142_ftn_20190317_blue_6.0_58561_1_ex
+	task	identify
+	image	arc_Mrk142_ftn_20190317_blue_6.0_58561_1_ex - Ap 1
+	aperture	1
+	aplow	44.32
+	aphigh	57.01
+	units	Angstroms
+	features	4
+	        295.16 3649.94418   3650.153   4.0 1 1 Hg
+	        523.23 4047.17263   4046.563   4.0 1 1 Hg
+	        701.59 4357.88949   4358.328   4.0 1 1 Hg
+	       1334.42 5460.77251  5460.7348   4.0 1 1 Hg
+	function legendre
+	order 3
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	7
+		2.
+		3.
+		295.1590881347657
+		1334.41748046875
+		4555.200294311336
+		905.4141658287557
+		0.158046772585297
+

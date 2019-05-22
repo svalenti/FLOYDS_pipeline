@@ -273,6 +273,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             print img
             hdr=floyds.util.readhdr(img)
             _type=floyds.util.readkey3(hdr,'OBSTYPE')
+            camera = floyds.util.readkey3(hdr, 'INSTRUME')
             if _type=='EXPOSE':  
                       _type=floyds.util.readkey3(hdr,'imagetyp')
                       if not _type: _type='EXPOSE'
@@ -404,12 +405,12 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
 
 ###################################################################   rectify 
               if setup[0]=='red':
-                  fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_red'
-                  fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_red'
+                  fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_red'
+                  fcfile1=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify1_'+_tel+'_red'
                   print fcfile
               else:
-                  fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_blue'
-                  fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_blue'
+                  fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_blue'
+                  fcfile1=floyds.__path__[0]+'/standard/ident/' + camera +'/fcrectify1_'+_tel+'_blue'
                   print fcfile
               print img,arcfile,flatfile
               img0=img
@@ -468,7 +469,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       _grpid2=floyds.util.readkey3(hdr2,'grpid')
                       if _grpid1==_grpid2:
                           print flatfile,img,setup[0]
-                          imgn=floyds.fringing_classicmethod2(flatfile,img,'no','*',15,setup[0])
+                          imgn=floyds.fringing_classicmethod(flatfile,img,'no','*',15,setup[0])
                       else:
                           print 'Warning flat not the same OB'
                           imgex=floyds.floydsspecdef.extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)
