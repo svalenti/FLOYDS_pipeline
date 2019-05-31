@@ -469,7 +469,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       _grpid2=floyds.util.readkey3(hdr2,'grpid')
                       if _grpid1==_grpid2:
                           print flatfile,img,setup[0]
-                          imgn=floyds.fringing_classicmethod(flatfile,img,'no','*',15,setup[0])
+                          imgn=floyds.fringing_classicmethod2(flatfile,img,'no','*',15,setup[0])
                       else:
                           print 'Warning flat not the same OB'
                           imgex=floyds.floydsspecdef.extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)

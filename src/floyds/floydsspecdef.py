@@ -1143,22 +1143,6 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     print img, arcfile, flatfile, fcfile, fcfile1, _cosmic
                     img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum(img, arcfile, flatfile, fcfile,
                                                                                   fcfile1, 'no', _cosmic)
-                import time
-
-                if setup[0] == 'red':
-                    cut='[10:1750,*]'
-                else:
-                    cut='[20:1665,*]'
-
-                for ll in [img, arcfile, flatfile]:
-                        if ll:
-                            floyds.util.delete('_tmp.fits')
-                            time.sleep(1)
-                            iraf.imcopy(ll+cut, '_tmp.fits', verbose='yes')
-                            time.sleep(1)
-                            floyds.util.delete(ll)
-                            iraf.imrename('_tmp.fits',ll,verbose='yes')
-                            time.sleep(1)
 
                 ###############     flat correction  method 1 or 3  ###############
                 print img, arcfile, flatfile, setup
@@ -2000,7 +1984,7 @@ def combineredsens(imglist, imgout='pippo.fits'): # used for both arms of FTS
     ##################################################
 
 
-def rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=False):
+def rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, _cosmic=False):
     import floyds
     from numpy import float32
     from astropy.io import fits
@@ -2037,8 +2021,9 @@ def rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=False):
     floyds.util.delete(wavelength_rectified_image)
     iraf.specred.transform(input=first_rectified_image, output=wavelength_rectified_image, minput='',
                            fitnames=re.sub('.fits', '', imgrect1),
-                           databas='database', x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
-                           logfile='logfile')  #, mode='h')
+                           databas='database', x1=lambda1, x2=lambda2, dx='INDEF',
+                           y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
+                           logfile='logfile')  # , mode='h')
     floyds.util.updateheader(wavelength_rectified_image, 0, {'DISPAXIS': [1, 'dispersion axis']})
     floyds.util.delete(first_rectified_image)
 
@@ -2099,10 +2084,11 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
 
     if _tel not in ['ftn', 'fts']:     _tel = floyds.util.readkey3(hdr, 'SITEID')
     if _arm == 'red':
+        lambda1, lambda2 = 4850.0, 10180.0
         if _tel in ['ftn', 'ogg']:
             if camera == 'en06':
-                xa, xb = 0, 1800
-                ya, yb = 211, 308
+                xa, xb = 0, 1565
+                ya, yb = 215, 315
             else:
                 raise ValueError('Camera not supported by pipeline')
         else:
@@ -2110,15 +2096,16 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
                 xa, xb = 0, 1800
                 ya, yb = 186, 285
             elif camera == 'en12':
-                xa, xb = 0, 1800
-                ya, yb = 224, 325
+                xa, xb = 0, 1675
+                ya, yb = 216, 311
             else:
                 raise ValueError('Camera not supported by pipeline')
     else:
+        lambda1, lambda2 = 3300.0, 5700.0
         if _tel in ['ftn', 'ogg']:
             if camera == 'en06':
-                xa, xb = 0, 1800
-                ya, yb = 127, 227
+                xa, xb = 100, 1500
+                ya, yb = 135, 225
             else:
                 raise ValueError('Camera not supported by pipeline')
         else:
@@ -2126,20 +2113,20 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
                 xa, xb = 0, 1669
                 ya, yb = 125, 226
             elif camera == 'en12':
-                xa, xb = 0, 1669
-                ya, yb = 178, 281
+                xa, xb = 0, 1412
+                ya, yb = 124, 225
             else:
                 raise ValueError('Camera not supported by pipeline')
 
-    rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=_cosmic)
+    rectify_single_image(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, _cosmic=_cosmic)
 
     if arcfile:
-        rectify_single_image(arcfile, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=_cosmic)
+        rectify_single_image(arcfile, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, _cosmic=_cosmic)
         output_arcfile = 'tt' + arcfile
     else:
         output_arcfile = ''
     if flatfile:
-        rectify_single_image(flatfile, imgrect, imgrect1, xa, xb, ya, yb, _cosmic=False)
+        rectify_single_image(flatfile, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, _cosmic=False)
         output_flatfile = 'tt' + flatfile
     else:
         output_flatfile = ''
@@ -2162,7 +2149,7 @@ def fringing_classicmethod(flatfile, img, _inter, _sample, _order, arm):
     ydim = hdrx['NAXIS2']
     if arm == 'red':
         floyds.util.delete(re.sub('.fits', 'c.fits', flatfile))
-        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
+        iraf.imcopy(flatfile + '[350:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
         flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
         iraf.specred.response(flatfile, normaliz=flatfile + '[*,1:' + str(int(ydim) - 1) + ']',
@@ -2170,7 +2157,7 @@ def fringing_classicmethod(flatfile, img, _inter, _sample, _order, arm):
                               function='spline3', low_rej=3, high_rej=3, order=_order, niterat=20, grow=0,
                               graphic='stdgraph')
         iraf.imarith(img, '/', img, 'norm.fits', verbose='no')
-        iraf.imcopy('n' + flatfile, 'norm.fits[500:' + str(xdim) + ',*]', verbose='no')
+        iraf.imcopy('n' + flatfile, 'norm.fits[350:' + str(xdim) + ',*]', verbose='no')
     else:
         iraf.specred.response(flatfile, normaliz=flatfile + '[*,1:' + str(int(ydim) - 1) + ']',
                               response='norm.fits', interac=_inter, thresho='INDEF', sample=_sample, naverage=2,
@@ -2319,7 +2306,7 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
     iraf.specred.aptrace.nlost = 10
     if arm == 'red':
         floyds.util.delete(re.sub('.fits', 'c.fits', flatfile))
-        iraf.imcopy(flatfile + '[500:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
+        iraf.imcopy(flatfile + '[350:' + str(xdim) + ',*]', re.sub('.fits', 'c.fits', flatfile), verbose='no')
         iraf.imarith(flatfile, '/', flatfile, 'norm.fits', verbose='no')
         flatfile = re.sub('.fits', 'c.fits', flatfile)
         floyds.util.delete('n' + flatfile)
@@ -2329,7 +2316,7 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
                                edit='no', trace='no',
                                fittrac='no', fitspec='no', flatten='yes', aperture='',
                                pfit='fit2d', clean='no', function='legendre', order=_order, sample='*', mode='ql')
-        iraf.imcopy('n' + flatfile, 'norm.fits[500:' + str(xdim) + ',*]', verbose='no')
+        iraf.imcopy('n' + flatfile, 'norm.fits[350:' + str(xdim) + ',*]', verbose='no')
     else:
         iraf.specred.response(flatfile, normaliz=flatfile + '[*,1:' + str(int(ydim) - 1) + ']',
                               response='norm.fits', interac=_inter, thresho='INDEF', sample=_sample, naverage=2,
