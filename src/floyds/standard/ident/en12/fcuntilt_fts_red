@@ -1,0 +1,17 @@
+# 2019-06-21
+begin	untilt_fts_red
+	task	fitcoords
+	axis	1
+	units	angstroms
+	surface	11
+		2.
+		2.
+		2.
+		1.
+		1.
+		1801.
+		1.
+		351.
+        900.
+        900.
+        25.806679672957774
