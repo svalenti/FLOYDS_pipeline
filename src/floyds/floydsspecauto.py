@@ -273,6 +273,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             print img
             hdr=floyds.util.readhdr(img)
             _type=floyds.util.readkey3(hdr,'OBSTYPE')
+            camera = floyds.util.readkey3(hdr, 'INSTRUME')
             if _type=='EXPOSE':  
                       _type=floyds.util.readkey3(hdr,'imagetyp')
                       if not _type: _type='EXPOSE'
@@ -404,12 +405,14 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
 
 ###################################################################   rectify 
               if setup[0]=='red':
-                  fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_red'
-                  fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_red'
+                  fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_red'
+                  fcfile1=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify1_'+_tel+'_red'
+                  fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_red'
                   print fcfile
               else:
-                  fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_blue'
-                  fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_blue'
+                  fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_blue'
+                  fcfile1=floyds.__path__[0]+'/standard/ident/' + camera +'/fcrectify1_'+_tel+'_blue'
+                  fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_blue'
                   print fcfile
               print img,arcfile,flatfile
               img0=img
@@ -417,7 +420,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
 
-              img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,'no',_cosmic)
+              img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1, fcfile_untilt, 'no',_cosmic)
               if img      and img not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)

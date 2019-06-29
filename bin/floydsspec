@@ -17,7 +17,8 @@ if __name__ == "__main__":
     parser.add_option("-c", "--classify", dest="classify", action="store_true",
                       help='try to classifyed the reduced spectrum using SNID (if installed) ')
     parser.add_option("-C", "--cosmic", dest="cosmic", action="store_true",
-                      help='using this option cosmic rays are removed from the images ')
+                      help='using this option cosmic rays are removed from the images. WARNING: If you have a '
+                           'very bright trace, this option may significantly degrade your data. ')
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true")
     parser.add_option("-A", "--Automatic", dest="automatic", action="store_true",
                       help='extract spectrum with previous parameters in the database')
@@ -69,7 +70,7 @@ if __name__ == "__main__":
         print 'making the list with raw data in the current directory ...... please wait'
         for img in listfile:
             hdr0 = readhdr(img)
-            if readkey3(hdr0, 'instrume') in ['en05', 'en06']:
+            if readkey3(hdr0, 'instrume') in ['en05', 'en06', 'en12']:
                 _type = ''
                 _naxis1 = readkey3(hdr0, 'NAXIS1')
                 _naxis2 = readkey3(hdr0, 'NAXIS2')

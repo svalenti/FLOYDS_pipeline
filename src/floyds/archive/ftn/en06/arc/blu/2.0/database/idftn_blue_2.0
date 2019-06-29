@@ -1,0 +1,15 @@
+# Fri 21:51:08 28-Jun-2019
+begin	identify ftn_blue_2.0 - Ap 1
+	id	ftn_blue_2.0
+	task	identify
+	image	ftn_blue_2.0 - Ap 1
+	aperture	1
+	aplow	1.
+	aphigh	1.
+	units	Angstroms
+	features	4
+	        153.60 3649.14004   3650.153   4.0 1 1 Hg
+	        326.99 4045.83597   4046.563   4.0 1 1 Hg
+	        463.21 4357.49412   4358.328   4.0 1 1 Hg
+	        945.16 5460.13322  5460.7348   4.0 1 1 Hg
+
