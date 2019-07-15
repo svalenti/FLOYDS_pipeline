@@ -407,10 +407,12 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if setup[0]=='red':
                   fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_red'
                   fcfile1=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify1_'+_tel+'_red'
+                  fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_red'
                   print fcfile
               else:
                   fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_blue'
                   fcfile1=floyds.__path__[0]+'/standard/ident/' + camera +'/fcrectify1_'+_tel+'_blue'
+                  fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_blue'
                   print fcfile
               print img,arcfile,flatfile
               img0=img
@@ -418,7 +420,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
 
-              img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,'no',_cosmic)
+              img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1, fcfile_untilt, 'no',_cosmic)
               if img      and img not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
@@ -469,7 +471,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       _grpid2=floyds.util.readkey3(hdr2,'grpid')
                       if _grpid1==_grpid2:
                           print flatfile,img,setup[0]
-                          imgn=floyds.fringing_classicmethod(flatfile,img,'no','*',15,setup[0])
+                          imgn=floyds.fringing_classicmethod2(flatfile,img,'no','*',15,setup[0])
                       else:
                           print 'Warning flat not the same OB'
                           imgex=floyds.floydsspecdef.extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)
