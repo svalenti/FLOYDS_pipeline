@@ -1,3 +1,6 @@
+from pathlib2 import Path
+
+
 def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
     from astropy.io import fits
     import re,string
@@ -711,8 +714,7 @@ def archivespectrum(img,_force=True):
     a=re.sub('-','',string.split(a,'T')[0])
     directory='/science/'+str(user)+'/data/WEB/floyds/'+a+'_'+_tel
     try:
-        if os.path.isdir(directory): print 'directory there'
-        else:                        os.system('mkdir '+directory)
+        Path.mkdir(directory, parents=True, exist_ok=True)
         imglist=glob.glob(directory+'/*_'+_tel+'_*2df*fits')
         filethere=0
         for imgold in imglist:
