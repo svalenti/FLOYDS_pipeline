@@ -8,10 +8,11 @@ import glob
 import floyds
 import time
 import datetime
-from floyds.util import delete, readhdr, readkey3
+from floyds.util import readhdr, readkey3
 from optparse import OptionParser
 import tempfile
 import shutil
+from pathlib2 import Path
 
 GUIDER_CAMERAS = {'ogg': 'kb42', 'coj': 'kb38'}
 FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en12'}
@@ -323,8 +324,7 @@ if __name__ == "__main__":
     output_files = glob.glob('*.tar.gz')
     output_directory = os.path.join(option.output_directory, option.site, camera, option.day_obs,
                                     'specproc')
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+    Path.mkdir(output_directory, exist_ok=True)
 
     for output_file in output_files:
         shutil.copy(output_file, output_directory)

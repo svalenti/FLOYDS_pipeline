@@ -36,7 +36,7 @@ setup(
     license='LICENSE.txt', 
     description='floyds is a package to reduce floyds spectra',
     long_description=open('README.txt').read(),
-    requires=['numpy','astropy','pyraf','matplotlib', 'xhtml2pdf'],
+    requires=['numpy','astropy','pyraf','matplotlib', 'xhtml2pdf', 'pathlib2'],
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\

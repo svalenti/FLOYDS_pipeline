@@ -23,7 +23,7 @@ RUN apt-get update \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
 
-RUN pip install numpy astropy matplotlib pyraf xhtml2pdf && rm -rf ~/.cache/pip
+RUN pip install numpy astropy matplotlib pyraf xhtml2pdf pathlib2 && rm -rf ~/.cache/pip
 
 RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.0.1.tar.gz \
         && tar -xzvf ds9.debian9.8.0.1.tar.gz -C /usr/local/bin \
