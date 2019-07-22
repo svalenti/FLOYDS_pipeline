@@ -714,7 +714,7 @@ def archivespectrum(img,_force=True):
     a=re.sub('-','',string.split(a,'T')[0])
     directory='/science/'+str(user)+'/data/WEB/floyds/'+a+'_'+_tel
     try:
-        Path.mkdir(directory, parents=True, exist_ok=True)
+        Path(directory).mkdir(parents=True, exist_ok=True)
         imglist=glob.glob(directory+'/*_'+_tel+'_*2df*fits')
         filethere=0
         for imgold in imglist:

@@ -324,7 +324,7 @@ if __name__ == "__main__":
     output_files = glob.glob('*.tar.gz')
     output_directory = os.path.join(option.output_directory, option.site, camera, option.day_obs,
                                     'specproc')
-    Path.mkdir(output_directory, parents=True, exist_ok=True)
+    Path(output_directory).mkdir(parents=True, exist_ok=True)
 
     for output_file in output_files:
         shutil.copy(output_file, output_directory)

@@ -1295,7 +1295,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             if arcref[0] == '/':
                                 os.system('cp ' + arcref + ' .')
                                 arcref = string.split(arcref, '/')[-1]
-                            Path.mkdir('database/', parents=True, exist_ok=True)
+                            Path('database/').mkdir(parents=True, exist_ok=True)
                             if os.path.isfile(floyds.util.searcharc(imgex, '')[1] + '/database/id' + re.sub('.fits', '',
                                                                                                             arcref)):
                                 os.system('cp ' + floyds.util.searcharc(imgex, '')[1] +
@@ -2083,7 +2083,7 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, fcfile_untilt, _int
     imgrect = string.split(fcfile, '/fc')[-1] + '.fits'
     imgrect1 = string.split(fcfile1, '/fc')[-1] + '.fits'
 
-    Path.mkdir('database/', parents=True, exist_ok=True)
+    Path('database/').mkdir(parents=True, exist_ok=True)
     os.system('cp ' + fcfile + ' database/')
     os.system('cp ' + fcfile1 + ' database/')
     os.system('cp ' + fcfile_untilt + ' database/')
