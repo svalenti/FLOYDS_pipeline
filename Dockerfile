@@ -19,11 +19,14 @@ RUN  mkdir -p $iraf \
         && make sysgen
 
 RUN apt-get update \
-        && apt-get -y install libx11-dev libcfitsio-bin wget x11-apps libtk8.6  openssh-client wcstools libxml2 vim libssl1.0.2 zip \
+        && apt-get -y install libx11-dev libcfitsio-bin wget x11-apps libtk8.6 \
+        python3 python3-pip openssh-client wcstools libxml2 vim libssl1.0.2 zip \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
 
-RUN pip install numpy astropy matplotlib pyraf xhtml2pdf pathlib2 && rm -rf ~/.cache/pip
+RUN pip install numpy astropy matplotlib pyraf xhtml2pdf pathlib2 requests && rm -rf ~/.cache/pip
+
+RUN pip3 install lco_ingester kombu && rm -rf ~/.cache/pip
 
 RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.0.1.tar.gz \
         && tar -xzvf ds9.debian9.8.0.1.tar.gz -C /usr/local/bin \
@@ -31,7 +34,9 @@ RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.0.1.tar.gz \
 
 RUN mkdir -p /home/archive/iraf && /usr/sbin/groupadd -g 10000 "domainusers" \
         && /usr/sbin/useradd -g 10000 -d /home/archive -M -N -u 10087 archive \
-        && chown -R archive:domainusers /home/archive
+        && chown -R archive:domainusers /home/archive \
+        && mkdir -p /archive/engineering \
+        && chown -R archive:domainusers /archive/engineering
 
 USER archive
 

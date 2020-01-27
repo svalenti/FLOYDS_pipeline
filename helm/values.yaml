@@ -1,0 +1,27 @@
+image:
+  repository: docker.lco.global/floyds_pipeline
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 4
+    memory: 4096Mi
+  requests:
+    cpu: 1
+    memory: 1024Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+bucket: "archive-lco-global"
+
+apiRoot: "https://archive-api.lco.global/"
+
+doIngest: 1
+
+opentsdbHostame: "opentsdb.lco.gtn"
+
+bosonHostname: "alerts.lco.gtn"

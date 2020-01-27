@@ -1,0 +1,75 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "floyds.fullname" . }}
+  labels:
+{{ include "floyds.labels" . | indent 4 }}
+spec:
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "floyds.name" . }}
+        helm.sh/chart: {{ include "floyds.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+  spec:
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: {{ include "floyds.name" . }}
+          helm.sh/chart: {{ include "floyds.chart" . }}
+          app.kubernetes.io/instance: {{ .Release.Name }}
+          app.kubernetes.io/managed-by: {{ .Release.Service }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - floydsauto
+            - --site={{ .Values.site }}
+          env:
+            - name: API_ROOT
+              value: {{ .Values.apiRoot }}
+            - name: DO_INGEST
+              value: 1
+            - name: BUCKET
+              value: {{ .Values.bucket }}
+            - name: OPENTSDB_HOSTNAME
+              value: {{ .Values.opentsdbHostame }}
+            - name: BOSUN_HOSTNAME
+              value: {{ .Values.bosunHostname}}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: floydsSecrets
+                  key: awsAccessKey
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: floydsSecrets
+                  key: awsSecretKey
+            - name: AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: floydsSecrets
+                  key: authToken
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
