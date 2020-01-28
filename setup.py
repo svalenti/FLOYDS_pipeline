@@ -28,7 +28,7 @@ except:
 
 setup(
     name='floyds',
-    version='2.3.0',
+    version='2.6.0',
     author='S. Valenti',
     author_email='svalenti@lcogt.net',
     scripts=['bin/floydsspec','bin/floydsfixheaders','bin/floydsauto'],
