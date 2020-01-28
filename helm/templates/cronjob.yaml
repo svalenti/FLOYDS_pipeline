@@ -37,7 +37,7 @@ spec:
             - name: API_ROOT
               value: {{ .Values.apiRoot }}
             - name: DO_INGEST
-              value: 1
+              value: {{ .Values.doIngest }}
             - name: BUCKET
               value: {{ .Values.bucket }}
             - name: OPENTSDB_HOSTNAME
@@ -47,17 +47,17 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: floydsSecrets
+                  name: floydssecrets
                   key: awsAccessKey
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: floydsSecrets
+                  name: floydssecrets
                   key: awsSecretKey
             - name: AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: floydsSecrets
+                  name: floydssecrets
                   key: authToken
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
