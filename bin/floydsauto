@@ -13,6 +13,7 @@ from optparse import OptionParser
 import tempfile
 import shutil
 from pathlib2 import Path
+import requests
 
 GUIDER_CAMERAS = {'ogg': 'kb42', 'coj': 'kb38'}
 FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en12'}
@@ -88,8 +89,19 @@ if __name__ == "__main__":
         camera = FLOYDS_CAMERAS[option.site]
     else:
         camera = option.camera
-    fpacked_files = glob.glob(os.path.join(option.input_directory, option.site, camera,
-                                           option.day_obs, 'raw', '*.fits.fz'))
+
+    raw_data_path = glob.glob(os.path.join(option.input_directory, option.site, camera,
+                                           option.day_obs, 'raw', ''))
+    if not os.path.exists(option.input_directory):
+        os.makedirs(raw_data_path)
+        url_day_obs = datetime.datetime.strptime(option.day_obs, '%Y%m%d').strftime('%Y-%m-%d')
+        url = os.getenv('API_ROOT', '') + 'frames/?siteid={site}&instrume={instrument}&DAY_OBS={day_obs}&RLEVEL=0'.format(site=option.site, instrument=camera, day_obs=url_day_obs),
+        frames = requests.get(url, headers={'Authorization': 'Token {token}'.format(token=os.getenv('AUTH_TOKEN'))}).json()['results']
+        for frame in frames:
+            with open(os.path.join(raw_data_path, frame['filename']), 'wb') as f:
+                f.write(requests.get(frame['url']).content)
+
+    fpacked_files = glob.glob(raw_data_path, '*.fits.fz')
     for fpacked_file in fpacked_files:
         fpack_output_file = os.path.join(temp_directory, os.path.splitext(os.path.basename(fpacked_file))[0])
         os.system('funpack -O {output_file} {input_file}'.format(input_file=fpacked_file, output_file=fpack_output_file))
@@ -322,6 +334,14 @@ if __name__ == "__main__":
                 floyds.util.delete(img)
 
     output_files = glob.glob('*.tar.gz')
+
+    if os.getenv('DO_INGEST'):
+        for output_file in output_files:
+            os.system('lco_ingest_frame --api-root {api_root} --auth-token {auth_token} \
+                       --bucket {bucket} {path}'.format(api_root=os.getenv('API_ROOT'),
+                                                        auth_token=os.getenv('AUTH_TOKEN'),
+                                                        bucket=os.getenv('BUCKET'), path=output_file))
+
     output_directory = os.path.join(option.output_directory, option.site, camera, option.day_obs,
                                     'specproc')
     Path(output_directory).mkdir(parents=True, exist_ok=True)

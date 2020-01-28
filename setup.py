@@ -28,7 +28,7 @@ except:
 
 setup(
     name='floyds',
-    version='2.3.0',
+    version='2.6.0',
     author='S. Valenti',
     author_email='svalenti@lcogt.net',
     scripts=['bin/floydsspec','bin/floydsfixheaders','bin/floydsauto'],
@@ -36,7 +36,7 @@ setup(
     license='LICENSE.txt', 
     description='floyds is a package to reduce floyds spectra',
     long_description=open('README.txt').read(),
-    requires=['numpy','astropy','pyraf','matplotlib', 'xhtml2pdf', 'pathlib2'],
+    requires=['numpy','astropy','pyraf','matplotlib', 'xhtml2pdf', 'pathlib2', 'requests'],
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\
