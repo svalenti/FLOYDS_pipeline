@@ -10,12 +10,6 @@ resources:
     cpu: 1
     memory: 1024Mi
 
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
 bucket: "archive-lco-global"
 
 apiRoot: "https://archive-api.lco.global/"
