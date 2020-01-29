@@ -32,7 +32,7 @@ spec:
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               command:
                 - floydsauto
-                - --site={{ .Values.site | quote }}
+                - --site={{ .Values.site }}
               env:
                 - name: API_ROOT
                   value: {{ .Values.apiRoot | quote }}
