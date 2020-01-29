@@ -94,7 +94,7 @@ if __name__ == "__main__":
     if not os.path.exists(raw_data_path):
         os.makedirs(raw_data_path)
         url_day_obs = datetime.datetime.strptime(option.day_obs, '%Y%m%d').strftime('%Y-%m-%d')
-        url = os.getenv('API_ROOT', '') + 'frames/?siteid={site}&instrume={instrument}&DAY_OBS={day_obs}&RLEVEL=0'.format(site=option.site, instrument=camera, day_obs=url_day_obs)
+        url = os.getenv('API_ROOT', '') + 'frames/?SITEID={site}&INSTRUME={instrument}&DAY_OBS={day_obs}&RLEVEL=0'.format(site=option.site, instrument=camera, day_obs=url_day_obs)
         frames = requests.get(url, headers={'Authorization': 'Token {token}'.format(token=os.getenv('AUTH_TOKEN'))}).json()['results']
         for frame in frames:
             with open(os.path.join(raw_data_path, frame['filename']), 'wb') as f:

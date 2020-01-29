@@ -35,7 +35,7 @@ pipeline {
 	        steps {
 	            withKubeConfig([credentialsId: 'prod-kube-config']) {
 	                sh('helm upgrade --install floyds-ogg-en06 helm/ -f helm/ogg-values.yaml --force --set image.tag="${GIT_DESCRIPTION}"')
-	                sh('helm upgrade --install floyds-coj-en13 helm/ -f helm/coj-values.yaml --force --set image.tag="${GIT_DESCRIPTION}"')
+	                sh('helm upgrade --install floyds-coj-en12 helm/ -f helm/coj-values.yaml --force --set image.tag="${GIT_DESCRIPTION}"')
 	            }
 	        }
 	    }
