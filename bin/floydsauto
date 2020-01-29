@@ -91,7 +91,7 @@ if __name__ == "__main__":
         camera = option.camera
 
     raw_data_path = os.path.join(option.input_directory, option.site, camera, option.day_obs, 'raw', '')
-    if not os.path.exists(option.input_directory):
+    if not os.path.exists(raw_data_path):
         os.makedirs(raw_data_path)
         url_day_obs = datetime.datetime.strptime(option.day_obs, '%Y%m%d').strftime('%Y-%m-%d')
         url = os.getenv('API_ROOT', '') + 'frames/?siteid={site}&instrume={instrument}&DAY_OBS={day_obs}&RLEVEL=0'.format(site=option.site, instrument=camera, day_obs=url_day_obs),
