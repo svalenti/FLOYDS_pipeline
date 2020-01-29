@@ -101,7 +101,7 @@ if __name__ == "__main__":
             with open(os.path.join(raw_data_path, frame['filename']), 'wb') as f:
                 f.write(requests.get(frame['url']).content)
 
-    fpacked_files = glob.glob(raw_data_path, '*.fits.fz')
+    fpacked_files = glob.glob(os.path.join(raw_data_path, '*.fits.fz'))
     for fpacked_file in fpacked_files:
         fpack_output_file = os.path.join(temp_directory, os.path.splitext(os.path.basename(fpacked_file))[0])
         os.system('funpack -O {output_file} {input_file}'.format(input_file=fpacked_file, output_file=fpack_output_file))
