@@ -26,7 +26,7 @@ RUN apt-get update \
 
 RUN pip install numpy astropy matplotlib pyraf xhtml2pdf pathlib2 requests && rm -rf ~/.cache/pip
 
-RUN pip3 install lco_ingester kombu && rm -rf ~/.cache/pip
+RUN pip3 install lco_ingester>=0.1.4 kombu && rm -rf ~/.cache/pip
 
 RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.0.1.tar.gz \
         && tar -xzvf ds9.debian9.8.0.1.tar.gz -C /usr/local/bin \
