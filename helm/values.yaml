@@ -19,3 +19,5 @@ doIngest: 1
 opentsdbHostame: "opentsdb.lco.gtn"
 
 bosonHostname: "alerts.lco.gtn"
+
+ingesterProcessName: "floyds_pipeline"
