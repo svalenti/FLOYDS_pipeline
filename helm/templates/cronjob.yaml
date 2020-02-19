@@ -44,6 +44,8 @@ spec:
                   value: {{ .Values.opentsdbHostame | quote }}
                 - name: BOSUN_HOSTNAME
                   value: {{ .Values.bosunHostname | quote }}
+                - name: INGESTER_PROCESS_NAME
+                  value: {{ .Values.ingesterProcessName | quote }}
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
