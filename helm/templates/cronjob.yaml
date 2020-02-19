@@ -47,6 +47,8 @@ spec:
                 - name: INGESTER_PROCESS_NAME
                   value: {{ .Values.ingesterProcessName | quote }}
                 - name: AWS_ACCESS_KEY_ID
+                - name: POSTPROCESS_FILES
+                  value: {{ .Values.postprocessFiles | quote }}
                   valueFrom:
                     secretKeyRef:
                       name: floydssecrets
