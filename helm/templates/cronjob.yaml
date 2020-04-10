@@ -42,6 +42,8 @@ spec:
                   value: {{ .Values.bucket | quote }}
                 - name: OPENTSDB_HOSTNAME
                   value: {{ .Values.opentsdbHostame | quote }}
+                - name: OPENTSDB_PORT
+                  value: {{ .Values.opentsdbPort | quote }}
                 - name: BOSUN_HOSTNAME
                   value: {{ .Values.bosunHostname | quote }}
                 - name: INGESTER_PROCESS_NAME
