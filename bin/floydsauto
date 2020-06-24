@@ -170,11 +170,7 @@ if __name__ == "__main__":
                         _type = 'object'
                     elif answ == '5':
                         _type = 'not good'
-            if _type in ['flat', 'lamp']:  # reject bad flat ,arc
-                good = floyds.floydsspecauto.badimage(img, _type)
-            else:
-                good = 1
-            if good and _type in ['flat', 'sky', 'lamp', 'bias', 'object']:
+            if _type in ['flat', 'sky', 'lamp', 'bias', 'object']:
                 files.append(img)
     _verbose = option.verbose
     _archive = option.archive
