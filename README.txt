@@ -48,7 +48,7 @@ command below.
 > mkiraf
 > export IRAFARCH=linux64
 > export iraf=/home/dsand/.conda/envs/floyds/lib/iraf/
-> git clone https://github.com/svalenti/FLOYDS_pipeline.git
+> git clone https://github.com/lcogt/FLOYDS_pipeline.git
 > cd FLOYDS_pipeline
 > python setup.py install
 
