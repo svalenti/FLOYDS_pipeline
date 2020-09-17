@@ -28,9 +28,9 @@ RUN pip install numpy astropy matplotlib pyraf xhtml2pdf pathlib2 requests && rm
 
 RUN pip3 install lco_ingester>=2.1.14 kombu && rm -rf ~/.cache/pip
 
-RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.0.1.tar.gz \
-        && tar -xzvf ds9.debian9.8.0.1.tar.gz -C /usr/local/bin \
-        && rm -rf ds9.debian9.8.0.1.tar.gz
+RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.1.tar.gz \
+        && tar -xzvf ds9.debian9.8.1.tar.gz -C /usr/local/bin \
+        && rm -rf ds9.debian9.8.1.tar.gz
 
 RUN mkdir -p /home/archive/iraf && /usr/sbin/groupadd -g 10000 "domainusers" \
         && /usr/sbin/useradd -g 10000 -d /home/archive -M -N -u 10087 archive \
@@ -55,3 +55,5 @@ RUN python setup.py install
 USER archive
 
 WORKDIR /home/archive
+
+ENV DISPLAY host.docker.internal:0
