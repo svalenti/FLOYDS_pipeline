@@ -2111,7 +2111,8 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
                            databas='database',
                            x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
                            logfile='logfile')  #, mode='h')
-    floyds.util.updateheader('tt' + img, 0, {'DISPAXIS': [1, 'dispersion axis']})
+    floyds.util.updateheader('tt' + img, 0, {'DISPAXIS': [1, 'dispersion axis'],
+                                             'CUNIT1': ['Angstrom', 'Units of dispersion axis']})
     floyds.util.delete('t' + img)
 
     if arcfile:
@@ -2144,7 +2145,8 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
                                fitnames=re.sub('.fits', '', imgrect1), databas='database',
                                x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes', blank=0,
                                logfile='logfile')  #, mode='h')
-        floyds.util.updateheader('tt' + arcfile, 0, {'DISPAXIS': [1, 'dispersion axis']})
+        floyds.util.updateheader('tt' + arcfile, 0, {'DISPAXIS': [1, 'dispersion axis'],
+                                                     'CUNIT1': ['Angstrom', 'Units of dispersion axis']})
         floyds.util.delete('t' + arcfile)
         arcfile = 'tt' + arcfile
 
@@ -2181,7 +2183,8 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
                                fitnames=re.sub('.fits', '', imgrect1), databas='database',
                                x1='INDEF', x2='INDEF', y1='INDEF', y2='INDEF', flux='yes', blank=0,
                                logfile='logfile')  #, mode='h')
-        floyds.util.updateheader('tt' + flatfile, 0, {'DISPAXIS': [1, 'dispersion axis']})
+        floyds.util.updateheader('tt' + flatfile, 0, {'DISPAXIS': [1, 'dispersion axis'],
+                                                      'CUNIT1': ['Angstrom', 'Units of dispersion axis']})
         floyds.util.delete('t' + flatfile)
         flatfile = 'tt' + flatfile
     return 'tt' + img, arcfile, flatfile
