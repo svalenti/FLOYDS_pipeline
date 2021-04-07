@@ -1,0 +1,69 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "floyds.fullname" . }}
+  labels:
+{{ include "floyds.labels" . | indent 4 }}
+spec:
+  concurrencyPolicy: "Forbid"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "floyds.name" . }}
+        helm.sh/chart: {{ include "floyds.chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: {{ include "floyds.name" . }}
+            helm.sh/chart: {{ include "floyds.chart" . }}
+            app.kubernetes.io/instance: {{ .Release.Name }}
+            app.kubernetes.io/managed-by: {{ .Release.Service }}
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command:
+                - floydsauto
+                - --site={{ .Values.site }}
+              env:
+                - name: API_ROOT
+                  value: {{ .Values.apiRoot | quote }}
+                - name: DO_INGEST
+                  value: {{ .Values.doIngest | quote }}
+                - name: BUCKET
+                  value: {{ .Values.bucket | quote }}
+                - name: OPENTSDB_HOSTNAME
+                  value: {{ .Values.opentsdbHostame | quote }}
+                - name: OPENTSDB_PORT
+                  value: {{ .Values.opentsdbPort | quote }}
+                - name: BOSUN_HOSTNAME
+                  value: {{ .Values.bosunHostname | quote }}
+                - name: INGESTER_PROCESS_NAME
+                  value: {{ .Values.ingesterProcessName | quote }}
+                - name: POSTPROCESS_FILES
+                  value: {{ .Values.postprocessFiles | quote }}
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: floydssecrets
+                      key: awsAccessKey
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: floydssecrets
+                      key: awsSecretKey
+                - name: AUTH_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: floydssecrets
+                      key: authToken
+              resources:
+                {{- toYaml .Values.resources | nindent 16 }}

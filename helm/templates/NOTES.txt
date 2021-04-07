@@ -1,0 +1,14 @@
+This application is a simple cron job to run the FLOYDS pipeline. It only runs at specific intervals,
+and otherwise is not running.
+
+You can inspect the CronJob specification by using:
+
+  kubectl --namespace {{ .Release.Namespace }} describe cronjob {{ include "floyds.fullname" . }}
+
+You can retrive the history of failed and successful jobs:
+
+  kubectl --namespace {{ .Release.Namespace }} describe job -l "app.kubernetes.io/name={{ include "floyds.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+You can also retrieve the logs from Pods used as part of this Job:
+
+  kubectl --namespace {{ .Release.Namespace }} logs -l "app.kubernetes.io/name={{ include "floyds.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"

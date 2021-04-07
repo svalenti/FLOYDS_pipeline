@@ -1,0 +1,33 @@
+# Tue 00:28:36 19-Mar-2019
+begin	identify arc_ZTF18acebssa_fts_20181130_blue_1.2_58560_1_ex - Ap 1
+	id	arc_ZTF18acebssa_fts_20181130_blue_1.2_58560_1_ex
+	task	identify
+	image	arc_ZTF18acebssa_fts_20181130_blue_1.2_58560_1_ex - Ap 1
+	aperture	1
+	aplow	41.45
+	aphigh	53.86
+	units	Angstroms
+	features	6
+	        286.51 3650.25142   3650.153   4.0 1 1 Hg
+	        514.08 4046.18188   4046.563   4.0 1 1 Hg
+	        693.77 4358.68285   4358.328   4.0 1 1 Hg
+	       1327.80 5460.56232  5460.7348   4.0 1 1 Hg
+	       1505.83 5769.74162  5769.5982   4.0 1 1 Hg
+	       1517.86 5790.61991   5790.663   4.0 1 1 Hg
+	function legendre
+	order 3
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	7
+		2.
+		3.
+		286.5094604492188
+		1517.8583984375
+		4720.826889062989
+		1070.184245446219
+		-0.3912203579232893
+

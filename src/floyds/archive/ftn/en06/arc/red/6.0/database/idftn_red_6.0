@@ -1,0 +1,33 @@
+# Fri 23:04:38 28-Jun-2019
+begin	identify ftn_red_6.0 - Ap 1
+	id	ftn_red_6.0
+	task	identify
+	image	ftn_red_6.0 - Ap 1
+	aperture	1
+	aplow	1.
+	aphigh	1.
+	units	Angstroms
+	features	7
+	        139.40 5460.41435  5460.7348   4.0 1 1 Hg
+	        603.04 7512.64485  7514.6518   4.0 1 1 ArI
+	        630.86 7635.78788  7635.1056   4.0 1 1 ArI
+	        716.83  8016.3298  8014.7857   4.0 1 1 ArI
+	        739.53 8116.81706  8115.3108   4.0 1 1 ArI
+	        966.60 9121.87599  9122.9674   4.0 1 1 ArI
+	       1087.60 9657.47247  9657.7863   4.0 1 1 ArI
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		139.3976287841797
+		1087.599853515625
+		7558.943406303137
+		2098.529060221889
+
