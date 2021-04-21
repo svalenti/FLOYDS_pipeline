@@ -1,7 +1,7 @@
 from pathlib2 import Path
 
 
-def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
+def fluxcalib2d(img2d,sensfun, scale=1e-20):  # flux calibrate 2d images
     from astropy.io import fits
     import re,string
     from numpy import arange, array, float32
@@ -41,11 +41,11 @@ def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
     atm_xx=ninterp(xxd,xxe,yye)
     aircorr=10**(0.4*array(atm_xx)*_airmass)
     img2df=re.sub('.fits','_2df.fits',img2d)
-    for i in range(len(data2d[:,0])):  data2d[i,:]=((array(data2d[i,:]/_exptime)*array(aircorr))/aasens2)*1e20
+    for i in range(len(data2d[:,0])):  data2d[i,:]=((array(data2d[i,:]/_exptime)*array(aircorr))/aasens2) / scale
     floyds.util.delete(img2df)
     fits.writeto(img2df, float32(data2d), hdr2d)
     floyds.util.updateheader(img2df,0,{'SENSFUN'+_arm[0]:[string.split(sensfun,'/')[-1],'']})
-    floyds.util.updateheader(img2df,0,{'BUNIT':['10^-20 erg / (Angstrom cm2 s)','Physical unit of array values']})
+    floyds.util.updateheader(img2df,0,{'BUNIT':['{:.0e} erg / (Angstrom cm2 s)'.format(scale),'Physical unit of array values']})
     return img2df
 
 def gettar(img):
