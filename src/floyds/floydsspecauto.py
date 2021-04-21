@@ -45,7 +45,7 @@ def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
     floyds.util.delete(img2df)
     fits.writeto(img2df, float32(data2d), hdr2d)
     floyds.util.updateheader(img2df,0,{'SENSFUN'+_arm[0]:[string.split(sensfun,'/')[-1],'']})
-    floyds.util.updateheader(img2df,0,{'BUNIT':['10^20 erg / (Angstrom cm2 s)','Physical unit of array values']})
+    floyds.util.updateheader(img2df,0,{'BUNIT':['10^-20 erg / (Angstrom cm2 s)','Physical unit of array values']})
     return img2df
 
 def gettar(img):
