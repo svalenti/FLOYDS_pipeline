@@ -2036,7 +2036,8 @@ def rectify_single_image(img, imgrect, imgrect1, fcuntilt_file, xa, xb, ya, yb, 
                            databas='database', x1=lambda1, x2=lambda2, dx='INDEF',
                            y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
                            logfile='logfile')  # , mode='h')
-    floyds.util.updateheader(wavelength_rectified_image, 0, {'DISPAXIS': [1, 'dispersion axis']})
+    floyds.util.updateheader(wavelength_rectified_image, 0, {'DISPAXIS': [1, 'dispersion axis'],
+                                                             'CUNIT1': ['Angstrom', 'Units of dispersion axis']})
     floyds.util.delete(first_rectified_image)
     floyds.util.delete(untilted_image)
 
