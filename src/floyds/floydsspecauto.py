@@ -1,4 +1,5 @@
 from pathlib2 import Path
+from floyds.util import to_safe_filename
 
 
 def fluxcalib2d(img2d,sensfun, scale=1e-20):  # flux calibrate 2d images
@@ -92,7 +93,7 @@ def gettar(img):
     _date_dt = _date_dt - timedelta(days=delta)
     p=_date_dt.strftime('%Y%m%d')
 
-    obj=hdr['object']
+    obj=to_safe_filename(hdr['OBJECT'])
     propid=hdr['PROPID']
     if 'fts' in _tel or 'coj' in _tel: 
         i=r'http://floyds.coj.lco.gtn/night_summary/%s/' % (p)
@@ -102,7 +103,7 @@ def gettar(img):
     try:
         webpage=urlopen(i).read()
         for data_dir in webpage.split('href='):
-            if propid in data_dir:
+            if propid in data_dir and obj in data_dir:
                 dir_name = data_dir.split('>')[0]
                 dir_name = dir_name.replace('"','')
                 dir_url = i+dir_name

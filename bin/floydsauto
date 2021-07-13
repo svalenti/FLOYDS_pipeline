@@ -8,7 +8,7 @@ import glob
 import floyds
 import time
 import datetime
-from floyds.util import readhdr, readkey3
+from floyds.util import readhdr, readkey3, to_safe_filename
 from optparse import OptionParser
 import tempfile
 import shutil
@@ -250,13 +250,14 @@ if __name__ == "__main__":
         for _type in typeobs:
             for img0 in outputlist[_type].keys():
                 hdr = floyds.readhdr(img0)
-                grpid = str(floyds.readkey3(hdr, 'REQNUM'))
+                grpid = str(floyds.readkey3(hdr, 'BLKUID'))
+                obj = hdr['OBJECT']
                 if grpid == 'N/A':     grpid = 'UNKNOWN'
                 prop = floyds.readkey3(hdr, 'PROPID')
-                if (grpid, prop) not in outputlist['grpid']:
-                    outputlist['grpid'][(grpid, prop)] = {}
-                if img0 not in outputlist['grpid'][(grpid, prop)]:
-                    outputlist['grpid'][(grpid, prop)][img0] = outputlist[_type][img0]
+                if (grpid, prop, obj) not in outputlist['grpid']:
+                    outputlist['grpid'][(grpid, prop, obj)] = {}
+                if img0 not in outputlist['grpid'][(grpid, prop, obj)]:
+                    outputlist['grpid'][(grpid, prop, obj)][img0] = outputlist[_type][img0]
 
         for oblock in outputlist['grpid']:
             img0 = outputlist['grpid'][oblock].keys()[0]
@@ -264,9 +265,10 @@ if __name__ == "__main__":
             date = floyds.readkey3(hdr, 'date-night')
             grpid = oblock[0]
             prop = oblock[1]
+            obj = oblock[2]
             _instrume = floyds.readkey3(hdr, 'TELID')
-            nametar = str(prop) + '_' + str(grpid) + '_' + str(_instrume) + '_' + str(date) + '_' + str(
-                MJDtoday) + '.tar.gz'
+            nametar = str(prop) + '_' + str(grpid) + '_'+ to_safe_filename(obj) +'_'+ str(_instrume) + '_' + str(date) + '_' + \
+                      str(MJDtoday) + '.tar.gz'
 
             # We still need e90 files to tell
             for img0 in outputlist['grpid'][oblock]:
