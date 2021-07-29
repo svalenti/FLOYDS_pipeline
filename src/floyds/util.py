@@ -242,6 +242,8 @@ def readkey3(hdr, keyword):
                 value = value.lower()
             elif keyword == 'grism':
                 if not value: value = 'full'
+            elif keyword == 'grpid':
+                value = '_'.join([hdr.get('BLKUID'), hdr.get('OBJECT')])
             elif keyword == 'RA' or keyword == 'CAT-RA':
                 import string, re
 
@@ -1104,3 +1106,8 @@ def mjdtoday():
   mjd0  = datetime(1858,11,17)
   mjd = (today - mjd0).days
   return mjd
+
+def to_safe_filename(unsafe_string):
+    import string
+    valid_filename_characters = "-_.(){letters}{numbers}".format(letters=string.ascii_letters, numbers=string.digits)
+    return ''.join(character for character in unsafe_string if character in valid_filename_characters)

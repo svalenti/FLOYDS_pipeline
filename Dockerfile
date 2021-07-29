@@ -24,13 +24,14 @@ RUN apt-get update \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
 
-RUN pip install numpy astropy matplotlib pyraf xhtml2pdf pathlib2 requests && rm -rf ~/.cache/pip
+RUN pip install setuptools==44.1.1
+RUN pip install numpy==1.16.6 astropy==2.0.16 pyraf==2.1.15 matplotlib==2.2.4 xhtml2pdf==0.2.4 pathlib2==2.3.5 requests==2.22.0 pytest==3.6.4 stsci.tools==3.6.0 && rm -rf ~/.cache/pip
 
 RUN pip3 install ocs_ingester>=2.2.5 kombu && rm -rf ~/.cache/pip
 
-RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.1.tar.gz \
-        && tar -xzvf ds9.debian9.8.1.tar.gz -C /usr/local/bin \
-        && rm -rf ds9.debian9.8.1.tar.gz
+RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.2.1.tar.gz \
+        && tar -xzvf ds9.debian9.8.2.1.tar.gz -C /usr/local/bin \
+        && rm -rf ds9.debian9.8.2.1.tar.gz
 
 RUN mkdir -p /home/archive/iraf && /usr/sbin/groupadd -g 10000 "domainusers" \
         && /usr/sbin/useradd -g 10000 -d /home/archive -M -N -u 10087 archive \
