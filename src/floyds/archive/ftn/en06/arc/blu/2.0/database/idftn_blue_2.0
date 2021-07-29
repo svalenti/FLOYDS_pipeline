@@ -12,4 +12,18 @@ begin	identify ftn_blue_2.0 - Ap 1
 	        326.99 4045.83597   4046.563   4.0 1 1 Hg
 	        463.21 4357.49412   4358.328   4.0 1 1 Hg
 	        945.16 5460.13322  5460.7348   4.0 1 1 Hg
-
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		153.6032867431641
+		945.158203125
+		4555.396787716875
+		905.3235765408668
