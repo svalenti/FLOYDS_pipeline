@@ -1,95 +1,63 @@
-4916.068     Hg
-5460.7348    Hg
-5769.5982    Hg
-5790.6630    Hg
-6025.1515    ArI
-6032.1273    ArI
-6043.2233    ArI
-6059.3723    ArI
-6098.8046    ArI
-6105.6346    ArI
-6114.9234    ArII
-6155.2385    ArI
-6212.5031    ArI
-6296.8722    ArI
-6307.6561    ArI
-6369.5756    ArI
-6384.7160    ArI
-6416.3071    ArI
-6431.5553    ArI
-6466.5498    ArI
-6677.2812    ArI
-6698.8752    ArI
+# 6114.9232    ArII
+6416.307 Ar I
+6677.282     ArI
 6752.8335    ArI
-6766.6117    ArI
-6827.2529    ArI
+# 6766.6117    ArI
+# 6827.2529    ArI
 6871.2891    ArI
-6937.6642    ArI
+# 6937.6642    ArI
 6965.4307    ArI
 7067.2175    ArI
-7107.4778    ArI
-7125.82      ArI
 7147.0416    ArI
-7206.9804    ArI
+# 7206.9804    ArI
 7272.9359    ArI
-7353.293     ArI
-7372.1184    ArI
-7383.9805    ArI
-7503.8691    ArI
-7514.6518    ArI
+# 7372.1184    ArI Blended in FLOYDS
+# 7383.9805    ArI Blended in FLOYDS
+# 7503.8691    ArI Blended in FLOYDS
+# 7514.6518    ArI Blended in FLOYDS
 7635.1056    ArI
-7723.7599    ArI
-7891.075     ArI
+# 7723.7599    ArI Blend
 7948.1764    ArI
-8006.1567    ArI
-8014.7857    ArI
-8103.6931    ArI
-8115.3108    ArI
+# 8006.1567    ArI Blended in FLOYDS
+# 8014.7857    ArI Blended in FLOYDS
+# 8103.6931    ArI Blended in FLOYDS
+# 8115.3108    ArI Blended in FLOYDS
 8264.5225    ArI
-8408.2096    ArI
-8424.6475    ArI
+# 8408.2096    ArI Blended in FLOYDS
+# 8424.6475    ArI Blended in FLOYDS
 8521.4422    ArI
-8605.7762    ArI
-8620.4602    ArI
 8667.9442    ArI
-8799.0875    ArI
 9122.9674    ArI
-9194.6385    ArI
+# 9194.6385    ArI Too weak in FLOYDS
 9224.4992    ArI
-9291.5313    ArI
-9354.2198    ArI
+# 9291.5313    ArI Weak
+# 9354.2198    ArI Weak
 9657.7863    ArI
 9784.5028    ArI
-10052.1      ArI
-10254.04     ArI
-10309.15     ArI
-10332.76     ArI
+# 10052.1      ArI Weak
+# 10332.76     ArI Weak
 10470.054    ArI
-10506.47     ArI
-10529.32     ArI
-10673.55     ArI
-10681.78     ArI
-10712.77     ArI
-10733.87     ArI
-10759.13     ArI
-10773.35     ArI
-10880.96     ArI
-10950.74     ArI
-11078.87     ArI
-11106.44     ArI
-3452.0       Hg
-3650.153     Hg
-3654.836     Hg
-3663.2793    Hg
-4046.563     Hg
-4077.8314    Hg
-4339.2232    Hg
-4347.50      Hg
-4358.328     Hg
-4916.068     Hg
-5460.7348    Hg
-5769.5982    Hg
-5790.6630    Hg
-4680.14 Zn 
-4722.15 Zn 
-4810.53 Zn 
+# 10506.47     ArI
+# 10673.55     ArI Too weak to get a reliable centroid
+# 10950.74     ArI No flux in FLOYDS
+# 11078.87     ArI No flux in FLOYDS
+# 11106.44     ArI No flux in FLOYDS
+# 3451.689     Hg No flux in FLOYDS
+3650.158     Hg
+3654.842     Hg
+# 3663.2793    Hg blend
+4046.565     Hg
+4077.837     Hg
+# 4339.2232    Hg Weak line
+# 4347.50      Hg Weak line
+4358.335     Hg
+# 4916.068     Hg Weak line
+5460.7500    Hg
+# 5675.81      Hg Weak
+5769.61      Hg
+10139.75    Hg
+5790.67      Hg Blend?
+# 4680.1359    Zn Removed until we start turning on the Zn lamp again.
+# 4722.1569    Zn Removed until we start turning on the Zn lamp again.
+# 4810.5321    Zn Removed until we start turning on the Zn lamp again.
+# 5181.9819    Zn Removed until we start turning on the Zn lamp again.
