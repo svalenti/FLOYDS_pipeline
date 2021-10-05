@@ -694,13 +694,13 @@ def airmass(img, overwrite=True, _observatory='lasilla'):
 def dvex():
     dv = {}
     dv['line'] = {'red': 300, 'blu': 1000}
-    dv['std'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
+    dv['std'] = {'_t_order': 3, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 30, '_t_step': 10, '_t_nsum': 10, '_lower': -10, '_upper': 10,
                  '_b_sample': '-25:-15,15:25', '_resize': 'no', '_b_naver': -15}
-    dv['obj'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
+    dv['obj'] = {'_t_order': 3, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 40, '_t_step': 10, '_t_nsum': 10, '_lower': -5, '_upper': 5,
                  '_b_sample': '-25:-15,15:25', '_resize': 'no', '_b_naver': -15}
-    dv['agn'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
+    dv['agn'] = {'_t_order': 3, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 40, '_t_step': 10, '_t_nsum': 10, '_lower': -13, '_upper': 13,
                  '_b_sample': '-35:-20,20:35', '_resize': 'no', '_b_naver': -15}
 #  -3, -15  
