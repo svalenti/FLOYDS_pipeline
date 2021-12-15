@@ -247,26 +247,34 @@ if __name__ == "__main__":
 
         typeobs = outputlist.keys()
         outputlist['grpid'] = {}
+        # keep a separate count of objects for each PROPID
+        object_counters = {}
         for _type in typeobs:
             for img0 in outputlist[_type].keys():
                 hdr = floyds.readhdr(img0)
                 grpid = str(floyds.readkey3(hdr, 'BLKUID'))
                 if grpid == 'N/A':     grpid = 'UNKNOWN'
                 prop = floyds.readkey3(hdr, 'PROPID')
+                # initialize proposal count to zero
+                if prop not in object_counters:
+                    object_counters[prop] = 0
                 if (grpid, prop) not in outputlist['grpid']:
                     outputlist['grpid'][(grpid, prop)] = {}
                 if img0 not in outputlist['grpid'][(grpid, prop)]:
                     outputlist['grpid'][(grpid, prop)][img0] = outputlist[_type][img0]
 
-        for object_index, oblock in enumerate(outputlist['grpid']):
+        for oblock in enumerate(outputlist['grpid']):
             img0 = outputlist['grpid'][oblock].keys()[0]
             hdr = floyds.readhdr(img0)
             date = floyds.readkey3(hdr, 'date-night')
             grpid = oblock[0]
             prop = oblock[1]
             _instrume = floyds.readkey3(hdr, 'TELID')
-            nametar = str(prop) + '_' + str(grpid) + '_'+ str(object_index) +'_'+ str(_instrume) + '_' + str(date) + '_' + \
+            nametar = str(prop) + '_' + str(grpid) + '_'+ str(object_counters[prop]) +'_'+ str(_instrume) + '_' + str(date) + '_' + \
                       str(MJDtoday) + '.tar.gz'
+            
+            # increment the object counter for the next time
+            object_counters[prop] += 1
 
             # We still need e90 files to tell
             for img0 in outputlist['grpid'][oblock]:
