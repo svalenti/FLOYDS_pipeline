@@ -265,7 +265,7 @@ if __name__ == "__main__":
             grpid = oblock[0]
             prop = oblock[1]
             _instrume = floyds.readkey3(hdr, 'TELID')
-            nametar = str(prop) + '_' + str(grpid) + '_'+ object_index +'_'+ str(_instrume) + '_' + str(date) + '_' + \
+            nametar = str(prop) + '_' + str(grpid) + '_'+ str(object_index) +'_'+ str(_instrume) + '_' + str(date) + '_' + \
                       str(MJDtoday) + '.tar.gz'
 
             # We still need e90 files to tell
