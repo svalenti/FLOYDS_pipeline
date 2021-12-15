@@ -263,7 +263,7 @@ if __name__ == "__main__":
                 if img0 not in outputlist['grpid'][(grpid, prop)]:
                     outputlist['grpid'][(grpid, prop)][img0] = outputlist[_type][img0]
 
-        for oblock in enumerate(outputlist['grpid']):
+        for oblock in outputlist['grpid']:
             img0 = outputlist['grpid'][oblock].keys()[0]
             hdr = floyds.readhdr(img0)
             date = floyds.readkey3(hdr, 'date-night')
