@@ -25,3 +25,5 @@ bosonHostname: "alerts.lco.gtn"
 ingesterProcessName: "floyds_pipeline"
 
 postprocessFiles: "False"
+
+filestoreType: "s3"

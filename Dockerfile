@@ -27,7 +27,7 @@ RUN apt-get update \
 RUN pip install setuptools==44.1.1
 RUN pip install numpy==1.16.6 astropy==2.0.16 pyraf==2.1.15 matplotlib==2.2.4 xhtml2pdf==0.2.4 pathlib2==2.3.5 requests==2.22.0 pytest==3.6.4 stsci.tools==3.6.0 && rm -rf ~/.cache/pip
 
-RUN pip3 install ocs_ingester>=2.2.5 kombu && rm -rf ~/.cache/pip
+RUN pip3 install ocs_ingester>=3.0.0 kombu && rm -rf ~/.cache/pip
 
 RUN wget http://ds9.si.edu/download/debian9/ds9.debian9.8.2.1.tar.gz \
         && tar -xzvf ds9.debian9.8.2.1.tar.gz -C /usr/local/bin \

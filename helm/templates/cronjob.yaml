@@ -48,6 +48,8 @@ spec:
                   value: {{ .Values.bosunHostname | quote }}
                 - name: INGESTER_PROCESS_NAME
                   value: {{ .Values.ingesterProcessName | quote }}
+                - name : FILESTORE_TYPE
+                  value: {{ .Values.filestoreType | quote }}
                 - name: POSTPROCESS_FILES
                   value: {{ .Values.postprocessFiles | quote }}
                 - name: AWS_ACCESS_KEY_ID
