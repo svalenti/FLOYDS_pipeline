@@ -50,6 +50,8 @@ spec:
                   value: {{ .Values.ingesterProcessName | quote }}
                 - name : FILESTORE_TYPE
                   value: {{ .Values.filestoreType | quote }}
+                - name: FILETYPE_MAPPING_OVERRIDES
+                  value: {{ .Values.filetypeMappingOverrides | quote }}
                 - name: POSTPROCESS_FILES
                   value: {{ .Values.postprocessFiles | quote }}
                 - name: AWS_ACCESS_KEY_ID

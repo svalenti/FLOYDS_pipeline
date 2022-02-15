@@ -27,3 +27,5 @@ ingesterProcessName: "floyds_pipeline"
 postprocessFiles: "False"
 
 filestoreType: "s3"
+
+filetypeMappingOverrides: "{'.fits': 'ocs_archive.input.lcofitsfile.LcoFitsFile', '.tar.gz': 'ocs_archive.input.lcotarwithfitsfile.LcoTarWithFitsFile'}"
