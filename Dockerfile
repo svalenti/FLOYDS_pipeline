@@ -20,7 +20,7 @@ RUN  mkdir -p $iraf \
 
 RUN apt-get update \
         && apt-get -y install libx11-dev libcfitsio-bin wget x11-apps libtk8.6 \
-        python3 python3-pip openssh-client wcstools libxml2 vim libssl1.0.2 zip \
+        python3.6 python3-pip openssh-client wcstools libxml2 vim libssl1.0.2 zip \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
 
