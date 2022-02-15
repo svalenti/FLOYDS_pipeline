@@ -4,7 +4,7 @@ ENV iraf /iraf/iraf/
 ENV IRAFARCH linux64
 ENV TERM xterm
 RUN  apt-get update \
-        && apt -y install gcc make flex git \
+        && apt -y install gcc make flex git wget \
         && apt -y install libcurl4-openssl-dev libexpat-dev libreadline-dev \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
