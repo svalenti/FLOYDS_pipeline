@@ -18,9 +18,14 @@ RUN  mkdir -p $iraf \
         && make linux64 \
         && make sysgen
 
+RUN wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz && \
+        tar xvf Python-3.6.9.tgz && cd Python-3.6.9 && \
+        ./configure --enable-optimizations --enable-shared --with-ensurepip=install && \
+        make -j8 && make altinstall
+
 RUN apt-get update \
         && apt-get -y install libx11-dev libcfitsio-bin wget x11-apps libtk8.6 \
-        python3 python3-pip openssh-client wcstools libxml2 vim libssl1.0.2 zip \
+        openssh-client wcstools libxml2 vim libssl1.0.2 zip \
         && apt-get autoclean \
         && rm -rf /var/lib/apt/lists/*
 
