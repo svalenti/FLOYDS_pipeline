@@ -341,9 +341,8 @@ if __name__ == "__main__":
     if os.getenv('DO_INGEST'):
         for output_file in output_files:
             os.system('ocs_ingest_frame --api-root {api_root} --auth-token {auth_token} \
-                       --bucket {bucket} --process-name {process_name} {path}'.format(api_root=os.getenv('API_ROOT'),
+                       --process-name {process_name} {path}'.format(api_root=os.getenv('API_ROOT'),
                                                                                       auth_token=os.getenv('AUTH_TOKEN'),
-                                                                                      bucket=os.getenv('BUCKET'),
                                                                                       process_name=os.getenv('INGESTER_PROCESS_NAME'),
                                                                                       path=output_file))
 
