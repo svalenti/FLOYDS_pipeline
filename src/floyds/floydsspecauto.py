@@ -310,16 +310,21 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                     dec0,dec1,dec2=float(dec00[0]),float(dec00[1]),float(dec00[2])
                     if '-' in str(dec0):       _dec=(-1)*((dec2/60.+dec1)/60.+((-1)*dec0))
                     else:                      _dec=(dec2/60.+dec1)/60.+dec0
+                propid =  floyds.util.readkey3(hdr,'PROPID')
                 dd=arccos(sin(_dec*scal)*sin(decstd*scal)+cos(_dec*scal)*cos(decstd*scal)*cos((_ra-rastd)*scal))*((180/pi)*3600)
                 if _verbose:
+                    print(propid)
                     print _ra,_dec
                     print std[argmin(dd)],min(dd)
-                if min(dd)<5200: _typeobj='std'
-                else: _typeobj='obj'
-                if min(dd)<5200:
+                if min(dd)<5200 and "FLOYDS standards" in propid:
+                    _typeobj='std'
+                else:
+                    _typeobj='obj'
+                if min(dd)<5200 and "FLOYDS standards" in propid:
                     floyds.util.updateheader(img,0,{'stdname':[std[argmin(dd)],'']})
                     floyds.util.updateheader(img,0,{'magstd':[float(magstd[argmin(dd)]),'']})
-                if _typeobj not in objectlist:      objectlist[_typeobj]={}
+                if _typeobj not in objectlist:
+                    objectlist[_typeobj]={}
 
                 if (arm,_slit) not in objectlist[_typeobj]:     objectlist[_typeobj][arm,_slit]=[img]
                 else: objectlist[_typeobj][arm,_slit].append(img)
@@ -353,18 +358,24 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               _rdnoise=floyds.util.readkey3(hdr,'ron')
               _grism=floyds.util.readkey3(hdr,'grism')
               _grpid=floyds.util.readkey3(hdr,'grpid')
+              blkuid = floyds.util.readkey3(hdr,'BLKUID')
               if archfile not in outputfile[tpe]: outputfile[tpe][archfile]=[]
 #####################      flat   ###############
               if _listflat:   flatgood=_listflat    # flat list from reducer
               elif setup in flatlist:  
                   if _grpid in flatlist[setup]:
-                      print '\n###FLAT WITH SAME GRPID'
+                      print '\n###FLAT WITH SAME OBJECT/GRPID'
                       flatgood= flatlist[setup][_grpid]     # flat in the  raw data
-                  else:  
-                      flatgood=[]
+                  else:
+                      flatgood = []
+                      full_flat_list = []
                       for _grpid0 in flatlist[setup].keys():
                           for ii in flatlist[setup][_grpid0]:
-                              flatgood.append(ii)
+                              if blkuid in _grpid0:
+                                  flatgood.append(ii)
+                              full_flat_list.append(ii)
+                      if not flatgood:
+                          flatgood = full_flat_list
               else: flatgood=[]
               if len(flatgood)!=0:
                   if len(flatgood)>1:
@@ -386,13 +397,18 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if _listarc:       arcfile= [floyds.util.searcharc(img,_listarc)[0]][0]   # take arc from list 
               if not arcfile and setup in arclist.keys():
                     if _grpid in arclist[setup]:  
-                        print '\n###ARC WITH SAME GRPID'
-                        arcfile= arclist[setup][_grpid]     # flat in the  raw data
+                        print '\n###ARC WITH SAME OBJECT/GRPID'
+                        arcfile= arclist[setup][_grpid]     # arc in the  raw data
                     else:  
                         arcfile=[]
+                        full_arc_list = []
                         for _grpid0 in arclist[setup].keys():
                             for ii in arclist[setup][_grpid0]:
-                                arcfile.append(ii)                   
+                                if blkuid in _grpid0:
+                                    arcfile.append(ii)
+                                full_arc_list.append(ii)
+                        if not arcfile:
+                            arcfile = full_arc_list
               if arcfile:
                   if len(arcfile)>1:                           # more than one arc available
                       print arcfile

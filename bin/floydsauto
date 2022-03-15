@@ -253,15 +253,16 @@ if __name__ == "__main__":
             for img0 in outputlist[_type].keys():
                 hdr = floyds.readhdr(img0)
                 grpid = str(floyds.readkey3(hdr, 'BLKUID'))
+                obj = hdr['OBJECT']
                 if grpid == 'N/A':     grpid = 'UNKNOWN'
                 prop = floyds.readkey3(hdr, 'PROPID')
                 # initialize proposal count to zero
                 if prop not in object_counters:
                     object_counters[prop] = 0
-                if (grpid, prop) not in outputlist['grpid']:
-                    outputlist['grpid'][(grpid, prop)] = {}
-                if img0 not in outputlist['grpid'][(grpid, prop)]:
-                    outputlist['grpid'][(grpid, prop)][img0] = outputlist[_type][img0]
+                if (grpid, prop, obj) not in outputlist['grpid']:
+                    outputlist['grpid'][(grpid, prop, obj)] = {}
+                if img0 not in outputlist['grpid'][(grpid, prop, obj)]:
+                    outputlist['grpid'][(grpid, prop, obj)][img0] = outputlist[_type][img0]
 
         for oblock in outputlist['grpid']:
             img0 = outputlist['grpid'][oblock].keys()[0]
