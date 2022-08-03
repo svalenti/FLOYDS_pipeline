@@ -1,5 +1,5 @@
 from pathlib2 import Path
-from floyds.util import to_safe_filename
+from floyds.util import to_safe_filename, readkey3
 
 
 def fluxcalib2d(img2d,sensfun, scale=1e-20):  # flux calibrate 2d images
@@ -94,7 +94,7 @@ def gettar(img):
     p=_date_dt.strftime('%Y%m%d')
 
     obj=to_safe_filename(hdr['OBJECT'])
-    propid=hdr['PROPID']
+    propid=readkey3(hdr, 'PROPID')
     if 'fts' in _tel or 'coj' in _tel: 
         i=r'http://floyds.coj.lco.gtn/night_summary/%s/' % (p)
     else:

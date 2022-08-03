@@ -292,6 +292,10 @@ def readkey3(hdr, keyword):
                 value = hdr.get('SITEID')
                 if value in ['ogg']: value = 'ftn'
                 if value in ['coj']: value = 'fts'
+        elif keyword == 'PROPID':
+            value = hdr.get('PROPID')
+            # Remove whitespace from proposal id
+            value = re.sub(r"\s+", "", value)
         else:
             try:
                 value = hdr.get(keyword)
