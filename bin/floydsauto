@@ -15,7 +15,7 @@ import shutil
 from pathlib2 import Path
 import requests
 
-GUIDER_CAMERAS = {'ogg': 'kb42', 'coj': 'kb38'}
+GUIDER_CAMERAS = {'ogg': 'kb41', 'coj': 'kb38'}
 FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en12'}
 
 description = "> Automatic Specroscopic pre-reduction of floyds data "
