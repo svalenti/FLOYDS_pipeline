@@ -36,7 +36,7 @@ setup(
     license='LICENSE.txt', 
     description='floyds is a package to reduce floyds spectra',
     long_description=open('README.txt').read(),
-    install_requires=['numpy==1.16.6','astropy==2.0.16','pyraf==2.1.15','matplotlib==2.2.4', 'xhtml2pdf==0.2.4', 'pathlib2==2.3.5', 'requests==2.22.0', 'stsci.tools==3.6.0'],
+    install_requires=['numpy==1.16.6','astropy==2.0.16','pyraf==2.1.15','matplotlib==2.2.4', 'xhtml2pdf==0.2.4', 'pathlib2==2.3.5', 'requests==2.31.0', 'stsci.tools==3.6.0'],
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\
