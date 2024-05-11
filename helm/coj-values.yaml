@@ -1,0 +1,3 @@
+site: "coj"
+
+schedule: "0 22 * * *"

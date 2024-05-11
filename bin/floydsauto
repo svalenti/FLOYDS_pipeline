@@ -1,16 +1,35 @@
 #!/usr/bin/env python
 
 import os
+os.environ['PYRAF_NO_DISPLAY'] = '1'
+from pyraf import iraf
 import sys
 import glob
 import floyds
 import time
 import datetime
-from floyds.util import delete, readhdr, readkey3
+from floyds.util import readhdr, readkey3
 from optparse import OptionParser
+import tempfile
+import shutil
+from pathlib2 import Path
+import requests
+
+GUIDER_CAMERAS = {'ogg': 'kb41', 'coj': 'kb38'}
+FLOYDS_CAMERAS = {'ogg': 'en06', 'coj': 'en12'}
 
 description = "> Automatic Specroscopic pre-reduction of floyds data "
 usage = "%prog  \t [listfile -B bias (use this bias) -F flatlist (use these flats) .....]"
+
+
+def get_default_dayobs(site):
+    if 'ogg' in site:
+        # Default day-obs is yesterday
+        day_obs = datetime.datetime.now() - datetime.timedelta(days=1)
+    else:
+        day_obs = datetime.datetime.now()
+    return day_obs.strftime('%Y%m%d')
+
 
 if __name__ == "__main__":
     parser = OptionParser(usage=usage, description=description, version="%prog " + str(floyds.__version__))
@@ -42,14 +61,51 @@ if __name__ == "__main__":
     parser.add_option("--fringing", dest="fringing", default=1, type=int,
                       help='fringing correction \t [1] using response, ' + \
                            '\t [2] computed on 1d images minimizing scatter, \t [3] using apflatten')
-    parser.add_option("-X", "--xwindow", action="store_true", dest='xwindow', default=False,
-                      help='xwindow \t\t\t [%default]')
     parser.add_option("--archive", action="store_true", dest='archive', default=False,
                       help='archive fast extraction \t\t\t [%default]')
+    parser.add_option('--input-root-directory', default='/archive/engineering',
+                      dest='input_directory', help='Top level directory that contains the raw data to reduce')
+    parser.add_option('--site', choices=['ogg', 'coj'],
+                      dest='site', help='Site to reduce', default=None)
+    parser.add_option('--day-obs', default=None,
+                      dest='day_obs', help='DAY-OBS of the data to reduce.')
+    parser.add_option('--output-root-directory', default='/archive/engineering',
+                      dest='output_directory', help='Top level directory that contains the processed data')
+    parser.add_option('--camera', default=None, choices=['en05', 'en06', 'en12', None], dest='camera',
+                      help='Camera to run the automatic reduction on.')
+
     option, args = parser.parse_args()
     # ###########################################################
-    _xwindow = option.xwindow
     starttime = time.time()
+    temp_directory = tempfile.mkdtemp()
+
+    if option.site not in ['coj', 'ogg']:
+        print('You much choose either coj or ogg for site')
+        sys.exit(1)
+    if option.day_obs is None:
+        option.day_obs = get_default_dayobs(option.site)
+
+    if option.camera is None:
+        camera = FLOYDS_CAMERAS[option.site]
+    else:
+        camera = option.camera
+
+    raw_data_path = os.path.join(option.input_directory, option.site, camera, option.day_obs, 'raw', '')
+    if not os.path.exists(raw_data_path):
+        os.makedirs(raw_data_path)
+        url_day_obs = datetime.datetime.strptime(option.day_obs, '%Y%m%d').strftime('%Y-%m-%d')
+        url = os.getenv('API_ROOT', '') + 'frames/?SITEID={site}&INSTRUME={instrument}&DAY_OBS={day_obs}&RLEVEL=0'.format(site=option.site, instrument=camera, day_obs=url_day_obs)
+        frames = requests.get(url, headers={'Authorization': 'Token {token}'.format(token=os.getenv('AUTH_TOKEN'))}).json()['results']
+        for frame in frames:
+            with open(os.path.join(raw_data_path, frame['filename']), 'wb') as f:
+                f.write(requests.get(frame['url']).content)
+
+    fpacked_files = glob.glob(os.path.join(raw_data_path, '*.fits.fz'))
+    for fpacked_file in fpacked_files:
+        fpack_output_file = os.path.join(temp_directory, os.path.splitext(os.path.basename(fpacked_file))[0])
+        os.system('funpack -O {output_file} {input_file}'.format(input_file=fpacked_file, output_file=fpack_output_file))
+
+    iraf.cd(temp_directory)
     if len(args) > 1:
         sys.argv.append('--help')
         option, args = parser.parse_args()
@@ -73,7 +129,7 @@ if __name__ == "__main__":
                 _imagetype = readkey3(hdr0, 'imagetyp')
             if _naxis1 != 2079 or (_naxis2 != 511 and _naxis2 != 512):
                 _type = 'not standard dimension 2079x511'
-            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06']:
+            if not _type and readkey3(hdr0, 'instrume') not in ['en05', 'en06', 'en12']:
                 _type = 'not efosc intrument'
             if _imagetype and not _type:
                 if _imagetype.lower() in ['lamp-flat', 'flat', 'f', 'lampflat']:
@@ -94,11 +150,12 @@ if __name__ == "__main__":
                     _object = readkey3(hdr0, 'object')
                     _filter = readkey3(hdr0, 'filter')
                     print img, _object, _imagetype, _filter, _exptime
-                    if _xwindow:
-                        answ = '5'
-                    else:
-                        answ = raw_input('what is it: dark[0], bias [1], lamp[2], flat [3],'
-                                         ' object[4], not good [5] ?  [5] ')
+#                    if _xwindow:
+#                        answ = '5'
+#                    else:
+#                        answ = raw_input('what is it: dark[0], bias [1], lamp[2], flat [3],'
+#                                         ' object[4], not good [5] ?  [5] ')
+                    answ = None
                     if not answ:  answ = '5'
                     _type = 'not good'  # Set default type to bad in case we don't get an expected answer
                     if answ == '0':
@@ -113,14 +170,9 @@ if __name__ == "__main__":
                         _type = 'object'
                     elif answ == '5':
                         _type = 'not good'
-            if _type in ['flat', 'lamp']:  # reject bad flat ,arc
-                good = floyds.floydsspecauto.badimage(img, _type)
-            else:
-                good = 1
-            if good and _type in ['flat', 'sky', 'lamp', 'bias', 'object']:
+            if _type in ['flat', 'sky', 'lamp', 'bias', 'object']:
                 files.append(img)
     _verbose = option.verbose
-    _xwindow = option.xwindow
     _archive = option.archive
     if not _verbose:
         _verbose = False
@@ -177,10 +229,6 @@ if __name__ == "__main__":
         listatmo = ''
     _rebin = option.rebin
     _fringing = option.fringing
-    if _xwindow:
-        from stsci.tools import capable
-
-        capable.OF_GRAPHICS = False
 
     if len(files) > 0:
         outputlist, readme = floyds.floydsspecauto.floydsautoredu(files, _interactive, _dobias, _doflat, listflat,
@@ -199,16 +247,22 @@ if __name__ == "__main__":
 
         typeobs = outputlist.keys()
         outputlist['grpid'] = {}
+        # keep a separate count of objects for each PROPID
+        object_counters = {}
         for _type in typeobs:
             for img0 in outputlist[_type].keys():
                 hdr = floyds.readhdr(img0)
-                grpid = str(floyds.readkey3(hdr, 'REQNUM'))
+                grpid = str(floyds.readkey3(hdr, 'BLKUID'))
+                obj = hdr['OBJECT']
                 if grpid == 'N/A':     grpid = 'UNKNOWN'
                 prop = floyds.readkey3(hdr, 'PROPID')
-                if (grpid, prop) not in outputlist['grpid']:
-                    outputlist['grpid'][(grpid, prop)] = {}
-                if img0 not in outputlist['grpid'][(grpid, prop)]:
-                    outputlist['grpid'][(grpid, prop)][img0] = outputlist[_type][img0]
+                # initialize proposal count to zero
+                if prop not in object_counters:
+                    object_counters[prop] = 0
+                if (grpid, prop, obj) not in outputlist['grpid']:
+                    outputlist['grpid'][(grpid, prop, obj)] = {}
+                if img0 not in outputlist['grpid'][(grpid, prop, obj)]:
+                    outputlist['grpid'][(grpid, prop, obj)][img0] = outputlist[_type][img0]
 
         for oblock in outputlist['grpid']:
             img0 = outputlist['grpid'][oblock].keys()[0]
@@ -217,8 +271,11 @@ if __name__ == "__main__":
             grpid = oblock[0]
             prop = oblock[1]
             _instrume = floyds.readkey3(hdr, 'TELID')
-            nametar = str(prop) + '_' + str(grpid) + '_' + str(_instrume) + '_' + str(date) + '_' + str(
-                MJDtoday) + '.tar.gz'
+            nametar = str(prop) + '_' + str(grpid) + '_'+ str(object_counters[prop]) +'_'+ str(_instrume) + '_' + str(date) + '_' + \
+                      str(MJDtoday) + '.tar.gz'
+            
+            # increment the object counter for the next time
+            object_counters[prop] += 1
 
             # We still need e90 files to tell
             for img0 in outputlist['grpid'][oblock]:
@@ -280,5 +337,24 @@ if __name__ == "__main__":
             if img not in listfile:
                 floyds.util.delete(img)
 
+    output_files = glob.glob('*.tar.gz')
+
+    if os.getenv('DO_INGEST'):
+        for output_file in output_files:
+            os.system('ocs_ingest_frame --api-root {api_root} --auth-token {auth_token} \
+                       --process-name {process_name} {path}'.format(api_root=os.getenv('API_ROOT'),
+                                                                                      auth_token=os.getenv('AUTH_TOKEN'),
+                                                                                      process_name=os.getenv('INGESTER_PROCESS_NAME'),
+                                                                                      path=output_file))
+
+    output_directory = os.path.join(option.output_directory, option.site, camera, option.day_obs,
+                                    'specproc')
+    Path(output_directory).mkdir(parents=True, exist_ok=True)
+
+    for output_file in output_files:
+        shutil.copy(output_file, output_directory)
+
+    iraf.cd(os.environ['HOME'])
+    shutil.rmtree(temp_directory)
     stoptime = time.time()
     print 'runnning time ' + str(stoptime - starttime)

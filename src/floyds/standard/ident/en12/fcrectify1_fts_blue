@@ -1,0 +1,26 @@
+# 2019-06-25
+# Blue Features Used {190.34547213421465: 3650.158 , # Note this probably blended with 3654
+#                     423.2709051127923: 4046.565 ,
+#                     441.6132036437482: 4077.837,
+#                     605.1562763944744: 4358.335,
+#                     1240.3221241285923: 5460.7500,
+#                     1306.778414546263: 5577.336, # Note this is a measured sky line from the science frame
+#                     }
+begin	rectify1_fts_blue
+	task	fitcoords
+	axis	1
+	units	angstroms
+	surface	13
+		2.
+		3.
+		2.
+		1.
+		1.
+		1394.
+		1.
+		91.0
+		4521.573808399312
+		1200.3917212072731𝑃
+		8.82058851534203
+        0.0
+		0.0

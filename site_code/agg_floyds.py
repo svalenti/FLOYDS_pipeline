@@ -26,7 +26,7 @@ def determine_camnames(site):
     if the passed site isn't a recognized 2m site.'''
 
     if 'ogg' in site:
-        acq_cam = 'kb42'
+        acq_cam = 'kb41'
         spec_cam = 'en06'
     elif 'coj' in site:
         acq_cam = 'kb37'

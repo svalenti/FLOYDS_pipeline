@@ -11,7 +11,7 @@ listfile4 = glob.glob('coj2m002*00.fits')
 imglist = listfile1 + listfile2 + listfile3 + listfile4
 for img in imglist:
     hdr = floyds.util.readhdr(img)
-    if floyds.util.readkey3(hdr, 'instrume') in ['en05', 'en06']:
+    if floyds.util.readkey3(hdr, 'instrume') in ['en05', 'en06', 'en12']:
         _tel = floyds.util.readkey3(hdr, 'TELID')
         aaa = floyds.util.display_image(img, 1, '', '', False)
         _type = floyds.util.readkey3(hdr, 'OBSTYPE')

@@ -1,4 +1,8 @@
-def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
+from pathlib2 import Path
+from floyds.util import to_safe_filename, readkey3
+
+
+def fluxcalib2d(img2d,sensfun, scale=1e-20):  # flux calibrate 2d images
     from astropy.io import fits
     import re,string
     from numpy import arange, array, float32
@@ -38,11 +42,11 @@ def fluxcalib2d(img2d,sensfun):  # flux calibrate 2d images
     atm_xx=ninterp(xxd,xxe,yye)
     aircorr=10**(0.4*array(atm_xx)*_airmass)
     img2df=re.sub('.fits','_2df.fits',img2d)
-    for i in range(len(data2d[:,0])):  data2d[i,:]=((array(data2d[i,:]/_exptime)*array(aircorr))/aasens2)*1e20
+    for i in range(len(data2d[:,0])):  data2d[i,:]=((array(data2d[i,:]/_exptime)*array(aircorr))/aasens2) / scale
     floyds.util.delete(img2df)
     fits.writeto(img2df, float32(data2d), hdr2d)
     floyds.util.updateheader(img2df,0,{'SENSFUN'+_arm[0]:[string.split(sensfun,'/')[-1],'']})
-    floyds.util.updateheader(img2df,0,{'BUNIT':['erg/cm2/s/A  10^20','Physical unit of array values']})
+    floyds.util.updateheader(img2df,0,{'BUNIT':['{:.0e} erg / (Angstrom cm2 s)'.format(scale),'Physical unit of array values']})
     return img2df
 
 def gettar(img):
@@ -89,8 +93,8 @@ def gettar(img):
     _date_dt = _date_dt - timedelta(days=delta)
     p=_date_dt.strftime('%Y%m%d')
 
-    obj=hdr['object']
-    propid=hdr['PROPID']
+    obj=to_safe_filename(hdr['OBJECT'])
+    propid=readkey3(hdr, 'PROPID')
     if 'fts' in _tel or 'coj' in _tel: 
         i=r'http://floyds.coj.lco.gtn/night_summary/%s/' % (p)
     else:
@@ -99,7 +103,7 @@ def gettar(img):
     try:
         webpage=urlopen(i).read()
         for data_dir in webpage.split('href='):
-            if propid in data_dir:
+            if propid in data_dir and obj in data_dir:
                 dir_name = data_dir.split('>')[0]
                 dir_name = dir_name.replace('"','')
                 dir_url = i+dir_name
@@ -273,6 +277,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
             print img
             hdr=floyds.util.readhdr(img)
             _type=floyds.util.readkey3(hdr,'OBSTYPE')
+            camera = floyds.util.readkey3(hdr, 'INSTRUME')
             if _type=='EXPOSE':  
                       _type=floyds.util.readkey3(hdr,'imagetyp')
                       if not _type: _type='EXPOSE'
@@ -305,16 +310,21 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                     dec0,dec1,dec2=float(dec00[0]),float(dec00[1]),float(dec00[2])
                     if '-' in str(dec0):       _dec=(-1)*((dec2/60.+dec1)/60.+((-1)*dec0))
                     else:                      _dec=(dec2/60.+dec1)/60.+dec0
+                propid =  floyds.util.readkey3(hdr,'PROPID')
                 dd=arccos(sin(_dec*scal)*sin(decstd*scal)+cos(_dec*scal)*cos(decstd*scal)*cos((_ra-rastd)*scal))*((180/pi)*3600)
                 if _verbose:
+                    print(propid)
                     print _ra,_dec
                     print std[argmin(dd)],min(dd)
-                if min(dd)<5200: _typeobj='std'
-                else: _typeobj='obj'
-                if min(dd)<5200:
+                if min(dd)<5200 and "FLOYDS standards" in propid:
+                    _typeobj='std'
+                else:
+                    _typeobj='obj'
+                if min(dd)<5200 and "FLOYDS standards" in propid:
                     floyds.util.updateheader(img,0,{'stdname':[std[argmin(dd)],'']})
                     floyds.util.updateheader(img,0,{'magstd':[float(magstd[argmin(dd)]),'']})
-                if _typeobj not in objectlist:      objectlist[_typeobj]={}
+                if _typeobj not in objectlist:
+                    objectlist[_typeobj]={}
 
                 if (arm,_slit) not in objectlist[_typeobj]:     objectlist[_typeobj][arm,_slit]=[img]
                 else: objectlist[_typeobj][arm,_slit].append(img)
@@ -348,18 +358,24 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               _rdnoise=floyds.util.readkey3(hdr,'ron')
               _grism=floyds.util.readkey3(hdr,'grism')
               _grpid=floyds.util.readkey3(hdr,'grpid')
+              blkuid = floyds.util.readkey3(hdr,'BLKUID')
               if archfile not in outputfile[tpe]: outputfile[tpe][archfile]=[]
 #####################      flat   ###############
               if _listflat:   flatgood=_listflat    # flat list from reducer
               elif setup in flatlist:  
                   if _grpid in flatlist[setup]:
-                      print '\n###FLAT WITH SAME GRPID'
+                      print '\n###FLAT WITH SAME OBJECT/GRPID'
                       flatgood= flatlist[setup][_grpid]     # flat in the  raw data
-                  else:  
-                      flatgood=[]
+                  else:
+                      flatgood = []
+                      full_flat_list = []
                       for _grpid0 in flatlist[setup].keys():
                           for ii in flatlist[setup][_grpid0]:
-                              flatgood.append(ii)
+                              if blkuid in _grpid0:
+                                  flatgood.append(ii)
+                              full_flat_list.append(ii)
+                      if not flatgood:
+                          flatgood = full_flat_list
               else: flatgood=[]
               if len(flatgood)!=0:
                   if len(flatgood)>1:
@@ -381,13 +397,18 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if _listarc:       arcfile= [floyds.util.searcharc(img,_listarc)[0]][0]   # take arc from list 
               if not arcfile and setup in arclist.keys():
                     if _grpid in arclist[setup]:  
-                        print '\n###ARC WITH SAME GRPID'
-                        arcfile= arclist[setup][_grpid]     # flat in the  raw data
+                        print '\n###ARC WITH SAME OBJECT/GRPID'
+                        arcfile= arclist[setup][_grpid]     # arc in the  raw data
                     else:  
                         arcfile=[]
+                        full_arc_list = []
                         for _grpid0 in arclist[setup].keys():
                             for ii in arclist[setup][_grpid0]:
-                                arcfile.append(ii)                   
+                                if blkuid in _grpid0:
+                                    arcfile.append(ii)
+                                full_arc_list.append(ii)
+                        if not arcfile:
+                            arcfile = full_arc_list
               if arcfile:
                   if len(arcfile)>1:                           # more than one arc available
                       print arcfile
@@ -404,12 +425,14 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
 
 ###################################################################   rectify 
               if setup[0]=='red':
-                  fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_red'
-                  fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_red'
+                  fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_red'
+                  fcfile1=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify1_'+_tel+'_red'
+                  fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_red'
                   print fcfile
               else:
-                  fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_blue'
-                  fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_blue'
+                  fcfile=floyds.__path__[0]+'/standard/ident/' + camera + '/fcrectify_'+_tel+'_blue'
+                  fcfile1=floyds.__path__[0]+'/standard/ident/' + camera +'/fcrectify1_'+_tel+'_blue'
+                  fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_blue'
                   print fcfile
               print img,arcfile,flatfile
               img0=img
@@ -417,7 +440,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
 
-              img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1,'no',_cosmic)
+              img,arcfile,flatfile=floyds.floydsspecdef.rectifyspectrum(img,arcfile,flatfile,fcfile,fcfile1, fcfile_untilt, 'no',_cosmic)
               if img      and img not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
               if flatfile and flatfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(flatfile)
@@ -708,8 +731,7 @@ def archivespectrum(img,_force=True):
     a=re.sub('-','',string.split(a,'T')[0])
     directory='/science/'+str(user)+'/data/WEB/floyds/'+a+'_'+_tel
     try:
-        if os.path.isdir(directory): print 'directory there'
-        else:                        os.system('mkdir '+directory)
+        Path(directory).mkdir(parents=True, exist_ok=True)
         imglist=glob.glob(directory+'/*_'+_tel+'_*2df*fits')
         filethere=0
         for imgold in imglist:

@@ -1,0 +1,35 @@
+# Fri 23:05:43 28-Jun-2019
+begin	identify fts_red_6.0 - Ap 1
+	id	fts_red_6.0
+	task	identify
+	image	fts_red_6.0 - Ap 1
+	aperture	1
+	aplow	1.
+	aphigh	1.
+	units	Angstroms
+	features	9
+	        138.24 5460.26489  5460.7348   4.0 1 1 Hg
+	        547.14 7272.52868  7272.9359   4.0 1 1 ArI
+	        572.20 7383.59729  7383.9805   4.0 1 1 ArI
+	        629.06 7635.63689  7635.1056   4.0 1 1 ArI
+	        737.57 8116.56519  8115.3108   4.0 1 1 ArI
+	        770.97 8264.60175  8264.5225   4.0 1 1 ArI
+	        964.53 9122.46127  9122.9674   4.0 1 1 ArI
+	        988.06 9226.75836  9224.4992   4.0 1 1 ArI
+	       1084.78  9655.4287  9657.7863   4.0 1 1 ArI
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		138.2418670654297
+		1084.781127929687
+		7557.846790123709
+		2097.581904999978
+

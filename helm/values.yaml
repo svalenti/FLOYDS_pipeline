@@ -1,0 +1,31 @@
+image:
+  repository: docker.lco.global/floyds_pipeline
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 4
+    memory: 4096Mi
+  requests:
+    cpu: 1
+    memory: 1024Mi
+
+bucket: "archive-lco-global"
+
+apiRoot: "https://archive-api.lco.global/"
+
+doIngest: 1
+
+opentsdbHostame: "opentsdb.lco.gtn"
+
+opentsdbPort: 80
+
+bosonHostname: "alerts.lco.gtn"
+
+ingesterProcessName: "floyds_pipeline"
+
+postprocessFiles: "False"
+
+filestoreType: "s3"
+
+filetypeMappingOverrides: "{'.fits': 'ocs_archive.input.lcofitsfile.LcoFitsFile', '.tar.gz': 'ocs_archive.input.lcotarwithfitsfile.LcoTarWithFitsFile'}"

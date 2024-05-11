@@ -167,7 +167,7 @@ def readkey3(hdr, keyword):
         _instrume = hdr.get('INSTRUME').lower()
     except:
         _instrume = 'none'
-    if _instrume in ['en05', 'en06']:
+    if _instrume in ['en05', 'en06', 'en12']:
         if not hdr.get('HDRVER'):
             useful_keys = {'object': 'OBJECT',
                            'date-obs': 'DATE-OBS',
@@ -242,6 +242,8 @@ def readkey3(hdr, keyword):
                 value = value.lower()
             elif keyword == 'grism':
                 if not value: value = 'full'
+            elif keyword == 'grpid':
+                value = '_'.join([hdr.get('BLKUID'), hdr.get('OBJECT')])
             elif keyword == 'RA' or keyword == 'CAT-RA':
                 import string, re
 
@@ -290,6 +292,10 @@ def readkey3(hdr, keyword):
                 value = hdr.get('SITEID')
                 if value in ['ogg']: value = 'ftn'
                 if value in ['coj']: value = 'fts'
+        elif keyword == 'PROPID':
+            value = hdr.get('PROPID')
+            # Remove whitespace from proposal id
+            value = re.sub(r"\s+", "", value)
         else:
             try:
                 value = hdr.get(keyword)
@@ -400,9 +406,10 @@ def searchatmo(img, listatmo):
     hdr = floyds.util.readhdr(img)
     JD = readkey3(hdr, 'JD')
     _instrume = readkey3(hdr, 'TELID')
+    camera = readkey3(hdr, 'INSTRUME')
     grism0 = readkey3(hdr, 'grism')
     if not listatmo:
-        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/atmo/' + grism0
+        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/' + camera +'/atmo/' + grism0
         listatmo = glob.glob(directory + '/*fits')
     else:
         directory = ''
@@ -438,12 +445,13 @@ def searcharc(img, listarc):
     hdr = floyds.util.readhdr(img)
     JD = readkey3(hdr, 'JD')
     _instrume = readkey3(hdr, 'TELID')
+    camera = readkey3(hdr, 'INSTRUME')
     grism0 = readkey3(hdr, 'grism')
     slit0 = readkey3(hdr, 'slit')
     #if slit0=='6.0' and _instrume in ['fts','2m0b']: slit0='2.0'
     #if slit0=='6.0' and _instrume in ['ftn','2m0a']: slit0='1.6'
     if not listarc:
-        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/arc/' + grism0 + '/' + slit0
+        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/' + camera + '/arc/' + grism0 + '/' + slit0
         listarc = glob.glob(directory + '/*fits')
     else:
         directory = ''
@@ -483,9 +491,10 @@ def searchsens(img, listsens):
         JD = readkey3(hdr, 'MJD-OBS')
 
     _instrume = readkey3(hdr, 'TELID')
+    camera = readkey3(hdr, 'INSTRUME')
     grism0 = readkey3(hdr, 'grism')
     if not listsens:
-        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/sens/' + grism0
+        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/' + camera + '/sens/' + grism0
         listsens = glob.glob(directory + '/*fits')
     else:
         directory = ''
@@ -523,9 +532,10 @@ def searchflat(img, listflat):
     hdr = readhdr(img)
     JD = readkey3(hdr, 'JD')
     _instrume = readkey3(hdr, 'TELID')
+    camera = readkey3(hdr, 'INSTRUME')
     grism0 = readkey3(hdr, 'grism')
     if not listflat:
-        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/flat/' + grism0
+        directory = floyds.__path__[0] + '/archive/' + str(_instrume) + '/' + camera + '/flat/' + grism0
         listflat = glob.glob(directory + '/*fits')
     else:
         directory = ''
@@ -688,13 +698,13 @@ def airmass(img, overwrite=True, _observatory='lasilla'):
 def dvex():
     dv = {}
     dv['line'] = {'red': 300, 'blu': 1000}
-    dv['std'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
+    dv['std'] = {'_t_order': 3, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 30, '_t_step': 10, '_t_nsum': 10, '_lower': -10, '_upper': 10,
                  '_b_sample': '-25:-15,15:25', '_resize': 'no', '_b_naver': -15}
-    dv['obj'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
+    dv['obj'] = {'_t_order': 3, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 40, '_t_step': 10, '_t_nsum': 10, '_lower': -5, '_upper': 5,
                  '_b_sample': '-25:-15,15:25', '_resize': 'no', '_b_naver': -15}
-    dv['agn'] = {'_t_order': 12, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
+    dv['agn'] = {'_t_order': 3, '_t_niter': 50, '_t_sample': '*', '_t_nlost': 20, '_width': 10, '_radius': 10,
                  '_weights': 'variance', '_nsum': 40, '_t_step': 10, '_t_nsum': 10, '_lower': -13, '_upper': 13,
                  '_b_sample': '-35:-20,20:35', '_resize': 'no', '_b_naver': -15}
 #  -3, -15  
@@ -1100,3 +1110,8 @@ def mjdtoday():
   mjd0  = datetime(1858,11,17)
   mjd = (today - mjd0).days
   return mjd
+
+def to_safe_filename(unsafe_string):
+    import string
+    valid_filename_characters = "-_.(){letters}{numbers}".format(letters=string.ascii_letters, numbers=string.digits)
+    return ''.join(character for character in unsafe_string if character in valid_filename_characters)

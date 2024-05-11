@@ -1,0 +1,30 @@
+# Fri 21:18:46 01-Oct-2021
+begin	identify ftn_blue_6.0 - Ap 1
+	id	ftn_blue_6.0
+	task	identify
+	image	ftn_blue_6.0 - Ap 1
+	aperture	1
+	aplow	19.13
+	aphigh	29.13
+	units	Angstroms
+	features	4
+	        211.31 3648.21994   3650.158   4.0 1 1 Hg
+	        446.48 4046.77053   4046.565   4.0 1 1 Hg
+	        632.04 4361.26695   4358.335   4.0 1 1 Hg
+	       1280.08 5459.55059    5460.75   4.0 1 1 Hg
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		211.3118438720703
+		1280.08251953125
+		4553.885262825223
+		905.6653265365454
+
