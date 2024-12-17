@@ -242,7 +242,7 @@ if __name__ == "__main__":
     if outputlist:
         now = datetime.datetime.now()
         datenow = now.strftime('20%y%m%d%H%M')
-        MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 01, 01)).days
+        MJDtoday = 55928 + (datetime.date.today() - datetime.date(2012, 1, 1)).days
         deletefile = []
 
         typeobs = outputlist.keys()

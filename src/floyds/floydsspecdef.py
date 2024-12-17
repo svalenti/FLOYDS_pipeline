@@ -446,7 +446,7 @@ def checkwavestd(imgex, _interactive, _type=1):
 
     print('\n### Warning: check in wavelength with sky lines not performed\n')
     if _interactive.upper() in ['YES', 'Y']:
-        answ = raw_input('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
+        answ = floyds.util.ask('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
         if not answ: answ = 'y'
     else:
         answ = 'y'
@@ -483,7 +483,7 @@ def checkwavelength_obj(fitsfile, skyfile, _interactive='yes', usethirdlayer=Tru
     from pyraf import iraf
 
     if _interactive.lower() in ['yes', 'y']:
-        do_shift = raw_input('### Do you want to check the wavelength calibration with telluric lines? [[y]/n] ')
+        do_shift = floyds.util.ask('### Do you want to check the wavelength calibration with telluric lines? [[y]/n] ')
     else:
         print('### Checking wavelength calibration with telluric lines')
         do_shift = ''
@@ -503,7 +503,7 @@ def checkwavelength_obj(fitsfile, skyfile, _interactive='yes', usethirdlayer=Tru
         x2 = sky_arch.header['CRVAL1'] + np.arange(len(y2)) * sky_arch.header['CD1_1']
         shift = checkwavelength_arc(x1, y1, x2, y2, 5500, 6500, _interactive)
         if _interactive.lower() in ['yes', 'y']:
-            answ = raw_input('By how much do you want to shift the wavelength calibration? [{}] '.format(shift))
+            answ = floyds.util.ask('By how much do you want to shift the wavelength calibration? [{}] '.format(shift))
             if answ:
                 shift = float(answ)
         arm = sky_spec.header['GRISM'].upper()
@@ -622,7 +622,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             if _interactive.upper() in ['YES', 'Y']:
                 answ = 'x'
                 while answ not in ['o', 'n', 's']:
-                    answ = raw_input('\n### New extraction [n], extraction with old parameters [o], skip extraction [s] ? [o] ')
+                    answ = floyds.util.ask('\n### New extraction [n], extraction with old parameters [o], skip extraction [s] ? [o] ')
                     if not answ: answ = 'o'
                 if answ == 'o':
                     _new, _extract = 'no', 'yes'
@@ -636,7 +636,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             if _interactive.upper() in ['YES', 'Y']:
                 answ = 'x'
                 while answ not in ['y', 'n']:
-                    answ = raw_input('\n### do you want to extract again [[y]/n] ? ')
+                    answ = floyds.util.ask('\n### do you want to extract again [[y]/n] ? ')
                     if not answ: answ = 'y'
                 if answ == 'y':
                     _new, _extract = 'yes', 'yes'
@@ -650,7 +650,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             question = 'yes'
             while question == 'yes':
                 _z1, _z2, goon = floyds.util.display_image(img, 1, '', '', False)
-                dist = raw_input(
+                dist = floyds.util.ask(
                     '\n### At which line do you want to extract the spectrum [' + str(dv['line'][_grism]) + '] ? ')
                 if not dist: dist = dv['line'][_grism]
                 try:
@@ -664,7 +664,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
             lista = glob.glob('*ex.fits')
             if lista:
                 for ii in lista: print(ii)
-                _reference = raw_input('\### which object do you want to use for the trace [' + str(lista[0]) + '] ? ')
+                _reference = floyds.util.ask('\### which object do you want to use for the trace [' + str(lista[0]) + '] ? ')
                 if not _reference: _reference = lista[0]
                 _reference = re.sub('_ex', '', _reference)
                 _fittrac = 'no'
@@ -751,7 +751,7 @@ def choseflat(obj, listflat, setup, _JD0, _interactive):
         for flat in listflat:
             _JDf = readkey3(readhdr(flat), 'JD')
             display_image(flat, 1, '', '', False)
-            answ = raw_input('### good/bad/stop(enough files, go on) [[g],b,s]')
+            answ = floyds.util.ask('### good/bad/stop(enough files, go on) [[g],b,s]')
             if not answ: answ = 'g'
             if answ in ['G', 'g', 'good', 'Good']:
                 flatgood.append(flat)
@@ -1118,7 +1118,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         if _interactive.upper() in ['YES', 'Y']:
                             for ii in floyds.util.sortbyJD(arcfile):
                                 print('\n### ', ii)
-                            arcfile = raw_input(
+                            arcfile = floyds.util.ask(
                                 '\n### more than one arcfile available, which one to use [' + str(_arcclose) + '] ? ')
                             if not arcfile: arcfile = _arcclose
                         else:
@@ -1228,13 +1228,13 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     if _interactive.lower() in ['yes', 'y']:
                         if oldfiletoday:
                             while ans3 not in ['n', 'o', 's']:
-                                ans3 = raw_input('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, '
+                                ans3 = floyds.util.ask('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, '
                                                  '[s]kip calibration (use previous file) [' + default + '] ')
                                 if not ans3:
                                     ans3 = default
                         elif oldfiles:
                             while ans3 not in ['n', 'o']:
-                                ans3 = raw_input('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, [' + default + '] ')
+                                ans3 = floyds.util.ask('\n### [n]ew wavelength calibration, redo calibration with [o]ld parameters, [' + default + '] ')
                                 if not ans3:
                                     ans3 = default
                         else:
@@ -1305,7 +1305,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                                                 overrid='yes', cradius=_cradius, step=0, newaps='no',
                                                                 nsum=5, nlost=2, mode='h', verbose='yes', Stdout=1)
                             if _interactive.upper() in ['YES', 'Y']:
-                                answ = raw_input('### do you like the identification [[y]/n]')
+                                answ = floyds.util.ask('### do you like the identification [[y]/n]')
                                 if not answ: answ = 'y'
                             else:
                                 import time
@@ -1326,7 +1326,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                                                     overrid='yes', cradius=_cradius, step=0,
                                                                     newaps='no', nsum=5, nlost=2, mode='h',
                                                                     verbose='yes', Stdout=1)
-                                answ = raw_input('### is it ok now [[y]/n]')
+                                answ = floyds.util.ask('### is it ok now [[y]/n]')
                                 if not answ: answ = 'y'
                                 if answ in ['n', 'N', 'no', 'NO', 'No']:
                                     if setup[0] == 'blu':
@@ -1386,7 +1386,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                 if _interactive.upper() in ['YES', 'Y']:
                                     print('Figure out the shift of H-alpha (should be near 6563).')
                                     iraf.onedspec.splot(imgl + '[*,1,1]')
-                                    num = raw_input('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
+                                    num = floyds.util.ask('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
                                     if not num:
                                         num = shiftred
                                     floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
@@ -1405,7 +1405,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                         if _interactive.upper() in ['YES', 'Y']:
                                             print('Figure out the shift of H-beta (should be near 4861).')
                                             iraf.onedspec.splot(imgl + '[*,1,1]')
-                                            num = raw_input('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
+                                            num = floyds.util.ask('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
                                             if not num:
                                                 num = shiftred
                                             floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
@@ -1613,7 +1613,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             if '_e.fits' in lista[1]: lista[1] = re.sub('_e.fits', '_f.fits', lista[1])
             _output_f = combspec2(lista[0], lista[1], _output_f, scale=True, num=None)
             if _classify: aa, bb, cc = floyds.util.classifyfast(_output, program='snid')
-        if _i: _trim = raw_input('Do you want to trim the edges of the spectrum? [[y]/n] ')
+        if _i: _trim = floyds.util.ask('Do you want to trim the edges of the spectrum? [[y]/n] ')
         if not _i or _trim != 'n':  # if not interactive, spectrum is trimmed at default boundaries (3200,10000)
             trimmed = 'trim_' + _output
             floyds.util.delete(trimmed)
@@ -1638,12 +1638,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 if _i:
                     print("See if this looks better. Then press 'q' to continue.")
                     iraf.onedspec.splot(trimmed + '[*,1,1]')
-                    okay = raw_input('Is this okay? [[y]/n] ')
+                    okay = floyds.util.ask('Is this okay? [[y]/n] ')
                 if not _i or okay != 'n':
                     break
                 else:
                     floyds.util.delete(trimmed)
-                    again = raw_input('Do you want to try again? [[y]/n] ')
+                    again = floyds.util.ask('Do you want to try again? [[y]/n] ')
                     if again == 'n':
                         trimmed = _output  # so it says the right output file below
                         break
@@ -1659,7 +1659,7 @@ def raw_input_num(base_prompt,default=None):
     else:
         prompt = base_prompt+' ['+str(default)+']: '
     while True:
-        num = raw_input(prompt)
+        num = floyds.util.ask(prompt)
         try: # if there was a response, cast to float and continue
             if num: num = float(num)
             else:   num = default

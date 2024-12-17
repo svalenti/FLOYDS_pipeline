@@ -1,3 +1,6 @@
+import sys
+pyversion = sys.version_info[0]
+
 def sortbyJD(lista):
     from astropy.io import fits
     from numpy import array
@@ -14,6 +17,13 @@ def sortbyJD(lista):
     inds = JDlist.argsort()
     sortedlista = lista[inds]
     return list(sortedlista)
+
+def ask(question):
+    if pyversion>=3:
+        answ = input(question)
+    else:
+        answ = raw_input(question)
+    return answ
 
 
 # ###########################################################
@@ -361,7 +371,7 @@ def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _
                 goon = False
 
         if scale and goon:
-            answ0 = raw_input('>>> Cuts OK ? [y/n] ? [y] ')
+            answ0 = ask('>>> Cuts OK ? [y/n] ? [y] ')
             if not answ0:
                 answ0 = 'y'
             elif answ0 == 'no' or answ0 == 'NO':
@@ -370,8 +380,8 @@ def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _
             while answ0 == 'n':
                 _z11 = float(str.split(str.split(sss[0])[0], '=')[1])
                 _z22 = float(str.split(str.split(sss[0])[1], '=')[1])
-                z11 = raw_input('>>> z1 = ? [' + str(_z11) + '] ? ')
-                z22 = raw_input('>>> z2 = ? [' + str(_z22) + '] ? ')
+                z11 = ask('>>> z1 = ? [' + str(_z11) + '] ? ')
+                z22 = ask('>>> z2 = ? [' + str(_z22) + '] ? ')
                 if not z11:
                     z11 = _z11
                 else:
@@ -384,7 +394,7 @@ def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _
                 sss = iraf.display(img, frame, fill='yes', xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize,
                                    erase=_erase,
                                    zrange='no', zscale='no', z1=z11, z2=z22, Stdout=1)
-                answ0 = raw_input('>>> Cuts OK ? [y/n] ? [y] ')
+                answ0 = ask('>>> Cuts OK ? [y/n] ? [y] ')
                 if not answ0:
                     answ0 = 'y'
                 elif answ0 == 'no' or answ0 == 'NO':
