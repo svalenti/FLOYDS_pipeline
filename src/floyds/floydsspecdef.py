@@ -211,7 +211,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
     iraf.set(direc=floyds.__path__[0] + '/')
     _caldir = 'direc$standard/MAB/'
     _extinctdir = 'direc$standard/extinction/'
-    print standardfile, _outputsens
+    print(standardfile, _outputsens)
     _outputsens = name_duplicate(standardfile, _outputsens, '')
     if os.path.isfile(_outputsens):
         if _interactive.lower() != 'yes':
@@ -262,7 +262,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                                   exptime=_exptime, interac=_interactive)
             #     sens full range
             if str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj'] and fts_contaminated:
-                print 'split blue sens'
+                print('split blue sens')
                 sss=''
                 for jj in range(0, len(string.split(sample, ','))):
                     aa, bb = string.split(string.split(sample, ',')[jj], ':')
@@ -310,11 +310,11 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                     sss = sss + ',' + sens1
                     floyds.util.delete(std1 + ',' + std0)
                 _outputsens = combineblusens(sss, _outputsens)
-                print _outputsens
+                print(_outputsens)
                 for i in string.split(sss, ','):
                     floyds.util.delete(i)
             else: # red arm
-                print 'split red sens'
+                print('split red sens')
                 sss=''
                 for jj in range(0, len(string.split(sample, ','))):
                     aa, bb = string.split(string.split(sample, ',')[jj], ':')
@@ -434,7 +434,7 @@ def telluric_atmo(imgstd):
         floyds.util.delete(imgout)
     else:
         _imgout = ''
-        print '### telluric correction with model not possible '
+        print('### telluric correction with model not possible ')
     return _imgout
 
 
@@ -443,14 +443,14 @@ def checkwavestd(imgex, _interactive, _type=1):
     from astropy.io import fits
     from numpy import arange, array
 
-    print '\n### Warning: check in wavelength with sky lines not performed\n'
+    print('\n### Warning: check in wavelength with sky lines not performed\n')
     if _interactive.upper() in ['YES', 'Y']:
         answ = raw_input('\n### Do you want to check the wavelength calibration with telluric lines [[y]/n]? ')
         if not answ: answ = 'y'
     else:
         answ = 'y'
     if answ in ['y', 'yes']:
-        print '\n### check wavelength calibration with telluric lines \n'
+        print('\n### check wavelength calibration with telluric lines \n')
         _skyfile = floyds.__path__[0] + '/standard/ident/sky_new_0.fits'
         skydata, skyhdr = fits.getdata(_skyfile, header=True)
         skyff = 1 - skydata
@@ -484,7 +484,7 @@ def checkwavelength_obj(fitsfile, skyfile, _interactive='yes', usethirdlayer=Tru
     if _interactive.lower() in ['yes', 'y']:
         do_shift = raw_input('### Do you want to check the wavelength calibration with telluric lines? [[y]/n] ')
     else:
-        print '### Checking wavelength calibration with telluric lines'
+        print('### Checking wavelength calibration with telluric lines')
         do_shift = ''
     if do_shift != 'n':
         if usethirdlayer:
@@ -656,13 +656,13 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
                     dist = int(dist)
                     question = 'no'
                 except:
-                    print '\n### input not valid, try again:'
+                    print('\n### input not valid, try again:')
         else:
             dist = dv['line'][_grism]
         if _ext_trace in ['yes', 'Yes', 'YES', True]:
             lista = glob.glob('*ex.fits')
             if lista:
-                for ii in lista: print ii
+                for ii in lista: print(ii)
                 _reference = raw_input('\### which object do you want to use for the trace [' + str(lista[0]) + '] ? ')
                 if not _reference: _reference = lista[0]
                 _reference = re.sub('_ex', '', _reference)
@@ -725,7 +725,7 @@ def extractspectrum(img, dv, _ext_trace, _dispersionline, _interactive, _type, a
         floyds.util.updateheader(imgex, 0, {'XMIN': [aaex[0], 'min wavelength [Angstrom]'],
                                             'XMAX': [aaex[-1], 'max wavelength [Angstrom]']})
     else:
-        print '\n### skipping new extraction'
+        print('\n### skipping new extraction')
     return imgex
 
 
@@ -759,9 +759,9 @@ def choseflat(obj, listflat, setup, _JD0, _interactive):
     else:
         if obidflat.count(_OBID) >= 3:
             flatgood = list(compress(array(obidflat) == _OBID, listflat))
-            print '### Flat field in the same OB !!'
+            print('### Flat field in the same OB !!')
         else:
-            print '### ', str(_OBID)
+            print('### ', str(_OBID))
             inds = array(differences).argsort()
             for i in range(0, 3):
                 flatgood.append(listflat[inds[i]])
@@ -798,12 +798,12 @@ def imreplace_region(img):
     iraf.unlearn('imutil.imreplace')
     if _grism == 'blue':
         iraf.imutil.imreplace(img + '[*,1:200]', value=1, lower='INDEF', upper='INDEF')
-        print '### replace pixel 1:200 with 1 (y axes)'
+        print('### replace pixel 1:200 with 1 (y axes)')
     elif _grism == 'red':
         iraf.imutil.imreplace(img + '[*,1:200]', value=1, lower='INDEF', upper='INDEF')
-        print '### replace pixel 1:200 with 1 (y axes)'
+        print('### replace pixel 1:200 with 1 (y axes)')
     else:
-        print '### no replace '
+        print('### no replace ')
 
 
 #####################################################
@@ -976,7 +976,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 lista['blu'].append(bimg)
                 lista['red'].append(rimg)
             else:
-                'print warning type not defined'
+                print('warning type not defined')
     for arm in lista.keys():
         for img in lista[arm]:
             hdr = readhdr(img)
@@ -1016,8 +1016,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 dd = arccos(sin(_dec * scal) * sin(decstd * scal) + cos(_dec * scal) * cos(decstd * scal) * cos(
                     (_ra - rastd) * scal)) * ((180 / pi) * 3600)
                 if _verbose:
-                    print _ra, _dec
-                    print std[argmin(dd)], min(dd)
+                    print(_ra, _dec)
+                    print(std[argmin(dd)], min(dd))
 
                 if min(dd) < 1200:
                     _typeobj = 'std'
@@ -1037,17 +1037,17 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 else:
                     objectlist[_typeobj][arm, _slit].append(img)
     if _verbose:
-        print 'object'
-        print objectlist
-        print 'flat'
-        print flatlist
-        print 'bias'
-        print biaslist
-        print 'arc'
-        print arclist
+        print('object')
+        print(objectlist)
+        print('flat')
+        print(flatlist)
+        print('bias')
+        print(biaslist)
+        print('arc')
+        print(arclist)
 
     if liststandard and 'std' in objectlist.keys():
-        print 'external standard, raw standard not used'
+        print('external standard, raw standard not used')
         del objectlist['std']
 
     sens = []
@@ -1058,9 +1058,9 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
         for setup in objectlist[tpe]:
 #            if setup not in sens:   
 #                sens[setup] = []
-            print '\n### setup= ', setup, '\n### objects= ', objectlist[tpe][setup], '\n'
+            print('\n### setup= ', setup, '\n### objects= ', objectlist[tpe][setup], '\n')
             for img in objectlist[tpe][setup]:
-                print '\n\n### next object= ', img, ' ', floyds.util.readkey3(readhdr(img), 'object'), '\n'
+                print('\n\n### next object= ', img, ' ', floyds.util.readkey3(readhdr(img), 'object'), '\n')
                 hdr = floyds.util.readhdr(img)
                 _gain = floyds.readkey3(hdr, 'gain')
                 _rdnoise = floyds.readkey3(hdr, 'ron')
@@ -1071,7 +1071,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     flatgood = _listflat  # flat list from reducer
                 elif setup in flatlist:
                     if _grpid in flatlist[setup]:
-                        print '\n###FLAT WITH SAME GRPID'
+                        print('\n###FLAT WITH SAME GRPID')
                         flatgood = flatlist[setup][_grpid]  # flat in the  raw data
                     else:
                         flatgood = []
@@ -1102,7 +1102,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     arcfile = [floyds.util.searcharc(img, _listarc)[0]][0]  # take arc from list
                 if not arcfile and setup in arclist.keys():
                     if _grpid in arclist[setup]:
-                        print '\n###ARC WITH SAME GRPID'
+                        print('\n###ARC WITH SAME GRPID')
                         arcfile = arclist[setup][_grpid]  # arc in the  raw data
                     else:
                         arcfile = []
@@ -1115,7 +1115,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         _arcclose = floyds.util.sortbyJD(arcfile)[-1]  #  take the last arc of the sequence
                         if _interactive.upper() in ['YES', 'Y']:
                             for ii in floyds.util.sortbyJD(arcfile):
-                                print '\n### ', ii
+                                print('\n### ', ii)
                             arcfile = raw_input(
                                 '\n### more than one arcfile available, which one to use [' + str(_arcclose) + '] ? ')
                             if not arcfile: arcfile = _arcclose
@@ -1124,22 +1124,22 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     else:
                         arcfile = arcfile[0]
                 else:
-                    print '\n### Warning: no arc found'
+                    print('\n### Warning: no arc found')
 
                 ###################################################################
                 if setup[0] == 'red':
                     fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_red'
                     fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_red'
-                    print fcfile
+                    print(fcfile)
                 else:
                     fcfile = floyds.__path__[0] + '/standard/ident/fcrectify_' + _tel + '_blue'
                     fcfile1 = floyds.__path__[0] + '/standard/ident/fcrectify1_' + _tel + '_blue'
-                    print fcfile
+                    print(fcfile)
 
                 if not img:  # or not arcfile:
-                    print '\n### no calibration for this setup available'
+                    print('\n### no calibration for this setup available')
                 else:
-                    print img, arcfile, flatfile, fcfile, fcfile1, _cosmic
+                    print(img, arcfile, flatfile, fcfile, fcfile1, _cosmic)
                     img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum(img, arcfile, flatfile, fcfile,
                                                                                   fcfile1, 'no', _cosmic)
                 import time
@@ -1159,16 +1159,16 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             time.sleep(1)
 
                 ###############     flat correction  method 1 or 3  ###############
-                print img, arcfile, flatfile, setup
+                print(img, arcfile, flatfile, setup)
                 imgn = 'n' + img
                 if fringing in [1, 3]:
                     if flatfile and setup[0] == 'red':
-                        print flatfile, img
+                        print(flatfile, img)
                         if fringing == 1:
-                            print 'fringing 1 classical'
+                            print('fringing 1 classical')
                             imgn = floyds.fringing_classicmethod(flatfile, img, 'no', '*', 15, setup[0])
                         elif fringing == 3:
-                            print 'fringing 3 apsum'
+                            print('fringing 3 apsum')
                             imgn = floyds.fringing_classicmethod2(flatfile, img, 'no', '*', 15, setup[0])
                     else:
                         floyds.util.delete(imgn)
@@ -1181,7 +1181,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                                              automaticex=_automaticex)
                 ####################################################
                 if setup[0] == 'blu' and smooth != 1:
-                    print 'smooth blu part of ' + str(smooth) + ' pixels'
+                    print('smooth blu part of ' + str(smooth) + ' pixels')
                     from numpy import float32
 
                     x1, y1 = floyds.util.readspectrum(imgex)
@@ -1202,7 +1202,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                            recente='no', resize='no', edit='no', trace='no', fittrac='no',
                                            extract='yes', extras='no', review='no', backgro='none')
                         fringingmask = normflat('flat' + imgex)
-                        print '\n### fringing correction'
+                        print('\n### fringing correction')
                         imgex, so2, shift = correctfringing_auto(imgex, fringingmask)  #  automatic correction
                         #imgex=correctfringing(imgex,fringingmask)      #  manual correction
                     #############################################
@@ -1218,10 +1218,10 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         os.system('cp ' + arcfile + ' arc_' + imgex)
                         arcfile = ' arc_' + imgex
                 else:
-                    print 'arcfile = ' + arcfile
+                    print('arcfile = ' + arcfile)
                 ############################################
                 if not arcfile:
-                    print '\n### warning no arcfile \n exit '
+                    print('\n### warning no arcfile \n exit ')
                     imgl = ''
                 else:
                     imgl = imgex.replace('_ex.fits', '_l.fits')
@@ -1277,7 +1277,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
 #                    if answ in ['y', 'Y', 'YES', 'yes', 'Yes']:
                     if wlident:
-                        print imgex, setup
+                        print(imgex, setup)
                         if setup[0] == 'blu':
                             _order = 3
                         else:
@@ -1327,7 +1327,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                 xx2 = arange(len(yy2))
                                 _shift = floyds.floydsspecdef.checkwavelength_arc(xx1, yy1, xx2, yy2, '', '',
                                                                                   _interactive)  #*(-1)
-                                print '\n### computed shift= ' + str(_shift)
+                                print('\n### computed shift= ' + str(_shift))
                                 identific = iraf.specred.reidentify(referenc=arcref, images=arcfile,
                                                                     interac=_interactive, section='middle line',
                                                                     shift=_shift, coordli='FLOYDS_lines.txt',
@@ -1349,12 +1349,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
                         floyds.util.delete('FLOYDS_lines.txt')
                         imgl = re.sub('_ex.fits', '_l.fits', imgex)
-                        print arcfile
+                        print(arcfile)
                         try:
                             specred = floyds.util.spectraresolution3(arcfile, _specres)
                         except:
                             specred = 0
-                        print identific
+                        print(identific)
                         if identific:
                             try:
                                 _rms = float(identific[-1].split()[-1])
@@ -1387,12 +1387,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             outputfile.append(imgl)
                         if tpe == 'std' or floyds.util.readkey3(floyds.util.readhdr(imgex), 'exptime') < 300:
                             if setup[0] == 'red':
-                                print '\n### check standard wave calib'
-                                print imgl
+                                print('\n### check standard wave calib')
+                                print(imgl)
                                 shiftred = floyds.floydsspecdef.checkwavestd(imgl, _interactive, 2)
                                 zro = fits.open(imgl)[0].header['CRVAL1']
                                 if _interactive.upper() in ['YES', 'Y']:
-                                    print 'Figure out the shift of H-alpha (should be near 6563).'
+                                    print('Figure out the shift of H-alpha (should be near 6563).')
                                     iraf.onedspec.splot(imgl + '[*,1,1]')
                                     num = raw_input('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
                                     if not num:
@@ -1400,18 +1400,18 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                     floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
                                     floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(num), '']})
                                 else:
-                                    print 'shifting wavelength calibration by', shiftred
+                                    print('shifting wavelength calibration by', shiftred)
                                     floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(shiftred), '']})
                                     floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
                             else:
-                                print re.sub('blue','red',imgl)
+                                print(re.sub('blue','red',imgl))
                                 if os.path.isfile(re.sub('blue','red',imgl)):
                                     hdrred = floyds.util.readhdr(re.sub('blue','red',imgl))
                                     shiftred = floyds.readkey3(hdrred,'SHIFTR')
                                     if shiftred:
                                         zro = fits.open(imgl)[0].header['CRVAL1']
                                         if _interactive.upper() in ['YES', 'Y']:
-                                            print 'Figure out the shift of H-beta (should be near 4861).'
+                                            print('Figure out the shift of H-beta (should be near 4861).')
                                             iraf.onedspec.splot(imgl + '[*,1,1]')
                                             num = raw_input('By how much do you want to shift the wavelength calibration? [' + str(shiftred) + '] ')
                                             if not num:
@@ -1419,16 +1419,16 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                             floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(num), '']})
                                             floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(num), '']})
                                         else:
-                                            print 'shifting wavelength calibration by', shiftred
+                                            print('shifting wavelength calibration by', shiftred)
                                             floyds.util.updateheader(imgl, 0, {'CRVAL1': [zro + float(shiftred), '']})
                                             floyds.util.updateheader(imgl, 0, {'shift' + setup[0][0]: [float(shiftred), '']})
                                     else:
-                                        print shiftred
-                                        print 'no shift'
+                                        print(shiftred)
+                                        print('no shift')
                                 else:
-                                    print '\n### warning check in wavelength not possible for short exposure in the blu range'
+                                    print('\n### warning check in wavelength not possible for short exposure in the blu range')
                         else:
-                            print '\n### check object wave calib'
+                            print('\n### check object wave calib')
                             _skyfile = floyds.__path__[0] + '/standard/ident/sky_' + setup[0] + '.fits'
                             floyds.floydsspecdef.checkwavelength_obj(imgl, _skyfile, _interactive)
                 if imgl:
@@ -1440,14 +1440,14 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         wavecalib[tpe][setup].append(imgl)
 
                 ###################################
-    print wavecalib
+    print(wavecalib)
     #sens = {}
     atmo = {}
     if 'std' in wavecalib.keys():
         for setup in wavecalib['std']:
 #            if setup not in sens:   
 #                sens[setup] = []
-            print '\n### setup= ', setup, '\n### objects= ', wavecalib['std'][setup], '\n'
+            print('\n### setup= ', setup, '\n### objects= ', wavecalib['std'][setup], '\n')
             for imgl in wavecalib['std'][setup]:
                 ######################################################
                 hdrs = readhdr(imgl)
@@ -1460,12 +1460,12 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                 except:
                     sys.exit('Error: missing header -stdname- in standard ' + str(standardfile) + '  ')
 
-                print '\n### compute sensitivity function and atmofile'
+                print('\n### compute sensitivity function and atmofile')
                 if fts_contaminated is not None: fts_contam = fts_contaminated         # if an option is given on the command line, use that
                 else: fts_contam = (datenight > '20140915' and datenight < '20150616') # by default, use the period that FTS FLOYDS had glycol on the mirrors
                 if setup[0] == 'red':
                     atmofile = floyds.floydsspecdef.telluric_atmo(imgl)
-                    print atmofile
+                    print(atmofile)
                     stdusedclean = re.sub('_l.fits', '_clean.fits', imgl)
                     floyds.util.delete(stdusedclean)
                     _function = 'spline3'
@@ -1487,7 +1487,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         _outputsens2 = floyds.floydsspecdef.sensfunction(imgl, _outputsens2, _function, 12, _interactive, '3400:4700')  #,3600:4300')
 
                 if _outputsens2 not in sens:
-                    print _outputsens2
+                    print(_outputsens2)
                     sens.append(_outputsens2)
 #                    if _verbose:
                     #    calibrate the standard using the sensitivity just obtained  
@@ -1501,9 +1501,9 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
 
     if _verbose:
-        print wavecalib
-        print sens
-        print atmo
+        print(wavecalib)
+        print(sens)
+        print(atmo)
 
     for tpe in ['std', 'obj', 'agn']:
         if tpe in wavecalib.keys():
@@ -1518,8 +1518,8 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 #                            _sens = floyds.util.searchsens(img, sens[setup])[0]  # search in the reduced data
                             _sens = floyds.util.searchsens(img, sens)[0]  # search in the reduced data
                         except:
-                            print setup
-                            print 'no standard'
+                            print( setup)
+                            print('no standard')
                             _sens = floyds.util.searchsens(img, '')[0]  # search in the archive
 
                     _atmo = ''
@@ -1607,14 +1607,14 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     else:
                         coppie[MJD].append(obj)
 
-    print coppie
+    print(coppie)
     _i = _interactive.lower() in ['y', 'yes']
     for mjd in coppie.keys():
         lista = coppie[mjd]
         _output = re.sub('_red_', '_merge_', lista[0])
         _output = re.sub('_blue_', '_merge_', _output)
         _output = combspec2(lista[0], lista[1], _output, scale=True, num=None)
-        print _output
+        print(_output)
         if '_e.fits' in _output:
             _output_f = re.sub('_e.fits', '_f.fits', _output)
             if '_e.fits' in lista[0]: lista[0] = re.sub('_e.fits', '_f.fits', lista[0])
@@ -1627,7 +1627,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             floyds.util.delete(trimmed)
             while True:
                 if _i:
-                    print "Find the lower and upper wavelength limits. Then press 'q' to continue."
+                    print("Find the lower and upper wavelength limits. Then press 'q' to continue.")
                     iraf.onedspec.splot(_output+'[*,1,1]')
                     low = raw_input_num('Lower limit (\xc3\x85)',3200)
                     up  = raw_input_num('Upper limit (\xc3\x85)',10000)
@@ -1644,7 +1644,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 #                iraf.scopy(_output, trimmed, w1=low, w2=up, rebin='no')
 #########################################################
                 if _i:
-                    print "See if this looks better. Then press 'q' to continue."
+                    print("See if this looks better. Then press 'q' to continue.")
                     iraf.onedspec.splot(trimmed + '[*,1,1]')
                     okay = raw_input('Is this okay? [[y]/n] ')
                 if not _i or okay != 'n':
@@ -1655,9 +1655,9 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     if again == 'n':
                         trimmed = _output  # so it says the right output file below
                         break
-            print 'Output saved as', trimmed
+            print('Output saved as', trimmed)
         else:
-            print 'Output saved as', _output  # only not trimmed if you specifically say no
+            print('Output saved as', _output)  # only not trimmed if you specifically say no
     return outputfile
 
 
@@ -1673,7 +1673,7 @@ def raw_input_num(base_prompt,default=None):
             else:   num = default
             break
         except ValueError: # if response can't be cast to float, reprompt
-            print 'Not a valid number.'
+            print('Not a valid number.')
     return num
 
 ##############################################################################
@@ -1872,7 +1872,7 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
         iraf.specred.scombine(input='s1.fits,s2.fits', w1='INDEF', w2='INDEF', output=_output,
                               scale=scomb_scale, sample=str(xred[num])+':'+str(xred[2*num])) # combine by averaging 2nd decile of overlap
     else:
-        print 'more than one dimension'
+        print('more than one dimension')
         datavecs = []
         hdrvec = []
         for layer in np.arange(dimension)+1: # IRAF is 1-indexed
@@ -2102,7 +2102,7 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, 
         floyds.cosmics.lacos('t' + img, output='', gain=_gain, readn=_rdnoise, xorder=9, yorder=9, sigclip=4.5,
                              sigfrac=0.5, objlim=1, verbose=True, interactive=True)
         floyds.util.updateheader('t' + img, 0, {'LACOSMIC': [True, 'Laplacian cosmic ray rejection']})
-        print '\n### cosmic rays rejections ........ done '
+        print('\n### cosmic rays rejections ........ done ')
     else:
         floyds.util.updateheader('t' + img, 0, {'LACOSMIC': [False, 'Laplacian cosmic ray rejection']})
 
@@ -2220,7 +2220,7 @@ def fringing_classicmethod(flatfile, img, _inter, _sample, _order, arm):
     floyds.util.delete('n' + flatfile)
     floyds.util.delete('n' + img)
     iraf.imrename('norm.fits', 'n' + flatfile, verbose='no')
-    print img, 'n' + flatfile, 'n' + img
+    print(img, 'n' + flatfile, 'n' + img)
     floyds.util.delete('n' + img)
     data, hdr = fits.getdata(img, 0, header=True)
     datan, hdrn = fits.getdata('n' + flatfile, 0, header=True)
@@ -2308,7 +2308,7 @@ def applyflat(img, flatimg, output='', scale='', shift=''):
             scale = 1
             shift = 0
     else:
-        print 'use ' + str(scale) + ' ' + str(shift)
+        print('use ' + str(scale) + ' ' + str(shift))
     ####################################
     datanew = datan * scale + (1 - scale)  # scale the normalizedflat
     if int(shift) >= 0:  # shift the flat
@@ -2379,7 +2379,7 @@ def fringing_classicmethod2(flatfile, img, _inter, _sample, _order, arm):
     floyds.util.delete('n' + flatfile)
     floyds.util.delete('n' + img)
     iraf.imrename('norm.fits', 'n' + flatfile, verbose='no')
-    print img, 'n' + flatfile, 'n' + img
+    print(img, 'n' + flatfile, 'n' + img)
     floyds.util.delete('n' + img)
     data, hdr = fits.getdata(img, 0, header=True)
     datan, hdrn = fits.getdata('n' + flatfile, 0, header=True)

@@ -25,9 +25,9 @@ def fromfits(infilename, hdu=0, verbose=True):
 
     pixelarrayshape = pixelarray.shape
     if verbose:
-        print "FITS import shape : (%i, %i)" % (pixelarrayshape[0], pixelarrayshape[1])
-        print "FITS file BITPIX : %s" % (hdr["BITPIX"])
-        print "Internal array type :", pixelarray.dtype.name
+        print("FITS import shape : (%i, %i)" % (pixelarrayshape[0], pixelarrayshape[1]))
+        print("FITS file BITPIX : %s" % (hdr["BITPIX"]))
+        print("Internal array type :", pixelarray.dtype.name)
 
     return pixelarray, hdr
 
@@ -40,7 +40,7 @@ def tofits(outfilename, pixelarray, hdr=None, verbose=True):
 	"""
     pixelarrayshape = pixelarray.shape
     if verbose:
-        print "FITS export shape : (%i, %i)" % (pixelarrayshape[0], pixelarrayshape[1])
+        print("FITS export shape : (%i, %i)" % (pixelarrayshape[0], pixelarrayshape[1]))
 
     if pixelarray.dtype.name == "bool":
         pixelarray = np.cast["uint8"](pixelarray)
@@ -56,7 +56,7 @@ def tofits(outfilename, pixelarray, hdr=None, verbose=True):
     hdu.writeto(outfilename)
 
     if verbose:
-        print "Wrote %s" % outfilename
+        print("Wrote %s" % outfilename)
 
 
 ###################################################

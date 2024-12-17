@@ -66,7 +66,7 @@ if __name__ == "__main__":
         listfile4 = glob.glob('coj2m002*00.fits')
         listfile = listfile1 + listfile2 + listfile3 + listfile4
         files = []
-        print 'making the list with raw data in the current directory ...... please wait'
+        print('making the list with raw data in the current directory ...... please wait')
         for img in listfile:
             hdr0 = readhdr(img)
             if readkey3(hdr0, 'instrume') in ['en05', 'en06']:
@@ -96,10 +96,10 @@ if __name__ == "__main__":
                         if float(_exptime) == 0.0:
                             _type = 'bias'
                     if not _type:
-                        print 'warning: object not recognized '
+                        print('warning: object not recognized ')
                         _object = readkey3(hdr0, 'object')
                         _filter = readkey3(hdr0, 'filter')
-                        print img, _object, _imagetype, _filter, _exptime
+                        print(img, _object, _imagetype, _filter, _exptime)
                         answ = raw_input('what is it: bias [1], flat [3], object[4], not good [5] ?  [5] ')
                         if not answ:  answ = '5'
                         if answ == '1':
@@ -173,4 +173,4 @@ if __name__ == "__main__":
     else:
         outputlist = []
     stoptime = time.time()
-    print 'runnning time ' + str(stoptime - starttime)
+    print('runnning time ' + str(stoptime - starttime))

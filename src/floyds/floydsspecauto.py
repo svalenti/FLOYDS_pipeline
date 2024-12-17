@@ -183,7 +183,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
         iraf.ccdred.verbose='no'
     now=datetime.datetime.now()
     datenow=now.strftime('20%y%m%d%H%M')
-    MJDtoday=55928+(datetime.date.today()-datetime.date(2012, 01, 01)).days
+    MJDtoday=55928+(datetime.date.today()-datetime.date(2012,1,1)).days
     outputlist=[]
     hdra=floyds.util.readhdr(re.sub('\n','',files[0]))
     _gain=floyds.util.readkey3(hdra,'gain')
@@ -267,10 +267,10 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                 lista['blu'].append(bimg)
                 lista['red'].append(rimg)
             else: 
-                print 'warning type not defined'
+                print('warning type not defined')
     for arm in lista.keys():
         for img in lista[arm]:
-            print img
+            print(img)
             hdr=floyds.util.readhdr(img)
             _type=floyds.util.readkey3(hdr,'OBSTYPE')
             if _type=='EXPOSE':  
@@ -278,7 +278,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       if not _type: _type='EXPOSE'
 
             if _type=='EXPOSE':  
-                print 'warning obstype still EXPOSE, are this old data ?  run manually floydsfixheader'
+                print('warning obstype still EXPOSE, are this old data ?  run manually floydsfixheader')
 
             _slit=floyds.util.readkey3(hdr,'slit')
             _grpid=floyds.util.readkey3(hdr,'grpid')
@@ -307,8 +307,8 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                     else:                      _dec=(dec2/60.+dec1)/60.+dec0
                 dd=arccos(sin(_dec*scal)*sin(decstd*scal)+cos(_dec*scal)*cos(decstd*scal)*cos((_ra-rastd)*scal))*((180/pi)*3600)
                 if _verbose:
-                    print _ra,_dec
-                    print std[argmin(dd)],min(dd)
+                    print(_ra,_dec)
+                    print(std[argmin(dd)],min(dd))
                 if min(dd)<5200: _typeobj='std'
                 else: _typeobj='obj'
                 if min(dd)<5200:
@@ -319,17 +319,17 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                 if (arm,_slit) not in objectlist[_typeobj]:     objectlist[_typeobj][arm,_slit]=[img]
                 else: objectlist[_typeobj][arm,_slit].append(img)
     if _verbose:
-        print 'object'
-        print objectlist
-        print 'flat'
-        print flatlist
-        print 'bias'
-        print biaslist
-        print 'arc'
-        print arclist
+        print('object')
+        print(objectlist)
+        print('flat')
+        print(flatlist)
+        print('bias')
+        print(biaslist)
+        print('arc')
+        print(arclist)
 
     if liststandard and 'std' in objectlist.keys():  
-        print 'external standard, raw standard not used'
+        print('external standard, raw standard not used')
         del objectlist['std']
 
     sens={}
@@ -339,9 +339,9 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
       if tpe not in outputfile:  outputfile[tpe]={}
       for setup in objectlist[tpe]:
         if setup not in sens:   sens[setup]=[]
-        print '\n### setup= ',setup,'\n### objects= ',objectlist[tpe][setup],'\n'
+        print('\n### setup= ',setup,'\n### objects= ',objectlist[tpe][setup],'\n')
         for img in objectlist[tpe][setup]:
-              print '\n\n### next object= ',img,' ',floyds.util.readkey3(floyds.util.readhdr(img),'object'),'\n'
+              print('\n\n### next object= ',img,' ',floyds.util.readkey3(floyds.util.readhdr(img),'object'),'\n')
               hdr=floyds.util.readhdr(img)
               archfile=floyds.util.readkey3(hdr,'arcfile')
               _gain=floyds.util.readkey3(hdr,'gain')
@@ -353,7 +353,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if _listflat:   flatgood=_listflat    # flat list from reducer
               elif setup in flatlist:  
                   if _grpid in flatlist[setup]:
-                      print '\n###FLAT WITH SAME GRPID'
+                      print('\n###FLAT WITH SAME GRPID')
                       flatgood= flatlist[setup][_grpid]     # flat in the  raw data
                   else:  
                       flatgood=[]
@@ -365,7 +365,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                   if len(flatgood)>1:
                       f=open('_oflatlist','w')
                       for fimg in flatgood:
-                          print fimg
+                          print(fimg)
                           f.write(fimg+'\n')
                       f.close()
                       floyds.util.delete('flat'+img)
@@ -381,7 +381,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
               if _listarc:       arcfile= [floyds.util.searcharc(img,_listarc)[0]][0]   # take arc from list 
               if not arcfile and setup in arclist.keys():
                     if _grpid in arclist[setup]:  
-                        print '\n###ARC WITH SAME GRPID'
+                        print('\n###ARC WITH SAME GRPID')
                         arcfile= arclist[setup][_grpid]     # flat in the  raw data
                     else:  
                         arcfile=[]
@@ -390,28 +390,28 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                                 arcfile.append(ii)                   
               if arcfile:
                   if len(arcfile)>1:                           # more than one arc available
-                      print arcfile
+                      print(arcfile)
 #                     _arcclose=floyds.util.searcharc(imgex,arcfile)[0]   # take the closest in time 
                       _arcclose=floyds.sortbyJD(arcfile)[-1]               #  take the last arc of the sequence
                       if _interactive.upper() in ['YES','Y']:
                               for ii in floyds.floydsspecdef.sortbyJD(arcfile):
-                                  print '\n### ',ii 
+                                  print('\n### ',ii) 
                               arcfile=raw_input('\n### more than one arcfile available, which one to use ['+str(_arcclose)+'] ? ')
                               if not arcfile: arcfile=_arcclose
                       else: arcfile=_arcclose
                   else: arcfile=arcfile[0]
-              else:   print '\n### Warning: no arc found'
+              else:   print('\n### Warning: no arc found')
 
 ###################################################################   rectify 
               if setup[0]=='red':
                   fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_red'
                   fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_red'
-                  print fcfile
+                  print(fcfile)
               else:
                   fcfile=floyds.__path__[0]+'/standard/ident/fcrectify_'+_tel+'_blue'
                   fcfile1=floyds.__path__[0]+'/standard/ident/fcrectify1_'+_tel+'_blue'
-                  print fcfile
-              print img,arcfile,flatfile
+                  print(fcfile)
+              print(img,arcfile,flatfile)
               img0=img
               if img      and img not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(img)
               if arcfile  and arcfile not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(arcfile)
@@ -424,7 +424,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
 ###################################################################         check wavecalib  
               if tpe=='std' or floyds.util.readkey3(floyds.util.readhdr(img),'exptime') < 300:
                   if setup[0]=='red':
-                      print '\n### check standard wave calib'
+                      print('\n### check standard wave calib')
                       data, hdr = fits.getdata(img, 0, header=True) 
                       y=data.mean(1)
                       import numpy as np
@@ -439,11 +439,11 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           floyds.util.updateheader(img,0,{'shift':[float(shift),'']})
                           floyds.util.delete('_std.fits')
                       else:
-                          print 'object not found'
+                          print('object not found')
                   else: 
-                      print '\n### warning check in wavelength not possible for short exposure in the blu range '
+                      print('\n### warning check in wavelength not possible for short exposure in the blu range ')
               else:
-                    print '\n### check object wave calib'
+                    print('\n### check object wave calib')
                     _skyfile=floyds.__path__[0]+'/standard/ident/sky_'+setup[0]+'.fits'
                     data, hdr = fits.getdata(img, 0, header=True) 
                     y=data.mean(1)
@@ -458,7 +458,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                         zro=hdr['CRVAL1']
                         floyds.util.updateheader(img,0,{'CRVAL1':[zro+int(shift),'']})
                         floyds.util.updateheader(img,0,{'shift':[float(shift),'']})
-                    else:  print 'object not found'
+                    else:  print('object not found')
 ####################################################     flat field
               if img and flatfile and setup[0]=='red':
                       imgn='n'+img
@@ -467,20 +467,20 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       _grpid1=floyds.util.readkey3(hdr1,'grpid')
                       _grpid2=floyds.util.readkey3(hdr2,'grpid')
                       if _grpid1==_grpid2:
-                          print flatfile,img,setup[0]
+                          print(flatfile,img,setup[0])
                           imgn=floyds.fringing_classicmethod2(flatfile,img,'no','*',15,setup[0])
                       else:
-                          print 'Warning flat not the same OB'
+                          print('Warning flat not the same OB')
                           imgex=floyds.floydsspecdef.extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)
                           floyds.delete('flat'+imgex)
                           iraf.specred.apsum(flatfile,output='flat'+imgex,referen=img,interac='no',find='no',recente='no',resize='no',\
                                              edit='no',trace='no',fittrac='no',extract='yes',extras='no',review='no',backgro='none')
                           fringingmask=floyds.normflat('flat'+imgex)
-                          print '\n### fringing correction'
-                          print imgex,fringingmask
+                          print('\n### fringing correction')
+                          print(imgex,fringingmask)
                           imgex,scale,shift=floyds.correctfringing_auto(imgex,fringingmask)  #  automatic correction
                           shift=int(.5+float(shift)/3.5)        # shift from correctfringing_auto in Angstrom
-                          print '\n##### flat scaling: ',str(scale),str(shift)
+                          print('\n##### flat scaling: ',str(scale),str(shift))
 ########################################################
                           datax, hdrx = fits.getdata(flatfile, 0, header=True)
                           xdim=hdrx['NAXIS1']
@@ -533,7 +533,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                   else: imgdn=''
                   if _sens not in outputfile[tpe][archfile]: outputfile[tpe][archfile].append(_sens)
                   else:        imgdn='' 
-                  print '\n### do 2D calibration'
+                  print('\n### do 2D calibration')
               else:
                   imgd=''
                   imgdn=''
@@ -542,8 +542,8 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                   try:
                       imgdnex=floyds.floydsspecdef.extractspectrum(imgdn,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)
                   except Exception as e:
-                      print 'failed to extract', imgdn
-                      print e
+                      print('failed to extract', imgdn)
+                      print(e)
                       imgdnex=''
               else:       
                   imgdnex=''
@@ -551,8 +551,8 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                   try:
                       imgdex=floyds.floydsspecdef.extractspectrum(imgd,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)  
                   except Exception as e:
-                      print 'failed to extract', imgd
-                      print e
+                      print('failed to extract', imgd)
+                      print(e)
                       imgdex=''
               else:
                   imgdex=''
@@ -565,15 +565,15 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       try:
                           imgnex=floyds.floydsspecdef.extractspectrum(imgn,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)  
                       except Exception as e:
-                          print 'failed to extract', imgn
-                          print e
+                          print('failed to extract', imgn)
+                          print(e)
                           imgnex=''
                   elif img:
                       try:
                           imgnex=floyds.floydsspecdef.extractspectrum(img,dv,_ext_trace,_dispersionline,_interactive,tpe,automaticex=_automaticex)  
                       except Exception as e:
-                          print 'failed to extract', img
-                          print e
+                          print('failed to extract', img)
+                          print(e)
                           imgnex=''
                   if imgnex:
                     hdrs=floyds.util.readhdr(imgnex)
@@ -582,7 +582,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                       _outputsens2='sens_'+_tel+'_'+str(floyds.util.readkey3(hdrs,'date-night'))+'_'+str(floyds.util.readkey3(hdrs,'grism'))+\
                           '_'+re.sub('.dat','',floyds.util.readkey3(hdrs,'stdname'))+'_'+str(MJDtoday)
                     except:  sys.exit('Error: missing header -stdname- in standard '+str(standardfile)+'  ')                          
-                    print '\n### compute sensitivity function and atmofile'
+                    print('\n### compute sensitivity function and atmofile')
                     if setup[0]=='red':
                           atmofile=floyds.floydsspecdef.telluric_atmo(imgnex)
                           if atmofile and atmofile not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(atmofile)
@@ -593,7 +593,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           try:
                               _outputsens2=floyds.floydsspecdef.sensfunction(stdusedclean,_outputsens2,_function,8,_interactive)
                           except:
-                              print 'Warning: problem computing sensitivity function'
+                              print('Warning: problem computing sensitivity function')
                               _outputsens2=''
                           if setup not in atmo: atmo[setup]=[atmofile]
                           else: atmo[setup].append(atmofile)
@@ -602,7 +602,7 @@ def floydsautoredu(files,_interactive,_dobias,_doflat,_listflat,_listbias,_lista
                           try:
                               _outputsens2=floyds.floydsspecdef.sensfunction(imgnex,_outputsens2,_function,12,_interactive,'3400:4700')#,3600:4300')
                           except:
-                              print 'Warning: problem computing sensitivity function'
+                              print('Warning: problem computing sensitivity function')
                               _outputsens2=''
                     if _outputsens2  and _outputsens2 not in outputfile[tpe][archfile]:    outputfile[tpe][archfile].append(_outputsens2)
     ###################################################
@@ -662,7 +662,7 @@ def badimage(img,_type):
                 good=0
             if rr1<1000:
                 good=0
-    if good==0:  print '\n### warning:  image '+img+' rejected'
+    if good==0:  print('\n### warning:  image '+img+' rejected')
     return good
 
 #########################################
@@ -708,7 +708,7 @@ def archivespectrum(img,_force=True):
     a=re.sub('-','',string.split(a,'T')[0])
     directory='/science/'+str(user)+'/data/WEB/floyds/'+a+'_'+_tel
     try:
-        if os.path.isdir(directory): print 'directory there'
+        if os.path.isdir(directory): print('directory there')
         else:                        os.system('mkdir '+directory)
         imglist=glob.glob(directory+'/*_'+_tel+'_*2df*fits')
         filethere=0

@@ -112,8 +112,8 @@ def readlist(listfile):
                             hdulist = fits.open(ff)
                             imglist.append(ff)
                         except Exception as e:
-                            print 'problem reading header of', ff
-                            print e
+                            print( 'problem reading header of', ff)
+                            print(e)
             except:
                 sys.exit('\n##### Error ###\n file ' + str(listfile) + ' do not  exist\n')
     if len(imglist) == 0:
@@ -156,7 +156,7 @@ def readhdr(img):
     try:
         hdr = fits.getheader(img)
     except Exception as e:
-        print "Couldn't read header of {}. Try deleting it and starting over.".format(img)
+        print("Couldn't read header of {}. Try deleting it and starting over.".format(img))
         raise e
     return hdr
 
@@ -314,8 +314,8 @@ def updateheader(filename, dimension, headerdict):
         header.update(tupledict)
         hdulist.close()
     except Exception as e:
-        print 'header of', image, 'not updated:'
-        print e
+        print('header of', image, 'not updated:')
+        print(e)
 
 #################################################################################################
 def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _ysize=1, _erase='yes'):
@@ -340,18 +340,18 @@ def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _
                 sss = iraf.display(img, frame, xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize, erase=_erase,
                                    fill='yes', zscale='no', zrange='no', z1=_z1, z2=_z2, Stdout=1)
             except:
-                print ''
-                print '### ERROR: PROBLEM OPENING DS9'
-                print ''
+                print('')
+                print('### ERROR: PROBLEM OPENING DS9')
+                print('')
                 goon = 'False'
         else:
             try:
                 sss = iraf.display(img, frame, xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize, erase=_erase,
                                    fill='yes', Stdout=1)
             except:
-                print ''
-                print '### ERROR: PROBLEM OPENING DS9'
-                print ''
+                print('')
+                print('### ERROR: PROBLEM OPENING DS9')
+                print('')
                 goon = False
 
         if scale and goon:
@@ -374,7 +374,7 @@ def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _
                     z22 = _z22
                 else:
                     z22 = float(z22)
-                print z11, z22
+                print(z11, z22)
                 sss = iraf.display(img, frame, fill='yes', xcen=_xcen, ycen=_ycen, xsize=_xsize, ysize=_ysize,
                                    erase=_erase,
                                    zrange='no', zscale='no', z1=z11, z2=z22, Stdout=1)
@@ -386,7 +386,7 @@ def display_image(img, frame, _z1, _z2, scale, _xcen=0.5, _ycen=0.5, _xsize=1, _
         if goon:
             _z1, _z2 = string.split(string.split(sss[0])[0], '=')[1], string.split(string.split(sss[0])[1], '=')[1]
     else:
-        print 'Warning: image ' + str(img) + ' not found in the directory '
+        print('Warning: image ' + str(img) + ' not found in the directory ')
     return _z1, _z2, goon
 
 
@@ -411,7 +411,7 @@ def searchatmo(img, listatmo):
         distance = []
         goodlist = []
         for atmo in listatmo:
-            print atmo
+            print(atmo)
             hdra = readhdr(atmo)
             JDarc = readkey3(hdra, 'JD')
             grism1 = readkey3(hdra, 'grism')
@@ -452,7 +452,7 @@ def searcharc(img, listarc):
         distance = []
         goodlist = []
         for arc in listarc:
-            print arc
+            print(arc)
             hdra = readhdr(arc)
             JDarc = readkey3(hdra, 'JD')
             grism1 = readkey3(hdra, 'grism')
@@ -788,11 +788,11 @@ def archivingtar(outputlist, nametar):
     import os, string, re
     from floyds.util import delete
 
-    print '### making a tar with pre-reduced frames ........ please wait'
+    print('### making a tar with pre-reduced frames ........ please wait')
     stringa = ' '.join(outputlist)
     delete(nametar)
     os.system('tar -zcvf ' + nametar + ' ' + stringa)
-    print '### tar file: ' + nametar + '\n'
+    print('### tar file: ' + nametar + '\n')
 
 
 #################################################################
@@ -868,7 +868,7 @@ def classifyfast(fitsfile, program='snid'):
     iraf.onedspec.wspectext(fitsfile + '[*,1,1]', imgasci, header='no')
 
     if program == 'snid':
-        print '\n######################\nclassify with snid\n'
+        print('\n######################\nclassify with snid\n')
         os.system('snid plot=0 iquery=0 inter=0 verbose=0 ' + imgasci)
         f = open(re.sub('.asci', '_snid.output', imgasci), 'r')
         ss = f.readlines()
@@ -888,11 +888,11 @@ def classifyfast(fitsfile, program='snid'):
             _frac.append(float(bb[bb.keys()[ii]]['frac']))
             _phase.append(float(bb[bb.keys()[ii]]['phase']))
     elif program == 'superfit':
-        print 'classifiy with suprfit'
+        print('classifiy with suprfit')
     elif program == 'gelato':
-        print 'gelato'
+        print('gelato')
     else:
-        print 'warning: program not found'
+        print('warning: program not found')
     trigger = False
     if _type[0] not in ['AGN', 'NotSN', 'Gal']:
         if _phase[0] <= 0:
@@ -902,15 +902,15 @@ def classifyfast(fitsfile, program='snid'):
                 trigger = True
             elif _type[0] in ['Ia-csm']:
                 trigger = True
-    print '\n#########################\n'
-    print '\n   Type        %        phase   (most probable)'
-    print '%7s\t%7s\t%7s' % (str(_type[0]), str(_frac[0]), str(_phase[0]))
-    print '\n   Type        %        phase    (second most probable)'
-    print '%7s\t%7s\t%7s' % (str(_type[1]), str(_frac[1]), str(_phase[1]))
+    print('\n#########################\n')
+    print('\n   Type        %        phase   (most probable)')
+    print('%7s\t%7s\t%7s' % (str(_type[0]), str(_frac[0]), str(_phase[0])))
+    print('\n   Type        %        phase    (second most probable)')
+    print('%7s\t%7s\t%7s' % (str(_type[1]), str(_frac[1]), str(_phase[1])))
     if trigger:
-        print '\n##################\n INTERESTING SN !!!!\n ACTIVATE FOLLOW-UP WITH FULL LCOGT NETWORK !!!!\n\n'
+        print('\n##################\n INTERESTING SN !!!!\n ACTIVATE FOLLOW-UP WITH FULL LCOGT NETWORK !!!!\n\n')
     else:
-        print '\n##################\n BORING SN ...... \n\n'
+        print('\n##################\n BORING SN ...... \n\n')
     #     print '\n We report that a spectrum of '+fitsfile+' was obtained robotically on Aug XX with the FLOYDS spectrograph '+
     #     ' at "Faulkes Telescope XXX". The spectrum (range 320-1000 nm) shows it to be a SN Ia roughly one week before maximum light, and is consistent with the host galaxy (CGCG 425-26) redshift of z=0.027. Classification was performed via supernova spectrum cross correlation using SNID (Blondin & Tonry, 2007, ApJ, 666, 1024).'
     return _type, _frac, _phase
@@ -954,7 +954,7 @@ def spectraresolution2(img0, ww=25):
     lines = []
     if len(ff) > 0:
         for i in ff:    lines.append(float(string.split(i)[2]))
-        print lines
+        print(lines)
         lines = compress((aa[0] < array(lines)) & (array(lines) < aa[-1]), array(lines))
         cursor = ''
         yym = ninterp(lines - ww, aa, yy)

@@ -62,7 +62,7 @@ if __name__ == "__main__":
         listfile4 = glob.glob('coj2m002*00.fits')
         listfile = listfile1 + listfile2 + listfile3 + listfile4
         files = []
-        print 'making the list with raw data in the current directory ...... please wait'
+        print('making the list with raw data in the current directory ...... please wait')
         for img in listfile:
             _type = ''
             hdr0 = readhdr(img)
@@ -90,10 +90,10 @@ if __name__ == "__main__":
                     if float(_exptime) == 0.0:
                         _type = 'bias'
                 if not _type:
-                    print 'warning: object not recognized '
+                    print('warning: object not recognized ')
                     _object = readkey3(hdr0, 'object')
                     _filter = readkey3(hdr0, 'filter')
-                    print img, _object, _imagetype, _filter, _exptime
+                    print(img, _object, _imagetype, _filter, _exptime)
                     if _xwindow:
                         answ = '5'
                     else:
@@ -243,8 +243,8 @@ if __name__ == "__main__":
             try:
                 bb, kk = floyds.gettar(img0)
             except Exception as e:
-                print 'failed to download guiding images for', img0
-                print e
+                print('failed to download guiding images for', img0)
+                print(e)
                 bb, kk = '', ''
             if bb:
                 imglist.append(bb)
@@ -281,4 +281,4 @@ if __name__ == "__main__":
                 floyds.util.delete(img)
 
     stoptime = time.time()
-    print 'runnning time ' + str(stoptime - starttime)
+    print('runnning time ' + str(stoptime - starttime))
