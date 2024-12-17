@@ -86,7 +86,7 @@ def correctfringing_auto(img0, imgN):
     fits.writeto(img0, float32(data1), hdr)
     floyds.util.updateheader(img0, 0, {'FRSCALE': [so2, 'fringing scale factor ']})
     floyds.util.updateheader(img0, 0, {'FRSHIFT': [shift, 'fringing shift factor ']})
-    floyds.util.updateheader(img0, 0, {'FLAT' + arm: [string.split(imgN, '/')[-1], 'flat field file ']})
+    floyds.util.updateheader(img0, 0, {'FLAT' + arm: [str.split(imgN, '/')[-1], 'flat field file ']})
     return img0, so2, shift
 
 
@@ -265,8 +265,8 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
             if str(readkey3(hdrs, 'grism')) == 'blu' and _tel in ['fts', 'coj'] and fts_contaminated:
                 print('split blue sens')
                 sss=''
-                for jj in range(0, len(string.split(sample, ','))):
-                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                for jj in range(0, len(str.split(sample, ','))):
+                    aa, bb = str.split(str.split(sample, ',')[jj], ':')
                     std0 = '_stdcut' + str(jj) + '.fits'
                     std1 = '_stdcut' + str(jj)
                     sens1 = '_senscut' + str(jj) + '.fits'
@@ -284,7 +284,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
 
                     floyds.util.delete(std1 + ',' + std0)
                 _outputsens = combineredsens(sss, _outputsens)
-                for i in string.split(sss, ','):
+                for i in str.split(sss, ','):
                     floyds.util.delete(i)
             elif str(readkey3(hdrs, 'grism')) == 'blu':
                 floyds.floydsspecdef.cutstd(_outputstd, start=3600, end=3900, out=False)
@@ -296,8 +296,8 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                                   ignorea='yes', observa=_observatory, graphs='sri', functio=_function, order=_order,
                                   interac=_interactive)
                 sss = 'sens0.fits'
-                for jj in range(0, len(string.split(sample, ','))):
-                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                for jj in range(0, len(str.split(sample, ','))):
+                    aa, bb = str.split(str.split(sample, ',')[jj], ':')
                     std0 = '_stdcut' + str(jj) + '.fits'
                     std1 = '_stdcut' + str(jj)
                     sens1 = '_senscut' + str(jj) + '.fits'
@@ -312,13 +312,13 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
                     floyds.util.delete(std1 + ',' + std0)
                 _outputsens = combineblusens(sss, _outputsens)
                 print(_outputsens)
-                for i in string.split(sss, ','):
+                for i in str.split(sss, ','):
                     floyds.util.delete(i)
             else: # red arm
                 print('split red sens')
                 sss=''
-                for jj in range(0, len(string.split(sample, ','))):
-                    aa, bb = string.split(string.split(sample, ',')[jj], ':')
+                for jj in range(0, len(str.split(sample, ','))):
+                    aa, bb = str.split(str.split(sample, ',')[jj], ':')
                     std0 = '_stdcut' + str(jj) + '.fits'
                     std1 = '_stdcut' + str(jj)
                     sens1 = '_senscut' + str(jj) + '.fits'
@@ -336,7 +336,7 @@ def sensfunction(standardfile, _outputsens, _function, _order, _interactive, sam
 
                     floyds.util.delete(std1 + ',' + std0)
                 _outputsens = combineredsens(sss, _outputsens)
-                for i in string.split(sss, ','):
+                for i in str.split(sss, ','):
                     floyds.util.delete(i)
 
         hdr = fits.getheader(standardfile)
@@ -1006,10 +1006,10 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     _ra = float(readkey3(hdr, 'RA'))
                     _dec = float(readkey3(hdr, 'DEC'))
                 except:
-                    ra00 = string.split(readkey3(hdr, 'RA'), ':')
+                    ra00 = str.split(readkey3(hdr, 'RA'), ':')
                     ra0, ra1, ra2 = float(ra00[0]), float(ra00[1]), float(ra00[2])
                     _ra = ((ra2 / 60. + ra1) / 60. + ra0) * 15.
-                    dec00 = string.split(readkey3(hdr, 'DEC'), ':')
+                    dec00 = str.split(readkey3(hdr, 'DEC'), ':')
                     dec0, dec1, dec2 = float(dec00[0]), float(dec00[1]), float(dec00[2])
                     if '-' in str(dec0):
                         _dec = (-1) * ((dec2 / 60. + dec1) / 60. + ((-1) * dec0))
@@ -1294,7 +1294,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                         else:
                             if arcref[0] == '/':
                                 os.system('cp ' + arcref + ' .')
-                                arcref = string.split(arcref, '/')[-1]
+                                arcref = str.split(arcref, '/')[-1]
                             Path('database/').mkdir(parents=True, exist_ok=True)
                             if os.path.isfile(floyds.util.searcharc(imgex, '')[1] + '/database/id' + re.sub('.fits', '',
                                                                                                             arcref)):
@@ -1538,7 +1538,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                                                      extinction=_extinctdir + _extinction, observatory=_observatory,
                                                      airmass=_airmass, ignorea='yes', exptime=_exptime, fnu='no')
                         floyds.util.updateheader(imgf, 0, {
-                        'sensfun' + setup[0][0]: [string.split(_sens, '/')[-1], 'sensitivity curve']})
+                        'sensfun' + setup[0][0]: [str.split(_sens, '/')[-1], 'sensitivity curve']})
                         hdr = floyds.readhdr(imgf)
                         fileident = str(floyds.readkey3(hdr, 'JD'))[:9] + ' ' + floyds.readkey3(hdr,
                                                                                                 'object') + ' ' + str(
@@ -1569,7 +1569,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                             if imge not in outputfile: 
                                 outputfile.append(imge)
                             floyds.util.updateheader(imge, 0,
-                                                     {'ATMO' + setup[0][0]: [string.split(_atmo, '/')[-1], '']})
+                                                     {'ATMO' + setup[0][0]: [str.split(_atmo, '/')[-1], '']})
                             imgin = imge
                             if _atmo not in outputfile: 
                                 outputfile.append(_atmo)
@@ -1680,15 +1680,15 @@ def cutstd(stdfile, start=1, end=1e10, out=True):
     floyds.util.delete(stdfile)
     f = open(stdfile, 'w')
     if out:  # use only the values inside start and end
-        f.write(re.sub(string.split(ss[0])[-3], str(start), re.sub(string.split(ss[0])[-2], str(end), ss[0])))
+        f.write(re.sub(str.split(ss[0])[-3], str(start), re.sub(str.split(ss[0])[-2], str(end), ss[0])))
     else:
         f.write(ss[0])
     for line in ss[1:]:
         if out:  # use only the values inside start and end
-            if float(string.split(line)[0]) >= float(start) and float(string.split(line)[0]) <= float(end):
+            if float(str.split(line)[0]) >= float(start) and float(str.split(line)[0]) <= float(end):
                 f.write(line)
         else:  # don't use the value inside start and end
-            if float(string.split(line)[0]) <= float(start) or float(string.split(line)[0]) >= float(end):
+            if float(str.split(line)[0]) <= float(start) or float(str.split(line)[0]) >= float(end):
                 f.write(line)
     f.close()
 
@@ -1925,7 +1925,7 @@ def combineblusens(imglist, imgout='pippo.fits'):
     from numpy import interp as ninterp
     import floyds
 
-    img1, img2 = string.split(imglist, ',')
+    img1, img2 = str.split(imglist, ',')
     xx1, yy1 = floyds.util.readspectrum(img1)
     xx2, yy2 = floyds.util.readspectrum(img2)
     yy22 = ninterp(xx2, xx1, yy1)
@@ -2081,8 +2081,8 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, fcfile_untilt, _int
     iraf.ccdred.verbose = 'yes'
     iraf.specred.verbose = 'yes'
 
-    imgrect = string.split(fcfile, '/fc')[-1] + '.fits'
-    imgrect1 = string.split(fcfile1, '/fc')[-1] + '.fits'
+    imgrect = str.split(fcfile, '/fc')[-1] + '.fits'
+    imgrect1 = str.split(fcfile1, '/fc')[-1] + '.fits'
 
     Path('database/').mkdir(parents=True, exist_ok=True)
     os.system('cp ' + fcfile + ' database/')
@@ -2286,7 +2286,7 @@ def applyflat(img, flatimg, output='', scale='', shift=''):
     fits.writeto(output, np.float32(datanew2), hdr)
     floyds.util.updateheader(output, 0, {'FRSCALE': [scale, 'fringing scale factor ']})
     floyds.util.updateheader(output, 0, {'FRSHIFT': [shift, 'fringing shift factor ']})
-    floyds.util.updateheader(output, 0, {'FLAT' + arm: [string.split(flatimg, '/')[-1], 'flat field file ']})
+    floyds.util.updateheader(output, 0, {'FLAT' + arm: [str.split(flatimg, '/')[-1], 'flat field file ']})
     floyds.delete('_sky1.fits')
     floyds.delete('_sky2.fits')
     floyds.delete('sky1.fits')
