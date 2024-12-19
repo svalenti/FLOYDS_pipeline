@@ -1,0 +1,30 @@
+# Thu 00:08:22 19-Dec-2024
+begin	identify ftn_blue_2.0_new - Ap 1
+	id	ftn_blue_2.0_new
+	task	identify
+	image	ftn_blue_2.0_new - Ap 1
+	aperture	1
+	aplow	40.61
+	aphigh	50.61
+	units	Angstroms
+	features	4
+	        244.48 3650.34261   3650.158   7.0 1 1 Hg
+	        519.82 4046.51599   4046.565   7.0 1 1 Hg
+	        736.37 4358.09477   4358.335   7.0 1 1 Hg
+	       1502.80 5460.85464    5460.75   7.0 1 1 Hg
+	function legendre
+	order 2
+	sample *
+	naverage 1
+	niterate 0
+	low_reject 3.
+	high_reject 3.
+	grow 0.
+	coefficients	6
+		2.
+		2.
+		244.4763031005859
+		1502.804077148438
+		4555.598623242306
+		905.2560118125174
+
