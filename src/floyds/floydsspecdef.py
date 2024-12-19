@@ -1129,24 +1129,45 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
                     print('\n### Warning: no arc found')
 
                 ###################################################################
-                if setup[0] == 'red':
-                    fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_red'
-                    fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_red'
-                    fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_red'
-                    print(fcfile)
+                old =False
+                if old:
+                    if setup[0] == 'red':
+                        fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_red'
+                        fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_red'
+                        fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_red'
+                        print(fcfile)
+                    else:
+                        fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_blue'
+                        fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_blue'
+                        fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_blue'
+        
+                        print(fcfile)
+        
+                    if not img:  # or not arcfile:
+                        print('\n### no calibration for this setup available')
+                    else:
+                        print(img, arcfile, flatfile, fcfile, fcfile1, _cosmic)
+                        img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum(img, arcfile, flatfile, fcfile,
+                                                                                      fcfile1, fcfile_untilt, 'no', _cosmic)
                 else:
-                    fcfile = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify_' + _tel + '_blue'
-                    fcfile1 = floyds.__path__[0] + '/standard/ident/' + camera + '/fcrectify1_' + _tel + '_blue'
-                    fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_blue'
-
-                    print(fcfile)
-
-                if not img:  # or not arcfile:
-                    print('\n### no calibration for this setup available')
-                else:
-                    print(img, arcfile, flatfile, fcfile, fcfile1, _cosmic)
-                    img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum(img, arcfile, flatfile, fcfile,
-                                                                                  fcfile1, fcfile_untilt, 'no', _cosmic)
+                    if setup[0] == 'red':
+                        fcfile = floyds.__path__[0] + '/standard/ident2/' + camera + '/fcrectify_' + _tel + '_red'
+                        fcfile1 = floyds.__path__[0] + '/standard/ident2/' + camera + '/fcrectify1_' + _tel + '_red'
+#                        fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_red'
+                        print(fcfile)
+                    else:
+                        fcfile = floyds.__path__[0] + '/standard/ident2/' + camera + '/fcrectify_' + _tel + '_blue'
+                        fcfile1 = floyds.__path__[0] + '/standard/ident2/' + camera + '/fcrectify1_' + _tel + '_blue'
+#                        fcfile_untilt = floyds.__path__[0] + '/standard/ident/' + camera + '/fcuntilt_' + _tel + '_blue'
+        
+                        print(fcfile)
+        
+                    if not img:  # or not arcfile:
+                        print('\n### no calibration for this setup available')
+                    else:
+                        print(img, arcfile, flatfile, fcfile, fcfile1, _cosmic)
+                        img, arcfile, flatfile = floyds.floydsspecdef.rectifyspectrum_new(img, arcfile, flatfile, fcfile,
+                                                                                      fcfile1, 'no', _cosmic)                    
 
                 ###############     flat correction  method 1 or 3  ###############
                 if img[:2] != 'tt':
@@ -1654,6 +1675,7 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
 
 
 def raw_input_num(base_prompt,default=None):
+    import floyds
     if default is None:
         prompt = base_prompt+': '
     else:
@@ -1694,132 +1716,7 @@ def cutstd(stdfile, start=1, end=1e10, out=True):
 
 
 ######## currently using combspec2 instead of combspec ########
-#def combspec(_img0, _img1, _output, scale=True, num=None):
-#    import numpy as np
-#    #    from numpy import compress, array, trapz, argsort
-#    #    from numpy import interp as ninterp
-#    import re, string, os
-#    import floyds
-#    from astropy.io import fits
-#    _x0, _y0 = floyds.util.readspectrum(_img0)
-#    _x1, _y1 = floyds.util.readspectrum(_img1)
-
-#    hdr0 = fits.getheader(_img0)
-#    hdr1 = fits.getheader(_img1)
-#    if 'NAXIS3' in hdr0 and 'NAXIS3' in hdr1:
-#        if hdr0['NAXIS3'] == hdr1['NAXIS3']:
-#            dimension = hdr1['NAXIS3']
-#        else:
-#            dimension = 1
-#    else:
-#        dimension = 1
-
-#    if min(_x0) < min(_x1):
-#        x0, y0 = _x0, _y0
-#        x1, y1 = _x1, _y1
-#        img0, img1 = _img0, _img1
-#    else:
-#        x0, y0 = _x1, _y1
-#        x1, y1 = _x0, _y0
-#        img0, img1 = _img1, _img0
-
-#    limmin = max(min(x0), min(x1))
-#    limup = min(max(x0), max(x1))
-#    x01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limup), x0)
-#    y01 = np.compress((np.array(x0) > limmin) & (np.array(x0) < limup), y0)
-#    x11 = x01
-#    if not num:   
-#        num = int(len(x01) / 7)
-#    y11 = np.interp(x01, x1, y1)
-#    if scale:
-#        integral0 = np.trapz(y01, x01)
-#        integral1 = np.trapz(y11, x11)
-#        if integral0 < integral1:
-#            A0, A1 = integral1 / integral0, 1
-#        else:
-#            A0, A1 = 1, integral0 / integral1
-#    else:
-#        A0, A1 = 1, 1
-#    a = abs(y11 * A1 - y01 * A0)
-#    b = (y11 * A1 - y01 * A0)
-#    a1 = a[0:num]
-#    c1 = x01[0:num]
-#    a2 = a[-num:]
-#    c2 = x01[-num:]
-#    from pyraf import iraf
-
-#    floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-#    floyds.util.delete(_output)
-
-#    if dimension == 1:
-#        iraf.scopy(img0, 's1.fits', w1='INDEF', w2=c2[np.argsort(a2)[0]], rebin='no')
-#        iraf.scopy(img1, 's2.fits', w1=c1[np.argsort(a1)[0]], w2='INDEF', rebin='no')
-#        iraf.sarith(input1='s1.fits', op='*', input2=A0, output='s11.fits')
-#        iraf.sarith(input1='s2.fits', op='*', input2=A1, output='s22.fits')
-#        iraf.specred.scombine(input='s11.fits,s22.fits', w1='INDEF', w2='INDEF', output=_output)
-#    else:
-#        print 'more than one dimension'
-#        datavec = {}
-#        hdrvec = {}
-#        for ii in range(dimension):
-#            outputn = re.sub('.fits', '', _output) + '_' + str(ii + 1) + '.fits'
-#            floyds.util.delete(outputn)
-#            floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-#            iraf.scopy(img0 + '[*,1,' + str(ii + 1) + ']', 's1.fits', w1='INDEF', w2=c2[np.argsort(a2)[0]], rebin='no')
-#            iraf.scopy(img1 + '[*,1,' + str(ii + 1) + ']', 's2.fits', w1=c1[np.argsort(a1)[0]], w2='INDEF', rebin='no')
-#            iraf.sarith(input1='s1.fits', op='*', input2=A0, output='s11.fits')
-#            iraf.sarith(input1='s2.fits', op='*', input2=A1, output='s22.fits')
-#            iraf.specred.scombine(input='s11.fits,s22.fits', w1='INDEF', w2='INDEF', output=outputn)
-#            datavec[ii], hdrvec[ii] = fits.getdata(outputn, 0, header=True)
-
-#        datat = np.array([[datavec[0]], [datavec[1]], [datavec[2]], [datavec[3]]])
-#        floyds.util.delete(_output)
-#        try:
-#            hdr0.update('NAXIS1', hdrvec[1]['NAXIS1'], hdrvec[1].comments['NAXIS1'])
-#            hdr0.update('CRVAL1', hdrvec[1]['CRVAL1'], hdrvec[1].comments['CRVAL1'])
-#            hdr0.update('CD1_1', hdrvec[1]['CD1_1'], hdrvec[1].comments['CD1_1'])
-#            hdr0.update('CRPIX1', hdrvec[1]['CRPIX1'], hdrvec[1].comments['CRPIX1'])
-#        except:
-#            hdr0.update('NAXIS1', hdrvec[1]['NAXIS1'], 'Width of image data')
-#            hdr0.update('CRVAL1', hdrvec[1]['CRVAL1'], 'wavelength ref.')
-#            hdr0.update('CD1_1', hdrvec[1]['CD1_1'], '')
-#            hdr0.update('CRPIX1', hdrvec[1]['CRPIX1'], 'Pixel ref.')
-#            #       hdr0.update('NAXIS1',hdrvec[1]['NAXIS1'],hdrvec[1].comments['NAXIS1'])
-#        fits.writeto(_output, datat, hdr0)
-
-#    floyds.util.delete('s1.fits,s2.fits,s11.fits,s22.fits')
-#    for ii in range(dimension):
-#        outputn = re.sub('.fits', '', _output) + '_' + str(ii + 1) + '.fits'
-#        floyds.util.delete(outputn)
-#    dicto = {}
-#    listahed = ['ATMOR', 'ATMOB', 'SENSFUNB', 'SENSFUNR', 'ARCBLU', 'ARCRED', 'FLATRED', 'FLATBLUE',
-#                'SHIFTR', 'SHIFTB', 'LAMRMS_R', 'LAMNLINR', 'SPE_ER_R', 'LAMRMS_B', 'LAMNLINB', 'SPE_ER_B',
-#                'SPERES_R', 'SPERES_B']
-
-#    for hed in listahed:
-#        for hh in [hdr0, hdr1]:
-#            if hed in hh:
-#                try:
-#                    dicto[hed] = [hh[hed], hh.comments[hed]]
-#                except:
-#                    dicto[hed] = [hh[hed], '']
-
-#    if 'XMIN' in hdr0 and 'XMIN' in hdr1: _xmin = min(hdr0['XMIN'], hdr1['XMIN'])
-#    if 'XMAX' in hdr0 and 'XMAX' in hdr1: _xmax = max(hdr0['XMAX'], hdr1['XMAX'])
-#    dicto['XMIN'] = [_xmin, '']
-#    dicto['XMAX'] = [_xmax, '']
-#    dicto['GRISM'] = ['red/blu', 'full range spectrum']
-#    floyds.util.updateheader(_output, 0, dicto)
-
-#    #    iraf.scopy(img0,'s1.fits',w1='INDEF',w2=c2[argsort(a2)[0]],rebin='no')
-#    #    iraf.scopy(img1,'s2.fits',w1=c1[argsort(a1)[0]],w2='INDEF',rebin='no')
-#    #    iraf.sarith(input1='s1.fits',op='*',input2=A0,output='s11.fits')
-#    #    iraf.sarith(input1='s2.fits',op='*',input2=A1,output='s22.fits')
-#    #    iraf.specred.scombine(input='s11.fits,s22.fits',w1='INDEF',w2='INDEF',output=_output)
-#    import time
-
-#    time.sleep(1)
-#    return _output
+# removed
 
 
 ######## currently using combspec2 instead of combspec ########
@@ -1997,7 +1894,7 @@ def rectify_single_image(img, imgrect, imgrect1, fcuntilt_file, xa, xb, ya, yb, 
     from pyraf import iraf
     import re
     import os
-
+    
     first_rectified_image = 't' + img
     floyds.util.delete(first_rectified_image)
     iraf.specred.transform(input=img, output=first_rectified_image, minput='', fitnames=re.sub('.fits', '', imgrect),
@@ -2150,6 +2047,176 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, fcfile_untilt, _int
     else:
         output_flatfile = ''
     return 'tt' + img, output_arcfile, output_flatfile
+
+##################################################################
+
+def rectifyspectrum_new(img, arcfile, flatfile, fcfile, fcfile1, _interactive=True, _cosmic=True):
+    import floyds
+    from floyds.util import delete, updateheader, readhdr, readkey3, display_image
+    import string, re, os, glob, sys
+    from numpy import array, arange, argmin, float32
+    from astropy.io import fits
+    from pyraf import iraf
+    import datetime
+
+    os.environ["PYRAF_BETA_STATUS"] = "1"
+    iraf.set(direc=floyds.__path__[0] + '/')
+    dv = floyds.util.dvex()
+    iraf.noao(_doprint=0)
+    iraf.imred(_doprint=0)
+    iraf.ccdred(_doprint=0)
+    iraf.twodspec(_doprint=0)
+    iraf.longslit(_doprint=0)
+    iraf.specred(_doprint=0)
+    toforget = ['ccdred.flatcombine', 'ccdred.zerocombine', 'ccdproc', 'specred.apall', 'longslit.identify',
+                'longslit.reidentify',
+                'specred.standard', 'longslit.fitcoords', 'specred.transform', 'specred.response']
+    for t in toforget: iraf.unlearn(t)
+    iraf.longslit.dispaxi = 2
+    iraf.longslit.mode = 'h'
+    iraf.identify.fwidth = 7
+    iraf.identify.order = 2
+    iraf.specred.dispaxi = 2
+    iraf.specred.mode = 'h'
+    iraf.ccdproc.darkcor = 'no'
+    iraf.ccdproc.fixpix = 'no'
+    iraf.ccdproc.trim = 'no'
+    iraf.ccdproc.flatcor = 'no'
+    iraf.ccdproc.overscan = 'no'
+    iraf.ccdproc.zerocor = 'no'
+    iraf.ccdproc.biassec = ''
+    iraf.ccdproc.ccdtype = ''
+    iraf.ccdred.verbose = 'yes'
+    iraf.specred.verbose = 'yes'
+
+    imgrect = str.split(fcfile, '/fc')[-1] + '.fits'
+    imgrect1 = str.split(fcfile1, '/fc')[-1] + '.fits'
+
+    Path('database/').mkdir(parents=True, exist_ok=True)
+    os.system('cp ' + fcfile + ' database/')
+    os.system('cp ' + fcfile1 + ' database/')
+#    os.system('cp ' + fcfile_untilt + ' database/')
+
+    ###################################    transform img, arc, flat
+    data, hdr = fits.getdata(img, 0, header=True)
+    _arm = floyds.util.readkey3(hdr, 'GRISM')
+    _slit = floyds.util.readkey3(hdr, 'slit')
+    _arm = floyds.util.readkey3(hdr, 'GRISM')
+    _tel = floyds.util.readkey3(hdr, 'TELID')
+    camera = floyds.util.readkey3(hdr, 'INSTRUME')
+
+    if _tel not in ['ftn', 'fts']:     _tel = floyds.util.readkey3(hdr, 'SITEID')
+    if _arm == 'red':
+        lambda1, lambda2 = 4850.0, 10180.0
+        if _tel in ['ftn', 'ogg']:
+            if camera == 'en06':
+                xa, xb = 0, 1792
+                ya, yb = 208, 309
+                y2 = 'INDEF'
+            else:
+                raise ValueError('Camera not supported by pipeline')
+        else:
+            if camera == 'en05':
+                xa, xb = 0, 1800   
+                ya, yb = 186, 285   # to be finetuned
+            elif camera == 'en12':
+                xa, xb = 0, 1792     # to be finetuned
+                ya, yb = 221, 312   # to be finetuned
+                y2 = 'INDEF'
+            else:
+                raise ValueError('Camera not supported by pipeline')
+    else:
+        lambda1, lambda2 = 3300.0, 5700.0
+        if _tel in ['ftn', 'ogg']:
+            if camera == 'en06':
+                xa, xb = 0, 1996
+                ya, yb = 275, 360
+                y2 = 'INDEF'
+            else:
+                raise ValueError('Camera not supported by pipeline')
+        else:
+            if camera == 'en05':
+                xa, xb = 0, 1669    # to be finetuned
+                ya, yb = 125, 226   # to be finetuned
+            elif camera == 'en12':  
+                xa, xb = 206, 1587   # to be finetuned
+                ya, yb = 182, 273   # to be finetuned
+                y2 = 100
+            else:
+                raise ValueError('Camera not supported by pipeline')
+    print(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, y2, _cosmic)
+    rectify_single_image_new(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, y2, _cosmic=_cosmic)
+    
+    if arcfile:
+        rectify_single_image_new(arcfile, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, y2, _cosmic=_cosmic)
+        output_arcfile = 'tt' + arcfile
+    else:
+        output_arcfile = ''
+    if flatfile:
+        rectify_single_image_new(flatfile, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, y2, _cosmic=False)
+        output_flatfile = 'tt' + flatfile
+    else:
+        output_flatfile = ''
+    return 'tt' + img, output_arcfile, output_flatfile
+
+################################################################3
+
+def rectify_single_image_new(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, y2, _cosmic=False):
+    import floyds
+    from numpy import float32
+    from astropy.io import fits
+    from pyraf import iraf
+    iraf.specred(_doprint=0)
+    toforget = ['specred.transform']
+    for t in toforget: iraf.unlearn(t)
+    import re
+    import os
+
+    first_rectified_image = 't' + img
+    floyds.util.delete(first_rectified_image)
+    iraf.specred.transform(input=img, output=first_rectified_image, minput='', fitnames=re.sub('.fits', '', imgrect),
+                           databas='database', x1='INDEF', x2='INDEF', dx=1, y1='INDEF', y2='INDEF', dy=1,
+                           flux='yes', blank=0, logfile='logfile')
+
+    data, hdr = fits.getdata(first_rectified_image, 0, header=True)
+#    print(ya,yb,xa,xb)
+#    raw_input('stop')
+    if not hdr.get('HDRVER'):
+        fits.writeto(first_rectified_image, float32(data[0][ya:yb, xa:xb]), hdr, overwrite=True)
+    else:
+        fits.writeto(first_rectified_image, float32(data[ya:yb, xa:xb]), hdr, overwrite=True)
+
+    iraf.hedit(first_rectified_image, 'CCDSEC', delete='yes', update='yes', verify='no', Stdout=1)
+    iraf.hedit(first_rectified_image, 'TRIM', delete='yes', update='yes', verify='no', Stdout=1)
+
+    if _cosmic:
+        _gain = floyds.util.readkey3(hdr, 'gain')
+        _rdnoise = floyds.util.readkey3(hdr, 'ron')
+        floyds.cosmics.lacos(first_rectified_image, output='', gain=_gain, readn=_rdnoise, xorder=9, yorder=9,
+                             sigclip=4.5, sigfrac=0.5, objlim=1, verbose=True, interactive=True)
+        floyds.util.updateheader(first_rectified_image, 0, {'LACOSMIC': [True, 'Laplacian cosmic ray rejection']})
+        print('\n### cosmic rays rejections ........ done ')
+    else:
+        floyds.util.updateheader(first_rectified_image, 0, {'LACOSMIC': [False, 'Laplacian cosmic ray rejection']})
+
+#    untilted_image = 'u' + first_rectified_image
+#    iraf.specred.transform(input=first_rectified_image, output=untilted_image, fitnames=os.path.basename(fcuntilt_file)[2:],
+#                           databas='database', x1='INDEF', x2='INDEF', dx=1,
+#                           y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
+#                           logfile='logfile')
+    wavelength_rectified_image = 'tt' + img
+    floyds.util.delete(wavelength_rectified_image)
+    iraf.specred.transform(input=first_rectified_image, output=wavelength_rectified_image, minput='',
+                           fitnames=re.sub('.fits', '', imgrect1),
+                           databas='database', x1=lambda1, x2=lambda2, dx='INDEF',
+                           y1='INDEF', y2='INDEF', dy=1, flux='yes', blank=0,
+                           logfile='logfile')  # , mode='h')
+    floyds.util.updateheader(wavelength_rectified_image, 0, {'DISPAXIS': [1, 'dispersion axis'],
+                                                             'CUNIT1': ['Angstrom', 'Units of dispersion axis']})
+#    raw_input('stop2')
+    floyds.util.delete(first_rectified_image)
+#    floyds.util.delete(untilted_image)
+
 
 
 #############################################################33333

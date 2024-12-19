@@ -100,7 +100,7 @@ def readlist(listfile):
     if '*' in listfile:
         imglist = glob.glob(listfile)
     elif ',' in listfile:
-        imglist = str.split(listfile, sep=',')
+        imglist = str.split(listfile, ',')
     else:
         try:
             hdulist = fits.open(listfile)
@@ -146,7 +146,7 @@ def delete(listfile):
                 ff = re.sub('\n', '', ff)
                 imglist.append(ff)
     elif ',' in listfile:
-        imglist = str.split(listfile, sep=',')
+        imglist = str.split(listfile, ',')
     else:
         imglist = [listfile]
     lista = []
