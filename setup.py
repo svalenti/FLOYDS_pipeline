@@ -40,7 +40,7 @@ setup(
     packages=['floyds'],
     package_dir={'':'src','doc':'doc'},
     package_data = {'floyds' : ["standard/MAB/*","standard/ident/*","standard/cat/*","standard/extinction/*",\
-                                "standard/ident/en*/*",
+                                "standard/ident/en*/*","standard/ident2/en*/*","standard/ident/*",\
                                 "standard/fits/*","standard/sex/*","standard/stdlist/*","standard/flux/*",\
                                 "archive/ftn/*/arc/blu/*/*fits","archive/ftn/*/arc/blu/*/*/id*",\
                                 "archive/ftn/*/arc/red/*/*fits","archive/ftn/*/arc/red/*/*/id*",\

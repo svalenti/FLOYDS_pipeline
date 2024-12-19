@@ -20,7 +20,7 @@ for img in imglist:
         _slit = floyds.util.readkey3(hdr, 'slit')
         _exptime = floyds.util.readkey3(hdr, 'exptime')
         _objname = floyds.util.readkey3(hdr, 'objname')
-        print _slit, _exptime, _objname
+        print(_slit, _exptime, _objname)
         if _slit == 'None':
             if _tel == 'ftn':
                 floyds.util.updateheader(img, 0, {'APERWID': ['1.6', 'slit']})
@@ -40,12 +40,12 @@ for img in imglist:
         if _grp == -1:
             _ra = floyds.util.readkey3(hdr, 'RA')
             _dec = floyds.util.readkey3(hdr, 'DEC')
-            print '\n### missing groupid, define it from coordinates'
-            print _ra, _dec
+            print('\n### missing groupid, define it from coordinates')
+            print(_ra, _dec)
             try:
                 sss = (('000'[len(str(int(_ra))):] + str(int(_ra)) + '00'[len(str(int(abs(_dec + 90)))):] +
                         str(int(abs(_dec + 90)))))
-                print sss
+                print(sss)
                 floyds.util.updateheader(img, 0, {'GRPUID': [sss, 'unique group id']})
             except:
                 pass

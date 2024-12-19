@@ -1,7 +1,7 @@
-from util import *
-import cosmics
-from floydsspecdef import *
-from floydsspecauto import *
+from floyds.util import *
+import floyds.cosmics
+from floyds.floydsspecdef import *
+from floyds.floydsspecauto import *
 
 __version__ = "unknown"
 try:
