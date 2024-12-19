@@ -1756,7 +1756,7 @@ def combspec2(_img0, _img1, _output, scale=True, num=None):
         imgblue, imgred = _img1, _img0
 
     # num is the index in xred corresponding to 1st decile of the overlap
-    if not num: num = np.searchsorted(xred, max(xblue)) / 10
+    if not num: num = np.searchsorted(xred, max(xblue)) // 10
 
     # rescale red & blue to match
     if scale: scomb_scale = 'median'
