@@ -884,8 +884,17 @@ def floydsspecreduction(files, _interactive, _dobias, _doflat, _listflat, _listb
             _naxis1 = 512
 
     _overscan = '[2049:' + str(_naxis1) + ',1:' + str(_naxis2) + ']'
-    _biassecblu = '[379:2047,325:511]'
-    _biassecred = '[1:1801,1:351]'
+    #####
+    # had code new trimming for FTS 2024-12-01  #
+    _jdfirstfile = hdr0['MJD-OBS']
+    _instrume = hdr0['INSTRUME']
+    #####
+    if _jdfirstfile > 60645 and _instrume in ['en12']:
+        _biassecblu = '[490:2048,325:511]'
+        _biassecred = '[1:1801,1:351]'
+    else:
+        _biassecblu = '[379:2047,325:511]'
+        _biassecred = '[1:1801,1:351]'
     lista = {}
     objectlist = {}
     biaslist = {}
@@ -2028,8 +2037,8 @@ def rectifyspectrum(img, arcfile, flatfile, fcfile, fcfile1, fcfile_untilt, _int
                 xa, xb = 0, 1669
                 ya, yb = 125, 226
             elif camera == 'en12':
-                xa, xb = 206, 1587
-                ya, yb = 182, 273
+                xa, xb = 0, 1559
+                ya, yb = 260, 335
                 y2 = 100
             else:
                 raise ValueError('Camera not supported by pipeline')
@@ -2121,7 +2130,7 @@ def rectifyspectrum_new(img, arcfile, flatfile, fcfile, fcfile1, _interactive=Tr
                 ya, yb = 186, 285   # to be finetuned
             elif camera == 'en12':
                 xa, xb = 0, 1792     # to be finetuned
-                ya, yb = 221, 312   # to be finetuned
+                ya, yb = 106, 206   # to be finetuned
                 y2 = 'INDEF'
             else:
                 raise ValueError('Camera not supported by pipeline')
@@ -2139,9 +2148,9 @@ def rectifyspectrum_new(img, arcfile, flatfile, fcfile, fcfile1, _interactive=Tr
                 xa, xb = 0, 1669    # to be finetuned
                 ya, yb = 125, 226   # to be finetuned
             elif camera == 'en12':  
-                xa, xb = 206, 1587   # to be finetuned
-                ya, yb = 182, 273   # to be finetuned
-                y2 = 100
+                xa, xb =   0, 1559   # to be finetuned
+                ya, yb = 254, 340   # to be finetuned
+                y2 = 'INDEF'
             else:
                 raise ValueError('Camera not supported by pipeline')
     print(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, lambda2, y2, _cosmic)
@@ -2214,7 +2223,7 @@ def rectify_single_image_new(img, imgrect, imgrect1, xa, xb, ya, yb, lambda1, la
     floyds.util.updateheader(wavelength_rectified_image, 0, {'DISPAXIS': [1, 'dispersion axis'],
                                                              'CUNIT1': ['Angstrom', 'Units of dispersion axis']})
 #    raw_input('stop2')
-    floyds.util.delete(first_rectified_image)
+#    floyds.util.delete(first_rectified_image)
 #    floyds.util.delete(untilted_image)
 
 
